@@ -1,0 +1,55 @@
+Spec: SpecDD Plugin Metadata
+
+Platform: IntelliJ Platform / XML
+
+Purpose:
+  Define IntelliJ plugin metadata and extension registration for SpecDD language support.
+
+Owns:
+  plugin.xml
+  logo.svg
+  pluginIcon.svg
+
+Can modify:
+  plugin.xml
+  logo.svg
+  pluginIcon.svg
+
+Can read:
+  ../../../test/kotlin/ai/specdd/idea/SpecDDPluginMetadataBehaviorSpec.kt
+  ../../kotlin/ai/specdd/idea/*
+
+Must:
+  Use `ai.specdd.idea` as the plugin id.
+  Use `SpecDD` as the plugin name.
+  Use `SpecDD` as the vendor name.
+  Use `https://specdd.ai` as the vendor URL.
+  Use `https://specdd.ai` as the plugin homepage URL.
+  Describe the plugin as SpecDD language support for `.sdd` files.
+  Describe SpecDD as an SDD framework.
+  Link to `https://specdd.ai` for homepage and documentation.
+  Link to `https://github.com/specdd/intellij-plugin` for source code.
+  Link to `https://github.com/specdd/intellij-plugin/issues` for issue tracking.
+  Include initial release change notes.
+  Declare compatibility with minimum IntelliJ build `223`.
+  Depend on `com.intellij.modules.platform`.
+  Register the `SpecDD` file type for extension `sdd`.
+  Register file type implementation `ai.specdd.idea.SpecDDFileType`.
+  Register parser definition `ai.specdd.idea.SpecDDParserDefinition` using `lang.parserDefinition`.
+  Register code style settings provider `ai.specdd.idea.SpecDDCodeStyleSettingsProvider` using `langCodeStyleSettingsProvider` with `implementation`.
+  Register syntax highlighter factory `ai.specdd.idea.highlighting.SpecDDSyntaxHighlighterFactory` using `lang.syntaxHighlighterFactory`.
+  Register annotator `ai.specdd.idea.validation.SpecDDAnnotator`.
+  Register structure view factory `ai.specdd.idea.structure.SpecDDStructureViewFactory` using `lang.psiStructureViewFactory`.
+  Register documentation provider `ai.specdd.idea.documentation.SpecDDDocumentationProvider` using `documentationProvider` with `implementation`.
+  Register completion contributor `ai.specdd.idea.completion.SpecDDCompletionContributor` using `completion.contributor`.
+  Register path reference contributor `ai.specdd.idea.references.SpecDDPathReferenceContributor` using `psi.referenceContributor` with `language` and `implementation`.
+  Register path warning annotator `ai.specdd.idea.references.SpecDDPathAnnotator`.
+  Use `logo.svg` as the file type visual identity.
+  Use `pluginIcon.svg` as the plugin icon.
+  Keep extension registrations under the IntelliJ default extension namespace.
+
+Must not:
+  Register the deprecated `syntaxHighlighterFactory` extension point.
+  Add dependencies beyond platform unless required by implemented SpecDD language support.
+  Register settings or configuration UI.
+  Register unrelated IDE features outside SpecDD language support.

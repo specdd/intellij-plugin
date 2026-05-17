@@ -1,0 +1,31 @@
+Spec: SpecDD File Type
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Define IntelliJ file type metadata for SpecDD `.sdd` files.
+
+Owns:
+  SpecDDFileType.kt
+
+Can modify:
+  SpecDDFileType.kt
+
+Can read:
+  ../../../../../resources/META-INF/logo.svg
+  ../../../../../resources/META-INF/plugin.xml
+  ../../../../../../test/kotlin/ai/specdd/idea/SpecDDLanguageBehaviorSpec.kt
+
+Must:
+  Use `SpecDDLanguage` as the file type language.
+  Use `SpecDD` as the file type name.
+  Use `SpecDD specification file` as the file type description.
+  Use `sdd` as the default extension.
+  Use `/META-INF/logo.svg` as the file type icon.
+  Remain an instantiable class for IntelliJ extension point compatibility.
+
+Must not:
+  Be a Kotlin object.
+  Define syntax highlighting behavior.
+  Define validation diagnostics.
+  Add user-facing settings.

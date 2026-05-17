@@ -1,0 +1,31 @@
+Spec: SpecDD Section Documentation Registry
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Load and render help text for known SpecDD section labels.
+
+Owns:
+  SpecDDSectionDocumentation.kt
+  ../../../../../resources/ai/specdd/idea/documentation/sections.txt
+
+Can modify:
+  SpecDDSectionDocumentation.kt
+  ../../../../../resources/ai/specdd/idea/documentation/sections.txt
+
+Can read:
+  ../parser/*
+  ../../../../../../test/kotlin/ai/specdd/idea/documentation/SpecDDSectionDocumentationBehaviorSpec.kt
+
+Must:
+  Provide one documentation entry for every known SpecDD section label.
+  Keep documentation useful for novice SpecDD users while staying technical.
+  Load section documentation text from the packaged resource file.
+  Render documentation as IntelliJ-compatible HTML.
+  Escape section label and description text before rendering HTML.
+  Render blank-line-separated documentation text as paragraphs.
+  Return no documentation for unknown labels.
+
+Must not:
+  Define parser classification behavior.
+  Define validation diagnostics.

@@ -1,0 +1,77 @@
+Spec: SpecDD Parser Foundation
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Provide shared line-level SpecDD classification for editor features.
+
+Structure:
+  SpecDDLanguageFacts.kt: Known SpecDD language facts shared by editor concerns.
+  SpecDDLineClassifier.kt: Line classifier, classification model, and task status model.
+
+Owns:
+  SpecDDLanguageFacts.kt
+  SpecDDLineClassifier.kt
+
+Can modify:
+  SpecDDLanguageFacts.kt
+  SpecDDLineClassifier.kt
+
+Can read:
+  ../../../../../../test/kotlin/ai/specdd/idea/parser/*
+
+Must:
+  Define known SpecDD section labels.
+  Define known scenario step keywords.
+  Define supported task marker bodies.
+  Classify lines independently from IntelliJ editor colors, inspections, and annotations.
+  Classify one caller-provided line range at a time.
+  Preserve original line offsets in every classification.
+  Report the first non-whitespace offset as `contentStart`.
+  Classify whitespace-only line ranges as blank lines.
+  Classify lines whose first non-whitespace character is `#` as comments.
+  Classify comments before task markers, section headers, scenario steps, key-value lines, and text.
+  Classify known section headers before task markers, scenario steps, key-value lines, and text.
+  Classify a section header only when a known section label is followed immediately by `:`.
+  Keep section header classification independent from whether inline content after `:` is valid.
+  Report section label, colon, value start, and value end offsets.
+  Preserve inline section value whitespace exactly in the reported value range.
+  Keep section label ordering longest/specific enough that multi-word labels such as `Must not` and `Can modify` are recognized before shorter overlapping labels.
+  Classify task marker lines before scenario steps, key-value lines, and text.
+  Recognize supported three-character task markers `[x]`, `[X]`, `[ ]`, `[!]`, `[?]`, and `[-]`.
+  Map `[x]` and `[X]` to done task status.
+  Map `[ ]` to open task status.
+  Map `[!]` to blocked task status.
+  Map `[?]` to question task status.
+  Map `[-]` to skipped task status.
+  Recognize bracketed unsupported task markers such as `[invalid]` as invalid task status.
+  Recognize unsupported single-character task marker bodies such as `[z]` as invalid task status.
+  Report task marker start and end offsets.
+  Recognize an optional task id only when non-whitespace text after the task marker starts with `#` followed by at least one digit.
+  Report task id start and end offsets when a numeric task id is present.
+  Ignore empty hash ids such as `#` with no digits.
+  Classify scenario step lines before key-value lines and text.
+  Recognize scenario step keywords `Given`, `When`, `Then`, `And`, and `But`.
+  Require a scenario step keyword to be followed by end of line or whitespace.
+  Leave words that merely start with a scenario step keyword as text.
+  Classify generic body key-value lines before text.
+  Recognize generic key-value lines only when the first `:` has a nonempty key before it and at least one space after it.
+  Allow generic key-value keys and values to contain any valid UTF-8 text.
+  Do not require key case or a key character class.
+  Require generic key-value colons to be preceded by a non-whitespace key character.
+  Report generic key, colon, value start, and value end offsets.
+  Classify all otherwise unrecognized nonblank lines as text.
+  Expose classification payloads only for the matching line kind.
+  Keep the parser facts usable by highlighting and validation without depending on either concern.
+  Stay independent from syntax highlighting and validation diagnostics.
+  Cover blank lines, comments, section headers with and without values, all task states, task ids, scenario steps, key-value lines, and text lines in tests.
+  Cover negative cases for step-prefix words, empty hash ids, invalid task marker bodies, and unrecognized text in tests.
+
+Must not:
+  Define editor colors.
+  Report validation diagnostics.
+  Decide whether indentation is valid.
+  Decide whether a section is allowed to repeat.
+  Decide whether a section supports inline values or body lines.
+  Decide whether a known section is in the correct order.
+  Emit IntelliJ PSI, annotations, quick fixes, or error severities.

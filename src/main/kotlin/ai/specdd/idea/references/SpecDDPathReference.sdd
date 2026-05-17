@@ -1,0 +1,27 @@
+Spec: SpecDD Path PSI Reference
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Represent clickable IntelliJ references for SpecDD path and glob candidates.
+
+Owns:
+  SpecDDPathReference.kt
+
+Can modify:
+  SpecDDPathReference.kt
+
+Can read:
+  SpecDDPathResolver.kt
+  ../../../../../../test/kotlin/ai/specdd/idea/references/SpecDDPathReferenceBehaviorSpec.kt
+
+Must:
+  Resolve exact path candidates to one PSI target when possible.
+  Resolve glob candidates to all matching PSI targets.
+  Return no target when a candidate is unresolved or ignored.
+  Expose candidate text as canonical reference text.
+  Keep references soft so unresolved paths are handled by the path warning annotator.
+
+Must not:
+  Report diagnostics.
+  Modify target files.

@@ -1,0 +1,51 @@
+Spec: SpecDD IntelliJ Plugin
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Add IntelliJ support for SpecDD `.sdd` specification files.
+
+Owns:
+  Repository-level plugin structure and development contracts.
+
+Structure:
+  app.sdd: Repository-level SpecDD contract.
+  Makefile: Convenience build targets for local and release workflows.
+  src/main.sdd: Implementation-root SpecDD contract.
+  src/main/kotlin/ai/specdd/idea: SpecDD language package namespace.
+  src/test/kotlin/ai/specdd/idea: SpecDD language test package namespace.
+  src/main/kotlin/ai/specdd/idea/highlighting: Syntax highlighting concern.
+  src/main/kotlin/ai/specdd/idea/validation: Language validation concern.
+  src/main/kotlin/ai/specdd/idea/structure: Structure view concern.
+  src/main/kotlin/ai/specdd/idea/documentation: Hover documentation concern.
+  src/main/kotlin/ai/specdd/idea/completion: Completion concern.
+  src/main/kotlin/ai/specdd/idea/references: Path and glob reference concern.
+
+Can modify:
+  app.sdd
+  Makefile
+  README.md
+  CHANGELOG.md
+  build.gradle.kts
+  gradle.properties
+  settings.gradle.kts
+  src/*
+  fixtures/*
+
+Must:
+  Keep plugin behavior focused on SpecDD language support.
+  Keep Makefile targets as thin wrappers around Gradle tasks.
+  Place plugin code under the `ai.specdd.idea` package namespace.
+  Use Kotest BehaviorSpec style for Kotlin tests.
+  Keep syntax highlighting and language validation as separate implementation concerns.
+  Provide syntax highlighting for `.sdd` files.
+  Validate `.sdd` files against SpecDD structure and known section names.
+  Provide IntelliJ Structure view entries for `.sdd` file sections.
+  Provide inline documentation for known `.sdd` section labels.
+  Provide completion for known section labels, file paths, and local symbols.
+  Provide clickable navigation and unresolved-target warnings for file paths and globs.
+  Report likely section-name typos and unsupported section names.
+
+Must not:
+  Add unrelated IDE features outside SpecDD language support.
+  Add user-facing settings or configuration UI.

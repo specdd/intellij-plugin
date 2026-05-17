@@ -1,0 +1,32 @@
+Spec: SpecDD Documentation Provider
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Connect SpecDD section documentation to IntelliJ hover documentation.
+
+Owns:
+  SpecDDDocumentationProvider.kt
+
+Can modify:
+  SpecDDDocumentationProvider.kt
+
+Can read:
+  SpecDDSectionDocumentation.kt
+  ../parser/*
+  ../SpecDDFileType.kt
+  ../../../../../../test/kotlin/ai/specdd/idea/documentation/SpecDDDocumentationProviderBehaviorSpec.kt
+
+Must:
+  Implement IntelliJ `DocumentationProvider`.
+  Use `getCustomDocumentationElement` to resolve documentation at the editor hover offset.
+  Resolve documentation only for SpecDD files.
+  Classify the target line with `SpecDDLineClassifier`.
+  Return a documentation element only when the target offset is inside a known section label range.
+  Generate documentation from the resolved documentation element.
+  Return no documentation for non-SpecDD files and non-section-label offsets.
+
+Must not:
+  Define section documentation text directly.
+  Report validation diagnostics.
+  Define syntax highlighting behavior.

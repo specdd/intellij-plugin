@@ -1,0 +1,32 @@
+Spec: SpecDD Path Warning Annotator
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Report unresolved SpecDD path and glob candidates as editor warnings.
+
+Owns:
+  SpecDDPathAnnotator.kt
+
+Can modify:
+  SpecDDPathAnnotator.kt
+
+Can read:
+  SpecDDPathReferenceExtractor.kt
+  SpecDDPathResolver.kt
+  ../SpecDDFileType.kt
+  ../../../../../../test/kotlin/ai/specdd/idea/references/SpecDDPathAnnotatorBehaviorSpec.kt
+
+Must:
+  Extend IntelliJ `Annotator`.
+  Annotate only SpecDD files.
+  Report warning annotations for unresolved path and glob candidates.
+  Attach create-path quick fixes to unresolved exact path candidates.
+  Do not attach create-path quick fixes to unresolved glob candidates.
+  Do not report errors.
+  Ignore prose-like unresolved candidates without path syntax.
+  Keep warnings separate from structural validation diagnostics.
+
+Must not:
+  Define structural validation rules.
+  Define syntax highlighting colors.

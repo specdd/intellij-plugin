@@ -1,0 +1,45 @@
+Spec: SpecDD Structure View
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Provide IntelliJ Structure view entries for SpecDD `.sdd` files.
+
+Structure:
+  SpecDDStructureModel.kt: Text-level section extraction model.
+  SpecDDStructureViewFactory.kt: IntelliJ structure view factory, model, and tree elements.
+
+Owns:
+  structure.sdd
+  SpecDDStructureModel.sdd
+  SpecDDStructureViewFactory.sdd
+  SpecDDStructureModel.kt
+  SpecDDStructureViewFactory.kt
+
+Can modify:
+  structure.sdd
+  SpecDDStructureModel.sdd
+  SpecDDStructureViewFactory.sdd
+  SpecDDStructureModel.kt
+  SpecDDStructureViewFactory.kt
+
+Can read:
+  ../parser/*
+  ../SpecDDPsiFile.kt
+  ../../../../../../test/kotlin/ai/specdd/idea/structure/*
+
+Must:
+  Keep structure behavior independent from syntax highlighting and validation diagnostics.
+  Use the shared `SpecDDLineClassifier` line classification boundary.
+  List every known section header in file order.
+  Preserve repeated `Scenario` and `Example` entries as separate structure nodes.
+  Display section labels with inline values when present.
+  Navigate section nodes to their section header offsets.
+  Register through IntelliJ plugin metadata using `lang.psiStructureViewFactory`.
+  Cover structure extraction and factory behavior with Kotest BehaviorSpec tests.
+
+Must not:
+  Replace the minimal PSI parser with a full grammar only for structure view support.
+  Define syntax highlighting colors.
+  Report validation diagnostics.
+  Add user-facing settings.

@@ -1,0 +1,28 @@
+Spec: SpecDD Path Reference Provider
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Provide path PSI references for SpecDD PSI elements.
+
+Owns:
+  SpecDDPathReferenceProvider.kt
+
+Can modify:
+  SpecDDPathReferenceProvider.kt
+
+Can read:
+  SpecDDPathReferenceExtractor.kt
+  SpecDDPathReference.kt
+  ../SpecDDFileType.kt
+  ../../../../../../test/kotlin/ai/specdd/idea/references/SpecDDPathReferenceProviderBehaviorSpec.kt
+
+Must:
+  Return references only for SpecDD files.
+  Extract candidates from the containing file text.
+  Return references whose ranges are relative to the current PSI element.
+  Skip candidates outside the current PSI element range.
+
+Must not:
+  Report diagnostics.
+  Define path extraction rules independently from the extractor.

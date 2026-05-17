@@ -1,0 +1,15 @@
+package ai.specdd.idea.references
+
+import ai.specdd.idea.SpecDDElementTypes
+import com.intellij.patterns.PlatformPatterns
+import com.intellij.psi.PsiReferenceContributor
+import com.intellij.psi.PsiReferenceRegistrar
+
+class SpecDDPathReferenceContributor : PsiReferenceContributor() {
+    override fun registerReferenceProviders(registrar: PsiReferenceRegistrar) {
+        registrar.registerReferenceProvider(
+            PlatformPatterns.psiElement(SpecDDElementTypes.TEXT),
+            SpecDDPathReferenceProvider(),
+        )
+    }
+}

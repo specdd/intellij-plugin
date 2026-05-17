@@ -1,0 +1,56 @@
+Spec: SpecDD Language Validation
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Validate SpecDD `.sdd` files against known structure and section names.
+
+Structure:
+  SpecDDAnnotator.kt: IntelliJ annotator that turns validation issues into editor errors.
+  SpecDDKnownSections.kt: Known section registry and typo suggestion support.
+  SpecDDStructureValidator.kt: Text-level structure validation.
+  SpecDDValidationResult.kt: Validation result and issue model.
+
+Owns:
+  validation.sdd
+  SpecDDAnnotator.sdd
+  SpecDDKnownSections.sdd
+  SpecDDStructureValidator.sdd
+  SpecDDValidationResult.sdd
+  SpecDDAnnotator.kt
+  SpecDDKnownSections.kt
+  SpecDDStructureValidator.kt
+  SpecDDValidationResult.kt
+
+Can modify:
+  validation.sdd
+  SpecDDAnnotator.sdd
+  SpecDDKnownSections.sdd
+  SpecDDStructureValidator.sdd
+  SpecDDValidationResult.sdd
+  SpecDDAnnotator.kt
+  SpecDDKnownSections.kt
+  SpecDDStructureValidator.kt
+  SpecDDValidationResult.kt
+
+Can read:
+  ../parser/*
+  ../../../../../../test/kotlin/ai/specdd/idea/validation/*
+
+Must:
+  Validate known SpecDD section names.
+  Report unsupported section names and likely section-name typos.
+  Keep validation behavior independent from syntax highlighting.
+  Use the shared `SpecDDLineClassifier` line classification boundary.
+  Keep validation messages deterministic.
+  Keep validation issue ranges precise enough for IntelliJ annotations.
+  Use errors for validation diagnostics.
+  Cover validation behavior with Kotest BehaviorSpec tests.
+
+Must not:
+  Define highlighting colors.
+  Add user-facing settings or configuration UI.
+  Implement syntax highlighting.
+  Own section tokenization rules beyond consuming shared parser classifications.
+  Change shared language facts from validation code.
+  Report warnings for validation issues; validation diagnostics must be errors.

@@ -1,0 +1,72 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin url="https://specdd.ai">
+    <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
+    <id>ai.specdd.idea</id>
+
+    <!-- Public plugin name should be written in Title Case.
+     Guidelines: https://plugins.jetbrains.com/docs/marketplace/best-practices-for-listing.html#plugin-name -->
+    <name>SpecDD</name>
+
+    <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
+    <vendor url="https://specdd.ai">SpecDD</vendor>
+
+    <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/best-practices-for-listing.html#plugin-description -->
+    <description><![CDATA[
+        <p>SpecDD language support for <code>.sdd</code> specification files.</p>
+        <p>
+            SpecDD™ is an open-source framework for specification-driven development in AI-assisted software projects.
+        </p>
+        <p>
+            The SpecDD framework uses small, local, human-readable .sdd files that live beside the code they describe.
+            These specs document intent, architecture, behavior, boundaries, and implementation tasks in a way that
+            both human developers and AI coding agents can follow.
+        </p>
+        <p>
+            SpecDD works for both greenfield and existing projects. In new projects, specs can define structure before
+            implementation starts. In existing projects, specs can be introduced gradually around modules, services,
+            features, or files that are actively changing.
+        </p>
+        <p>
+            The plugin adds syntax highlighting, structural validation, section documentation, structure view entries,
+            section and path completion, clickable project file references, unresolved path warnings, and create-file
+            quick fixes for SpecDD files.
+        </p>
+        <ul>
+            <li><a href="https://specdd.ai">Homepage and documentation</a></li>
+            <li><a href="https://github.com/specdd/intellij-plugin">Source code</a></li>
+            <li><a href="https://github.com/specdd/intellij-plugin/issues">Issue tracker</a></li>
+        </ul>
+        ]]></description>
+
+    <change-notes><![CDATA[
+        <ul>
+            <li>Initial SpecDD language support for IntelliJ-based IDEs.</li>
+        </ul>
+        ]]></change-notes>
+
+    <!-- Product and plugin compatibility requirements.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
+
+    <idea-version since-build="223"/>
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType name="SpecDD" language="SpecDD" implementationClass="ai.specdd.idea.SpecDDFileType"
+                  extensions="sdd"/>
+        <lang.parserDefinition language="SpecDD" implementationClass="ai.specdd.idea.SpecDDParserDefinition"/>
+        <langCodeStyleSettingsProvider implementation="ai.specdd.idea.SpecDDCodeStyleSettingsProvider"/>
+        <lang.syntaxHighlighterFactory language="SpecDD"
+                                       implementationClass="ai.specdd.idea.highlighting.SpecDDSyntaxHighlighterFactory"/>
+        <annotator language="SpecDD" implementationClass="ai.specdd.idea.validation.SpecDDAnnotator"/>
+        <lang.psiStructureViewFactory language="SpecDD"
+                                      implementationClass="ai.specdd.idea.structure.SpecDDStructureViewFactory"/>
+        <documentationProvider implementation="ai.specdd.idea.documentation.SpecDDDocumentationProvider"/>
+        <completion.contributor language="SpecDD"
+                                implementationClass="ai.specdd.idea.completion.SpecDDCompletionContributor"/>
+        <psi.referenceContributor language="SpecDD"
+                                  implementation="ai.specdd.idea.references.SpecDDPathReferenceContributor"/>
+        <annotator language="SpecDD" implementationClass="ai.specdd.idea.references.SpecDDPathAnnotator"/>
+    </extensions>
+
+</idea-plugin>

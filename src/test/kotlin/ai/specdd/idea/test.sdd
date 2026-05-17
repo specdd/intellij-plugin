@@ -1,0 +1,64 @@
+Spec: SpecDD Language Tests
+
+Platform: IntelliJ Platform / Kotlin / Kotest
+
+Purpose:
+  Govern tests for SpecDD IntelliJ language support.
+
+Structure:
+  highlighting: Syntax highlighting tests.
+  parser: Shared parser and line-classifier tests.
+  validation: Validation and annotator tests.
+  structure: Structure view tests.
+  documentation: Hover documentation tests.
+  completion: Completion contributor tests.
+  references: Path and glob reference tests.
+
+Owns:
+  *.kt
+  highlighting/*
+  parser/*
+  validation/*
+  structure/*
+  documentation/*
+  completion/*
+  references/*
+
+Can modify:
+  *.kt
+  highlighting/*
+  parser/*
+  validation/*
+  structure/*
+  documentation/*
+  completion/*
+  references/*
+
+Can read:
+  ../../../../../main/kotlin/ai/specdd/idea/*
+  ../../../../../main/resources/META-INF/plugin.xml
+  ../../../../../../fixtures/*
+
+Must:
+  Use Kotest `BehaviorSpec` style.
+  Keep tests under the `ai.specdd.idea` package namespace.
+  Cover public behavior and material internal contracts required by local specs.
+  Keep package-level tests aligned with the production concern they verify.
+  Verify plugin metadata extension-point names and minimum IntelliJ build.
+  Verify language identity, file type metadata, parser definition behavior, PSI file metadata, and code style defaults.
+  Verify highlighting behavior in highlighting tests.
+  Verify parser facts and classifier behavior in parser tests.
+  Verify validation, known-section, result-model, and annotator behavior in validation tests.
+  Verify structure extraction and structure view factory behavior in structure tests.
+  Verify section documentation registry and provider behavior in documentation tests.
+  Verify section completion behavior in completion tests.
+  Verify path and glob reference behavior in references tests.
+  Maintain 100 percent coverage as required by the Gradle Kover gate.
+  Prefer focused fixtures and direct behavior assertions over broad snapshot assertions.
+  Use local fakes or proxies when IntelliJ platform interfaces are needed and full IDE fixtures are unnecessary.
+
+Must not:
+  Define production behavior not backed by source specs.
+  Depend on network access.
+  Launch the IDE or plugin verifier as part of normal unit tests.
+  Add user-facing settings or unrelated IDE feature coverage.

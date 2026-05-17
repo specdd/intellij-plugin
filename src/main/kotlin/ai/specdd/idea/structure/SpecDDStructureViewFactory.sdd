@@ -1,0 +1,32 @@
+Spec: SpecDD Structure View Factory
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Connect SpecDD structure entries to IntelliJ Structure view.
+
+Owns:
+  SpecDDStructureViewFactory.kt
+
+Can modify:
+  SpecDDStructureViewFactory.kt
+
+Can read:
+  SpecDDStructureModel.kt
+  ../SpecDDPsiFile.kt
+  ../../../../../../test/kotlin/ai/specdd/idea/structure/SpecDDStructureViewFactoryBehaviorSpec.kt
+
+Must:
+  Implement IntelliJ `PsiStructureViewFactory`.
+  Return a tree-based structure view builder for `SpecDDPsiFile`.
+  Return no builder for non-SpecDD PSI files.
+  Build structure models from current file text.
+  Use one root node for the file and one child node per extracted section.
+  Use section display names from `SpecDDStructureSection`.
+  Navigate section nodes to their stored section start offsets when a virtual file is available.
+  Use the SpecDD file icon for structure presentations.
+
+Must not:
+  Define section extraction rules directly.
+  Report validation diagnostics.
+  Define syntax highlighting behavior.

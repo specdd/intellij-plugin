@@ -1,0 +1,170 @@
+# SpecDD kitchen sink fixture.
+# Whole-line comments are allowed; inline trailing comments are intentionally absent.
+
+Spec: SpecDD Kitchen Sink Fixture
+
+Platform: SpecDD/1.2
+
+Purpose:
+  Exercise every documented SpecDD section and common syntax form in one valid fixture.
+  Provide a compact reference file for readers, examples, syntax highlighting, and parser smoke tests.
+
+Structure:
+  kitchen-sink.sdd: Complete language coverage fixture
+  generated: Optional generated outputs for local experiments
+  generated/*.json: Machine-readable coverage snapshots
+  examples/sample.js: JavaScript path token sample
+  examples/sample.ts: TypeScript path token sample
+  examples/component.tsx: TSX path token sample
+  examples/component.jsx: JSX path token sample
+  examples/tool.py: Python path token sample
+  examples/service.go: Go path token sample
+  examples/lib.rs: Rust path token sample
+  examples/App.java: Java path token sample
+  examples/Program.cs: C# path token sample
+  examples/model.rb: Ruby path token sample
+  examples/page.php: PHP path token sample
+  examples/schema.json: JSON path token sample
+  examples/config.yaml: YAML path token sample
+  examples/config.yml: YML path token sample
+  examples/site.toml: TOML path token sample
+  examples/styles.css: CSS path token sample
+  examples/index.html: HTML path token sample
+
+Owns:
+  kitchen-sink.sdd
+  generated/*
+  SpecDDKitchenSink
+  KitchenSinkCoverageReport
+  Coverage fixture authorship and maintenance
+
+Can modify:
+  kitchen-sink.sdd
+  generated/*
+
+Can read:
+  ../README.md
+  ../src/.specdd/bootstrap.md
+  ../src/.specdd/bootstrap.project.md
+  ../src/.specdd/bootstrap.local.md
+  ../web/assets/js/specdd-highlight.js
+
+References:
+  ../README.md
+  ../src/.specdd/bootstrap.md
+  ../src/.specdd/bootstrap.project.md
+  ../src/.specdd/bootstrap.local.md
+
+Must:
+  Include every currently documented SpecDD section label.
+  Include at least one whole-line comment.
+  Include path examples, glob examples, symbol examples, and free-form prose examples.
+  Include all documented task states.
+  Keep references pointed at files that exist in this repository.
+  Remain readable as a single source-adjacent development contract.
+
+Must not:
+  Require implementation files outside tmp to change.
+  Use inline trailing comments.
+  Treat examples as permission to ignore inherited SpecDD bootstrap rules.
+  Expand write authority beyond the paths listed in Can modify.
+
+Forbids:
+  ../src/**
+  ../web/**
+  network access
+  destructive filesystem commands
+  undocumented task state markers
+
+Depends on:
+  README.md
+  src/.specdd/bootstrap.md
+  SpecDD bootstrap language
+  SpecDDKitchenSink.coverageMatrix()
+  SpecDDKitchenSink.ReportBuilder.build(input)
+
+Exposes:
+  tmp/kitchen-sink.sdd
+  SpecDDKitchenSink.coverageMatrix()
+  SpecDDKitchenSink.ReportBuilder.build(input)
+  KitchenSinkCoverageReport.sections
+
+Accepts:
+  SpecDD version 1.2 section vocabulary
+  relative paths
+  glob paths
+  task status markers
+  Gherkin-like scenario steps
+  small concrete examples
+
+Returns:
+  a complete kitchen sink .sdd fixture
+  a human-readable coverage contract
+  parser and highlighter smoke-test input
+  KitchenSinkCoverageReport
+
+Raises:
+  MissingSectionCoverageError
+  MissingTaskStateCoverageError
+  InvalidInlineCommentError
+  MissingReferenceError
+
+Handles:
+  root-relative mental model from tmp
+  sibling and parent path references
+  task state coverage
+  Given steps
+  When steps
+  Then steps
+  And steps
+  But steps
+
+Tasks:
+  [x] #0 Include identity sections.
+  [x] #1 Include scope and ownership sections.
+  [x] #2 Include positive and negative constraint sections.
+  [x] #3 Include interface and contract sections.
+  [x] #4 Include workflow and behavior sections.
+  [ ] #5 Use this fixture in future parser or documentation checks.
+  [!] #6 Add automated validation when official validation tooling exists.
+  [?] #7 Decide whether fixtures should include intentionally invalid examples in a separate file.
+  [-] #8 Skip implementation changes because this request only creates a spec fixture.
+  # This indented comment is still a comment and is not a task.
+
+Done when:
+  Every documented section label appears at least once.
+  Every documented task state appears at least once.
+  Scenarios include Given, When, Then, And, and But steps.
+  References resolve to existing files.
+  The fixture remains a single .sdd file under tmp.
+
+Scenario: every documented section is represented
+  Given the SpecDD language defined by README.md and src/.specdd/bootstrap.md
+  And this fixture is read from top to bottom
+  When a reader checks the section labels
+  Then Spec, Platform, Purpose, Structure, Owns, Can modify, Can read, References, Must, Must not, Forbids, Depends on, Exposes, Accepts, Returns, Raises, Handles, Tasks, Done when, Scenario, and Example are present
+  But no inline trailing comment is required to understand the fixture
+
+Scenario: task states are covered
+  Given the allowed task states are open, done, skipped, blocked, and needs decision
+  And optional numeric task IDs may be present
+  When the Tasks section is scanned
+  Then [ ], [x], [-], [!], and [?] are all represented
+  And task IDs such as #0 and #8 are visible
+
+Scenario: write authority remains local
+  Given this fixture owns kitchen-sink.sdd and generated/*
+  When an agent works under this spec
+  Then only kitchen-sink.sdd and generated/* may be modified
+  And ../README.md and ../src/.specdd/bootstrap.md may be read as context
+  But ../src/** and ../web/** remain forbidden modification targets
+
+Example:
+  input spec path: tmp/kitchen-sink.sdd
+  reference path: ../src/.specdd/bootstrap.md
+  glob path: generated/*.json
+  public symbol: SpecDDKitchenSink.ReportBuilder.build(input)
+  accepted task states: [ ] [x] [-] [!] [?]
+  accepted scenario words: Given When Then And But
+  output file: generated/coverage.json
+  output status: complete

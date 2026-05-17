@@ -1,0 +1,30 @@
+Spec: SpecDD Validation Result
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Represent validation results and diagnostic issue messages.
+
+Owns:
+  SpecDDValidationResult.kt
+
+Can modify:
+  SpecDDValidationResult.kt
+
+Can read:
+  ../../../../../../test/kotlin/ai/specdd/idea/validation/SpecDDValidationResultBehaviorSpec.kt
+
+Must:
+  Store validation issues in `SpecDDValidationResult`.
+  Treat an empty issue list as valid.
+  Treat a nonempty issue list as invalid.
+  Store each issue range, message, and optional suggestion.
+  Use the raw message as the display message when no suggestion exists.
+  Append `Did you mean '<label>'?` to display messages when a suggestion exists.
+  Keep display messages deterministic.
+  Cover valid results, invalid results, and display-message formatting in tests.
+
+Must not:
+  Compute validation rules.
+  Create IntelliJ annotations.
+  Define highlighting colors.

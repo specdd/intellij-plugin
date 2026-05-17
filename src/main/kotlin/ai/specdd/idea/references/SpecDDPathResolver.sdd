@@ -1,0 +1,33 @@
+Spec: SpecDD Path Resolver
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Resolve SpecDD path and glob candidates against a project root and spec directory.
+
+Owns:
+  SpecDDPathResolver.kt
+
+Can modify:
+  SpecDDPathResolver.kt
+
+Can read:
+  ../../../../../../test/kotlin/ai/specdd/idea/references/SpecDDPathResolverBehaviorSpec.kt
+
+Must:
+  Resolve exact path candidates relative to the containing spec file directory.
+  Resolve glob candidates relative to the containing spec file directory.
+  Return matching existing files and directories.
+  Keep all returned targets inside the project root.
+  Return ignored status for unresolved candidates without path syntax.
+  Return unresolved status for unresolved candidates with path syntax.
+  Normalize relative path segments before checking containment.
+  Treat malformed glob patterns as unresolved.
+  Cap glob resolution results.
+  Skip common heavy directories while walking the project tree.
+  Continue resolution when an unreadable file or directory is encountered while walking the project tree.
+
+Must not:
+  Read or modify file contents.
+  Create IntelliJ PSI references.
+  Report diagnostics.

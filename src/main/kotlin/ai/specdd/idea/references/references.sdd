@@ -1,0 +1,82 @@
+Spec: SpecDD Path References
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Provide clickable navigation and missing-target warnings for path and glob text in SpecDD files.
+
+Structure:
+  SpecDDPathReferenceExtractor.kt: Text-level path and glob candidate extraction.
+  SpecDDPathResolver.kt: Project-relative path and glob target resolution.
+  SpecDDPathReference.kt: IntelliJ PSI reference for path and glob candidates.
+  SpecDDPathReferenceProvider.kt: IntelliJ reference provider.
+  SpecDDPathReferenceContributor.kt: IntelliJ reference contributor registration.
+  SpecDDPathAnnotator.kt: IntelliJ warning annotator for unresolved path and glob candidates.
+  SpecDDCreateFileQuickFix.kt: IntelliJ intention action for creating unresolved exact path references.
+
+Owns:
+  references.sdd
+  SpecDDPathReferenceExtractor.sdd
+  SpecDDPathResolver.sdd
+  SpecDDPathReference.sdd
+  SpecDDPathReferenceProvider.sdd
+  SpecDDPathReferenceContributor.sdd
+  SpecDDPathAnnotator.sdd
+  SpecDDCreateFileQuickFix.sdd
+  SpecDDPathReferenceExtractor.kt
+  SpecDDPathResolver.kt
+  SpecDDPathReference.kt
+  SpecDDPathReferenceProvider.kt
+  SpecDDPathReferenceContributor.kt
+  SpecDDPathAnnotator.kt
+  SpecDDCreateFileQuickFix.kt
+
+Can modify:
+  references.sdd
+  SpecDDPathReferenceExtractor.sdd
+  SpecDDPathResolver.sdd
+  SpecDDPathReference.sdd
+  SpecDDPathReferenceProvider.sdd
+  SpecDDPathReferenceContributor.sdd
+  SpecDDPathAnnotator.sdd
+  SpecDDCreateFileQuickFix.sdd
+  SpecDDPathReferenceExtractor.kt
+  SpecDDPathResolver.kt
+  SpecDDPathReference.kt
+  SpecDDPathReferenceProvider.kt
+  SpecDDPathReferenceContributor.kt
+  SpecDDPathAnnotator.kt
+  SpecDDCreateFileQuickFix.kt
+
+Can read:
+  ../parser/*
+  ../SpecDDFileType.kt
+  ../../../../../../test/kotlin/ai/specdd/idea/references/*
+
+Must:
+  Keep path and glob reference behavior separate from structure validation.
+  Reuse the shared line classifier for section and key-value detection.
+  Extract inline path and glob candidates from task text, scenario steps, key-value lines, and normal body text.
+  Extract bare key candidates only from path-bearing key-value sections such as `Structure`.
+  Treat path entries as relative to the containing `.sdd` file directory.
+  Restrict resolution to files and directories inside the current project root when a project root is available.
+  Resolve exact existing files and directories to clickable PSI targets.
+  Refresh local VFS entries when mapping resolved paths to PSI targets for navigation.
+  Resolve glob patterns to all matching project files or directories.
+  Treat malformed glob patterns as unresolved instead of throwing.
+  Cap glob results and skip common heavy directories while walking the project tree.
+  Register PSI references on the SpecDD PSI text token emitted by the minimal parser.
+  Support file-level reference lookup for Go to Declaration on minimal SpecDD PSI files.
+  Report warnings, not errors, for path or glob candidates that look like paths but resolve to no target.
+  Offer a create-path quick fix for unresolved exact path candidates only.
+  Do not offer create-path quick fixes for glob candidates.
+  Create missing files or directories only inside the current project root.
+  Create missing parent directories when creating a nested exact path.
+  Ignore prose-like candidates without path syntax when they resolve to no target.
+  Cover extraction, resolution, PSI reference behavior, warning annotations, quick fixes, and contributor registration with tests.
+
+Must not:
+  Change parser classification rules.
+  Report structural validation errors.
+  Define syntax highlighting colors.
+  Add user-facing settings.

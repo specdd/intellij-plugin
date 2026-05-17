@@ -1,0 +1,30 @@
+Spec: SpecDD Structure Model
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Extract SpecDD section entries from file text for structure view rendering.
+
+Owns:
+  SpecDDStructureModel.kt
+
+Can modify:
+  SpecDDStructureModel.kt
+
+Can read:
+  ../parser/*
+  ../../../../../../test/kotlin/ai/specdd/idea/structure/SpecDDStructureModelBehaviorSpec.kt
+
+Must:
+  Use `SpecDDLineClassifier` to identify section header lines.
+  Scan text line-by-line for LF, CR, and CRLF line endings.
+  Return sections in file order.
+  Store section label, trimmed inline value, label start offset, section start offset, and line end offset.
+  Use `Label: value` as the display name when an inline value is present.
+  Use `Label` as the display name when no inline value is present.
+  Preserve duplicate and repeatable sections as independent entries.
+  Ignore comments, blank lines, body lines, tasks, scenario steps, and key-value lines.
+
+Must not:
+  Validate section order, indentation, duplicates, or section content.
+  Define IntelliJ tree elements.

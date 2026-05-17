@@ -1,0 +1,108 @@
+Spec: SpecDD Language Foundation
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Define shared SpecDD language registration and file identity.
+
+Structure:
+  SpecDDLanguage.kt: SpecDD language id singleton.
+  SpecDDFileType.kt: `.sdd` file type identity and icon.
+  SpecDDCodeStyleSettingsProvider.kt: Default editor code style for `.sdd` files.
+  SpecDDParserDefinition.kt: Minimal PSI parser definition required by IntelliJ language services.
+  SpecDDPsiFile.kt: PSI file wrapper for SpecDD files.
+  parser: Shared SpecDD line classification and language facts.
+  highlighting: Syntax highlighting concern.
+  validation: Language validation concern.
+  structure: Structure view concern.
+  documentation: Hover documentation concern.
+  completion: Section name, file path, and local symbol completion concern.
+  references: Path and glob reference concern.
+
+Owns:
+  language.sdd
+  SpecDDLanguage.sdd
+  SpecDDFileType.sdd
+  SpecDDCodeStyleSettingsProvider.sdd
+  SpecDDParserDefinition.sdd
+  SpecDDPsiFile.sdd
+  SpecDDCodeStyleSettingsProvider.kt
+  SpecDDLanguage.kt
+  SpecDDFileType.kt
+  SpecDDParserDefinition.kt
+  SpecDDPsiFile.kt
+  parser/*
+  highlighting/*
+  validation/*
+  structure/*
+  documentation/*
+  completion/*
+  references/*
+
+Can modify:
+  language.sdd
+  SpecDDLanguage.sdd
+  SpecDDFileType.sdd
+  SpecDDCodeStyleSettingsProvider.sdd
+  SpecDDParserDefinition.sdd
+  SpecDDPsiFile.sdd
+  SpecDDCodeStyleSettingsProvider.kt
+  SpecDDLanguage.kt
+  SpecDDFileType.kt
+  SpecDDParserDefinition.kt
+  SpecDDPsiFile.kt
+  parser/*
+  highlighting/*
+  validation/*
+  structure/*
+  documentation/*
+  completion/*
+  references/*
+
+Can read:
+  ../../../../../resources/META-INF/plugin.xml
+  ../../../../../../test/kotlin/ai/specdd/idea/*
+  parser/*
+  highlighting/*
+  validation/*
+  structure/*
+  documentation/*
+  completion/*
+  references/*
+
+Must:
+  Provide default editor code style for `.sdd` files.
+  Provide shared language and file-type definitions for `.sdd` files.
+  Provide minimal PSI file support required by IntelliJ language services.
+  Provide shared line classification when highlighting and validation need the same SpecDD syntax facts.
+  Provide structure view, documentation, completion, and path reference integration for `.sdd` files.
+  Keep shared language code independent from highlighting and validation behavior.
+  Keep all implementation code under the `ai.specdd.idea` package namespace.
+  Use `SpecDD` as the IntelliJ language id.
+  Use `sdd` as the default file extension.
+  Use `SpecDD` as the file type name.
+  Use `SpecDD specification file` as the file type description.
+  Use `/META-INF/logo.svg` as the file type icon.
+  Keep the file type as an instantiable class for IntelliJ extension point compatibility.
+  Register file type, parser definition, code style provider, syntax highlighter factory, annotator, structure view factory, documentation provider, completion contributor, path reference contributor, and path warning annotator through plugin metadata.
+  Use `lang.parserDefinition` for parser registration.
+  Use `lang.syntaxHighlighterFactory` for syntax highlighter registration.
+  Use `lang.psiStructureViewFactory` for structure view registration.
+  Use `documentationProvider` for hover documentation registration.
+  Use `completion.contributor` for completion contributor registration.
+  Use `psi.referenceContributor` for path reference registration.
+  Use `langCodeStyleSettingsProvider` for code style provider registration.
+  Keep the minimum IntelliJ build at `223`.
+  Keep PSI support intentionally minimal; parsing may consume the file as text while enabling language services.
+  Keep default indentation, continuation indentation, and tab size at 2.
+  Disable tab indentation by default.
+  Expose only standard indent controls for code style settings.
+  Avoid user-facing configuration UI beyond standard IntelliJ code style controls.
+  Cover language id, file type metadata, parser definition, PSI file metadata, code style defaults, and plugin metadata in tests.
+
+Must not:
+  Implement syntax highlighting rules.
+  Implement validation diagnostics.
+  Define editor highlighting colors.
+  Define validation severity or inspection messages.
+  Add unrelated IDE features outside SpecDD language support.

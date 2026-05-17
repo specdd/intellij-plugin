@@ -1,0 +1,34 @@
+Spec: SpecDD Parser Definition
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Provide minimal IntelliJ PSI parser support for SpecDD language services.
+
+Owns:
+  SpecDDParserDefinition.kt
+
+Can modify:
+  SpecDDParserDefinition.kt
+
+Can read:
+  ../../../../../../test/kotlin/ai/specdd/idea/SpecDDLanguageBehaviorSpec.kt
+
+Must:
+  Create a PSI lexer that emits one text token over the requested buffer slice.
+  Preserve lexer state as 0.
+  Preserve lexer buffer sequence and buffer end.
+  Advance the PSI lexer to the end of the requested slice.
+  Create a parser that consumes all tokens into the requested root node.
+  Use a SpecDD file element type backed by `SpecDDLanguage`.
+  Use a text element type backed by `SpecDDLanguage`.
+  Expose empty token sets for whitespace, comments, and string literals.
+  Create generic wrapper PSI elements for AST nodes.
+  Create `SpecDDPsiFile` instances for SpecDD file view providers.
+  Allow spaces between any tokens.
+
+Must not:
+  Implement real SpecDD grammar parsing.
+  Implement syntax highlighting tokenization.
+  Implement validation diagnostics.
+  Classify comments or strings as PSI token sets.

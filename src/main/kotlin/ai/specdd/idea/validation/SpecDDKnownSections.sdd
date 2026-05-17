@@ -1,0 +1,32 @@
+Spec: SpecDD Known Sections
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Provide known SpecDD section lookup and typo suggestions for validation.
+
+Owns:
+  SpecDDKnownSections.kt
+
+Can modify:
+  SpecDDKnownSections.kt
+
+Can read:
+  ../parser/*
+  ../../../../../../test/kotlin/ai/specdd/idea/validation/SpecDDKnownSectionsBehaviorSpec.kt
+
+Must:
+  Mirror known section labels from shared language facts.
+  Distinguish known section labels from unknown labels.
+  Suggest the closest known section label only when edit distance is at most 2.
+  Compare typo suggestions case-insensitively.
+  Return no suggestion for unrelated labels.
+  Return no suggestion for empty labels.
+  Keep typo suggestion behavior deterministic.
+  Cover known labels, unknown labels, likely typos, unrelated labels, and empty labels in tests.
+
+Must not:
+  Define section parsing order.
+  Report validation diagnostics directly.
+  Define highlighting colors.
+  Change shared language facts.

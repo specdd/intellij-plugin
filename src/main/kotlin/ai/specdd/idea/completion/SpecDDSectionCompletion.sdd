@@ -1,0 +1,32 @@
+Spec: SpecDD Section Completion Model
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Decide when section name completion is available and create section lookup variants.
+
+Owns:
+  SpecDDSectionCompletion.kt
+
+Can modify:
+  SpecDDSectionCompletion.kt
+
+Can read:
+  ../parser/SpecDDLanguageFacts.kt
+  ../../../../../../test/kotlin/ai/specdd/idea/completion/SpecDDSectionCompletionBehaviorSpec.kt
+
+Must:
+  Return no completion result when the caret offset is outside the text.
+  Return no completion result when the current line is indented before the caret.
+  Return no completion result when the current line prefix contains non-section-label syntax.
+  Return no completion result when the current line prefix matches no known section label.
+  Return all known section labels for an empty unindented line prefix.
+  Return matching known section labels for a partial unindented line prefix.
+  Match partial prefixes case-insensitively.
+  Preserve the original known section label spelling in completion variants.
+  Expose lookup strings as section header text ending with `: `.
+  Keep the model independent from editor registration and plugin metadata.
+
+Must not:
+  Depend on validation, highlighting, documentation, or structure view code.
+  Report validation diagnostics.

@@ -1,0 +1,32 @@
+Spec: SpecDD Completion Contributor
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Connect SpecDD completion models to IntelliJ basic completion.
+
+Owns:
+  SpecDDCompletionContributor.kt
+
+Can modify:
+  SpecDDCompletionContributor.kt
+
+Can read:
+  SpecDDSectionCompletion.kt
+  SpecDDInlineCompletion.kt
+  ../SpecDDFileType.kt
+  ../../../../../../test/kotlin/ai/specdd/idea/completion/SpecDDCompletionContributorBehaviorSpec.kt
+
+Must:
+  Extend IntelliJ `CompletionContributor`.
+  Add section completion variants only for basic completion.
+  Add section completion variants only for SpecDD files.
+  Use the current editor document and completion offset to compute section completion.
+  Apply the computed prefix to the completion result set.
+  Add lookup elements from the section completion model.
+  Add inline file path and local symbol completion variants when section completion is not active.
+
+Must not:
+  Define section labels independently from the completion model.
+  Implement validation diagnostics.
+  Define syntax highlighting colors.

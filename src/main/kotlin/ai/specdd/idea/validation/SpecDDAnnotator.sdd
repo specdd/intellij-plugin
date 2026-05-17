@@ -1,0 +1,35 @@
+Spec: SpecDD Annotator
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Convert SpecDD validation issues into IntelliJ editor annotations.
+
+Owns:
+  SpecDDAnnotator.kt
+
+Can modify:
+  SpecDDAnnotator.kt
+
+Can read:
+  SpecDDStructureValidator.kt
+  SpecDDValidationResult.kt
+  ../../../../../../test/kotlin/ai/specdd/idea/validation/SpecDDAnnotatorBehaviorSpec.kt
+
+Must:
+  Validate only PSI files.
+  Validate only files whose file type is `SpecDDFileType`.
+  Ignore non-file PSI elements.
+  Ignore non-SpecDD PSI files.
+  Validate file text through `SpecDDStructureValidator`.
+  Create IntelliJ annotations with `HighlightSeverity.ERROR`.
+  Use each issue display message for the annotation message.
+  Use each issue range for the annotation range.
+  Expose direct text annotation support for focused tests.
+  Cover direct text, non-file elements, non-SpecDD files, and SpecDD files in tests.
+
+Must not:
+  Run syntax highlighting.
+  Define validation rules directly.
+  Create warnings for validation issues.
+  Add quick fixes or settings UI.

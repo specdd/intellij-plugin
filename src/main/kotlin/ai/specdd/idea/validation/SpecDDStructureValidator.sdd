@@ -1,0 +1,62 @@
+Spec: SpecDD Structure Validator
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Validate SpecDD text structure against known section and line rules.
+
+Owns:
+  SpecDDStructureValidator.kt
+
+Can modify:
+  SpecDDStructureValidator.kt
+
+Can read:
+  ../parser/*
+  SpecDDKnownSections.kt
+  SpecDDValidationResult.kt
+  ../../../../../../test/kotlin/ai/specdd/idea/validation/SpecDDStructureValidatorBehaviorSpec.kt
+
+Must:
+  Use the shared `SpecDDLineClassifier` line classification boundary.
+  Return validation issues sorted by start offset.
+  Ignore empty text.
+  Ignore text with no recognized section structure.
+  Validate line-by-line for LF, CR, and CRLF line endings.
+  Report unknown section candidates when a non-body line starts with a section-like label followed by `:`.
+  Do not limit unknown section detection to uppercase labels.
+  Include likely typo suggestions from `SpecDDKnownSections`.
+  Report missing `:` when a text line exactly matches a known section label.
+  Require the first known section in a file to be `Spec`.
+  Report a structure issue when the first known section is not `Spec`.
+  Require section headers to start at column 0.
+  Report leading indentation on section headers as an error.
+  Require nonblank indentation to use spaces only.
+  Require nonblank indentation length to be a multiple of 2.
+  Report tabs or non-multiple-of-2 indentation as errors.
+  Allow inline section values only for `Spec`, `Platform`, and `Scenario`.
+  Require inline section values to be separated from `:` by at least one space when content is present.
+  Require `Spec` to have a nonempty inline value.
+  Require `Platform` to have a nonempty inline value.
+  Report inline text after `:` for other known sections.
+  Treat `Spec` as a bodyless section.
+  Treat `Platform` as a bodyless section.
+  Report follow-up text lines under `Spec` as errors.
+  Report follow-up text lines under `Platform` as errors.
+  Report task, scenario-step, and key-value follow-up lines under `Platform` as errors.
+  Require body lines to belong to a current section that allows that body-line kind.
+  Report nonblank lines that are not comments, valid section headers, or valid body lines as invalid syntax.
+  Allow repeated `Scenario` sections only when their inline values are different.
+  Allow repeated `Example` sections.
+  Report duplicate `Scenario` inline values on the second and later matching `Scenario` section.
+  Report duplicate known sections other than `Scenario` and `Example`.
+  Report invalid task marker states as errors.
+  Report `[invalid]` and unsupported short task states such as `[z]` as invalid task states.
+  Cover valid snippets, unknown sections, typo suggestions, missing colons, unsupported inline text, unsupported body lines, duplicate sections, indentation errors, section indentation, invalid task states, first-section structure, line endings, empty text, and text without sections in tests.
+
+Must not:
+  Define known section labels directly.
+  Define parser classification behavior directly.
+  Create IntelliJ annotations.
+  Define highlighting colors.
+  Add user-facing settings.

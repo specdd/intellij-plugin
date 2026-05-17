@@ -1,0 +1,58 @@
+Spec: SpecDD Completion
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Provide section, file path, and local symbol completion for SpecDD files.
+
+Structure:
+  SpecDDSectionCompletion.kt: Section completion decision model and lookup element creation.
+  SpecDDInlineCompletion.kt: Inline file path and local symbol completion decision model.
+  SpecDDCompletionContributor.kt: IntelliJ completion contributor entry point.
+
+Owns:
+  completion.sdd
+  SpecDDSectionCompletion.sdd
+  SpecDDInlineCompletion.sdd
+  SpecDDCompletionContributor.sdd
+  SpecDDSectionCompletion.kt
+  SpecDDInlineCompletion.kt
+  SpecDDCompletionContributor.kt
+
+Can modify:
+  completion.sdd
+  SpecDDSectionCompletion.sdd
+  SpecDDInlineCompletion.sdd
+  SpecDDCompletionContributor.sdd
+  SpecDDSectionCompletion.kt
+  SpecDDInlineCompletion.kt
+  SpecDDCompletionContributor.kt
+
+Can read:
+  ../parser/*
+  ../SpecDDFileType.kt
+  ../../../../../../test/kotlin/ai/specdd/idea/completion/*
+
+Must:
+  Provide basic completion for known SpecDD section labels.
+  Reuse `SpecDDLanguageFacts.sectionLabels` as the section label source.
+  Propose section labels only for SpecDD files.
+  Propose section labels only for basic completion.
+  Propose section labels on unindented top-level lines.
+  Treat empty top-level lines as valid section completion positions.
+  Treat partial section label text before the caret as the completion prefix.
+  Support multi-word partial prefixes such as `Can m`.
+  Reject completion on indented lines because section headers must start at column 0.
+  Reject completion for comments, task lines, body text, scenario steps, key-value lines, and text that cannot be a section label prefix.
+  Insert completed sections as header text ending with `: `.
+  Provide file path completion from paths under the current project root.
+  Complete `./` and `../` path prefixes relative to the current `.sdd` file directory.
+  Provide local symbol completion from symbol-like tokens already present in the current SpecDD file.
+  Do not require cross-language symbol indexes for the first local symbol completion implementation.
+  Cover completion prefix rules and contributor behavior with Kotest BehaviorSpec tests.
+
+Must not:
+  Define section labels independently from parser language facts.
+  Implement validation diagnostics.
+  Define syntax highlighting colors.
+  Add user-facing settings.

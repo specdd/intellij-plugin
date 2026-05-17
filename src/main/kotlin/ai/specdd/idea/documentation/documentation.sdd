@@ -1,0 +1,47 @@
+Spec: SpecDD Documentation
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Provide hover documentation for SpecDD section labels.
+
+Structure:
+  SpecDDSectionDocumentation.kt: Known section documentation registry.
+  SpecDDDocumentationProvider.kt: IntelliJ documentation provider.
+  ../../../../../resources/ai/specdd/idea/documentation/sections.txt: Packaged section documentation text.
+
+Owns:
+  documentation.sdd
+  SpecDDSectionDocumentation.sdd
+  SpecDDDocumentationProvider.sdd
+  SpecDDSectionDocumentation.kt
+  SpecDDDocumentationProvider.kt
+  ../../../../../resources/ai/specdd/idea/documentation/sections.txt
+
+Can modify:
+  documentation.sdd
+  SpecDDSectionDocumentation.sdd
+  SpecDDDocumentationProvider.sdd
+  SpecDDSectionDocumentation.kt
+  SpecDDDocumentationProvider.kt
+  ../../../../../resources/ai/specdd/idea/documentation/sections.txt
+
+Can read:
+  ../parser/*
+  ../SpecDDFileType.kt
+  ../../../../../../test/kotlin/ai/specdd/idea/documentation/*
+
+Must:
+  Keep documentation behavior independent from syntax highlighting and validation diagnostics.
+  Use the shared `SpecDDLineClassifier` line classification boundary.
+  Provide documentation for known SpecDD section labels.
+  Show documentation only when the hover offset is within a section label range.
+  Return no documentation for section values, body text, comments, tasks, scenario steps, key-value lines, and unknown labels.
+  Register through IntelliJ plugin metadata using `documentationProvider`.
+  Cover documentation behavior with Kotest BehaviorSpec tests.
+
+Must not:
+  Replace the minimal PSI parser with a full grammar only for documentation support.
+  Define syntax highlighting colors.
+  Report validation diagnostics.
+  Add user-facing settings.

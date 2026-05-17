@@ -1,0 +1,24 @@
+Spec: SpecDD Path Reference Contributor
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Register SpecDD path references with IntelliJ.
+
+Owns:
+  SpecDDPathReferenceContributor.kt
+
+Can modify:
+  SpecDDPathReferenceContributor.kt
+
+Can read:
+  SpecDDPathReferenceProvider.kt
+  ../../../../../../test/kotlin/ai/specdd/idea/references/SpecDDPathReferenceContributorBehaviorSpec.kt
+
+Must:
+  Extend IntelliJ `PsiReferenceContributor`.
+  Register `SpecDDPathReferenceProvider` for SpecDD PSI elements.
+
+Must not:
+  Resolve paths directly.
+  Report diagnostics.

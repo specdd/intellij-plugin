@@ -1,0 +1,148 @@
+## Spec
+Names the specification. This is the short identity readers see first when they open the file or scan the Structure view.
+
+Use this section to say what contract the file represents, such as a plugin, feature, module, workflow, adapter, policy, or test fixture. The value should be specific enough that a reader can distinguish this spec from nearby specs.
+
+SpecDD resolves specs by path, not by symbol names or similar-looking filenames. The `Spec` value is a human-readable name; it does not grant write authority or change inheritance.
+
+## Platform
+Declares the technical context the spec is written for.
+
+Use this section to name the implementation platform, language, framework, runtime, protocol, or environment that shapes the rules below. Examples include `IntelliJ Platform / Kotlin`, `Node.js / TypeScript`, `HTTP API`, or `PostgreSQL`.
+
+Platform is free-form and optional. Keep it to the technical context that helps an agent or reader apply the rest of the spec.
+
+## Purpose
+Explains why the specified thing exists.
+
+Use this section for intent, not implementation detail. A good Purpose tells a new reader what outcome the file, module, feature, workflow, or contract is responsible for and why future changes should care about it.
+
+Prefer a short paragraph. Purpose should not be used as a task list, permissions list, or place to hide validation rules.
+
+## Structure
+Maps important child files, directories, components, or concepts to their responsibilities.
+
+Use this section when a spec governs more than one target and readers need a quick index. Each line should usually be a path or name followed by a short explanation, for example `parser: Shared line classification`.
+
+Structure helps readers navigate the local area, but it is not automatically write permission. Use `Owns` or `Can modify` when the spec must grant authority to change files.
+
+## Owns
+Declares what this spec is authoritative for.
+
+Use this section to define local ownership over files, directories, symbols, behaviors, data shapes, workflows, or contracts. Ownership means changes in that area should satisfy this spec and should not be treated as unrelated.
+
+If `Can modify` is absent, ownership is also the default modification boundary. Keep ownership local and precise so two specs do not claim the same item at the same level.
+
+## Can modify
+Lists the files or paths an agent is allowed to change while working under this spec.
+
+Use this section as write authority. Keep it narrow enough to prevent accidental edits outside the intended scope, but broad enough that the requested work can be completed without repeatedly asking for permission.
+
+Path entries are resolved relative to the spec file. A plain file path names one file, a directory path names that directory when the project convention allows it, and a glob-style entry such as `src/*` means the matching files or descendants described by that pattern. Globs are permissions, not commands: they do not make sibling specs, unrelated files, or referenced specs writable by themselves.
+
+## Can read
+Lists additional files or paths an agent may inspect for context.
+
+Use this section when useful context sits outside the writable area. Read authority is not write authority: paths listed here may inform the work, but they should not be changed unless another applicable spec allows it.
+
+Use `Can read` for fixtures, sibling modules, tests, docs, or generated examples that explain the local contract. Paths are relative to the declaring spec, and glob-style entries may be used to cover a small set of related files.
+
+## References
+Points to source-adjacent context that informs this spec.
+
+Use this section for related specs, documentation, fixtures, examples, APIs, or design notes that explain the local contract. References help readers understand why a rule exists without copying that material into this spec.
+
+References are explicit horizontal context. They are resolved relative to the spec file and do not grant write authority. A missing reference should be treated as a spec problem.
+
+## Must
+Declares required behavior, constraints, or outcomes.
+
+Use this section for positive obligations. These are the things implementation work has to preserve or create, such as validation rules, output formats, naming requirements, test expectations, or workflow guarantees.
+
+Must rules should be observable enough that a reviewer or test can tell whether they are satisfied. Prefer concrete behavior over broad intent.
+
+## Must not
+Declares prohibited behavior, constraints, or outcomes.
+
+Use this section for negative obligations. These rules are useful for preventing tempting but incorrect changes, such as adding settings UI, broadening write scope, changing public contracts, or introducing unrelated features.
+
+Must not rules are stronger than tasks or convenience. If a requested change would violate one, stop and ask for clarification instead of silently weakening the spec.
+
+## Depends on
+Lists required upstream contracts, modules, tools, services, or assumptions.
+
+Use this section when the subject cannot work alone. Dependencies can be code modules, external systems, runtime capabilities, protocols, build steps, libraries, or other specs that must remain available.
+
+Depends on lists allowed or required collaborators. It never overrides inherited `Forbids` or `Must not` rules.
+
+## Forbids
+Lists dependencies, behaviors, access patterns, or approaches that are not allowed.
+
+Use this section when a restriction is broader than a single Must not line or when you want to make a boundary especially visible. Forbids is often useful for disallowed dependencies, side effects, or unsafe operations.
+
+Forbids is commonly used for architectural boundaries, prohibited paths, libraries, service calls, or data access patterns. Treat it as a hard constraint.
+
+## Exposes
+Documents what this subject makes available to other code or users.
+
+Use this section for public functions, classes, endpoints, files, events, UI capabilities, extension points, generated outputs, or data that other parts of the system may rely on.
+
+Use Exposes when changing the visible surface would affect callers, users, downstream tools, or other specs.
+
+## Accepts
+Documents accepted inputs, parameters, formats, or preconditions.
+
+Use this section to clarify what valid input looks like before behavior runs. This can include file formats, request bodies, command arguments, environment variables, or state requirements.
+
+Good Accepts entries define boundaries: valid shapes, required fields, accepted values, encodings, path forms, or preconditions.
+
+## Returns
+Documents outputs, return values, generated files, responses, or postconditions.
+
+Use this section to clarify what callers, users, or downstream tools can expect after successful behavior. Include important shape, ordering, or stability requirements.
+
+Use Returns for success behavior. Use `Raises` for expected failures or diagnostics.
+
+## Raises
+Documents expected errors, failure modes, invalid states, or diagnostics.
+
+Use this section when failure behavior is part of the contract. Good entries say what condition triggers the error and what kind of issue should be reported.
+
+Raises can describe exceptions, validation diagnostics, rejected inputs, status codes, log-worthy failures, or blocked workflows. It should make invalid behavior explicit.
+
+## Handles
+Documents cases, events, scenarios, or workflows the subject must handle.
+
+Use this section for coverage of important variants. It is useful when the implementation needs to support multiple line endings, task states, file types, events, or edge cases.
+
+Handles is a good place for named cases that do not need full Given/When/Then scenarios but still must not be forgotten.
+
+## Tasks
+Tracks actionable work items using SpecDD task markers.
+
+Use this section for local implementation tasks, follow-ups, questions, blocked work, or skipped work. Task markers such as `[ ]`, `[x]`, `[?]`, `[!]`, and `[-]` make status visible without needing a separate tracker.
+
+Allowed states are `[ ]` open, `[x]` done, `[-]` skipped, `[!]` blocked, and `[?]` needs decision. Optional task IDs may be written after the marker, such as `[ ] #1 Add validation for missing references.`
+
+Tasks are local guidance. They must not contradict `Must`, `Must not`, `Forbids`, or inherited constraints, and they should only be marked done after the implementation and relevant checks are complete.
+
+## Scenario
+Describes a concrete behavior example or workflow.
+
+Scenarios are written as Gherkin-like steps. Use `Given` for setup, `When` for the action, and `Then` for the expected result. Use `And` or `But` only to continue the preceding kind of step.
+
+Multiple Scenario sections may appear in a spec when they describe different behavior. Keep each scenario focused enough that it can be implemented or tested independently.
+
+## Example
+Provides concrete examples, snippets, fixtures, or sample data.
+
+Use this section when a rule is easier to understand through an example than through prose alone. Examples can show paths, inputs, outputs, valid syntax, invalid syntax, payloads, or representative data.
+
+Multiple Example sections may appear when separate examples clarify separate rules. Keep examples small and avoid turning them into hidden requirements that should have been written under `Must`.
+
+## Done when
+Defines completion criteria for the specified work.
+
+Good criteria are observable: tests pass, a file exists, a validation error is reported, documentation is updated, or a behavior works in a named workflow.
+
+Use this section when the spec needs an explicit finish line. Done when should describe completion criteria, not general background or future ideas.

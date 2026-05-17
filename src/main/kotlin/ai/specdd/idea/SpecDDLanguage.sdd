@@ -1,0 +1,27 @@
+Spec: SpecDD Language Identity
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Define the IntelliJ language identity for SpecDD files.
+
+Owns:
+  SpecDDLanguage.kt
+
+Can modify:
+  SpecDDLanguage.kt
+
+Can read:
+  ../../../../../../test/kotlin/ai/specdd/idea/SpecDDLanguageBehaviorSpec.kt
+
+Must:
+  Expose a singleton `Language` instance for SpecDD.
+  Use `SpecDD` as the IntelliJ language id.
+  Be shared by file type, parser definition, PSI file, and code style support.
+  Stay independent from highlighting and validation behavior.
+
+Must not:
+  Define file type metadata.
+  Define parser behavior.
+  Define code style settings.
+  Define highlighting or validation behavior.

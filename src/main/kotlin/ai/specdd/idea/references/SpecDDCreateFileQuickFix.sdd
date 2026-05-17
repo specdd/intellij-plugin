@@ -1,0 +1,32 @@
+Spec: SpecDD Create File Quick Fix
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Create missing files or directories for unresolved exact SpecDD path references.
+
+Owns:
+  SpecDDCreateFileQuickFix.kt
+
+Can modify:
+  SpecDDCreateFileQuickFix.kt
+
+Can read:
+  ../../../../../../test/kotlin/ai/specdd/idea/references/*
+
+Must:
+  Implement an IntelliJ intention action.
+  Be available only when the target path is inside the project root.
+  Be available only when the target path does not already exist.
+  Create missing parent directories for nested exact paths.
+  Create file-like targets as files.
+  Create directory-like targets as directories.
+  Create the path inside an IntelliJ write action when an application is available.
+  Refresh the local VFS entry after path creation when an application is available.
+  Use action text `Create file '<path>'` for file-like targets.
+  Use action text `Create directory '<path>'` for directory-like targets.
+
+Must not:
+  Create paths outside the project root.
+  Execute created files or referenced files.
+  Create symbols.

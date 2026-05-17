@@ -1,0 +1,28 @@
+Spec: SpecDD Syntax Highlighter Factory
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Create syntax highlighters for SpecDD files through IntelliJ extension registration.
+
+Owns:
+  SpecDDSyntaxHighlighterFactory.kt
+
+Can modify:
+  SpecDDSyntaxHighlighterFactory.kt
+
+Can read:
+  ../../../../../../test/kotlin/ai/specdd/idea/highlighting/SpecDDSyntaxHighlighterFactoryBehaviorSpec.kt
+
+Must:
+  Extend IntelliJ `SyntaxHighlighterFactory`.
+  Return a new `SpecDDSyntaxHighlighter` from `getSyntaxHighlighter`.
+  Accept nullable project and virtual-file inputs.
+  Stay stateless.
+  Cover factory creation behavior in tests.
+
+Must not:
+  Implement tokenization rules.
+  Define highlighting colors.
+  Report validation diagnostics.
+  Add user-facing settings.

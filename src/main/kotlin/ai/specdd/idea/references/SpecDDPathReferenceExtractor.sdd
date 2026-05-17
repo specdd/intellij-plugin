@@ -1,0 +1,32 @@
+Spec: SpecDD Path Reference Extractor
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Extract path and glob candidates from SpecDD text.
+
+Owns:
+  SpecDDPathReferenceExtractor.kt
+
+Can modify:
+  SpecDDPathReferenceExtractor.kt
+
+Can read:
+  ../parser/*
+  ../../../../../../test/kotlin/ai/specdd/idea/references/SpecDDPathReferenceExtractorBehaviorSpec.kt
+
+Must:
+  Use `SpecDDLineClassifier` to identify sections and body line shapes.
+  Track the current known section while scanning lines.
+  Extract bare key text before `:` from key-value lines only inside `Structure`, `Owns`, `Can modify`, `Can read`, `References`, `Depends on`, `Forbids`, and `Exposes`.
+  Treat bare key candidates from path-bearing sections as path candidates even when they do not contain explicit path syntax.
+  Extract inline path-like candidates from task lines, scenario steps, key-value lines, and ordinary body text.
+  Recognize inline candidates with relative path prefixes, slash-separated path segments, glob characters, or known source, spec, data, and markup file extensions.
+  Ignore blank lines, comments, section headers, and non-path prose.
+  Preserve exact candidate text ranges in file coordinates.
+  Mark candidates with path syntax when they contain `/`, `.`, `*`, `?`, `[`, `]`, `{`, `}`, or start with `~`.
+
+Must not:
+  Resolve paths.
+  Create IntelliJ PSI references.
+  Report diagnostics.
