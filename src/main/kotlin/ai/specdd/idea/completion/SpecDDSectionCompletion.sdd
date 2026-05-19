@@ -6,14 +6,14 @@ Purpose:
   Decide when section name completion is available and create section lookup variants.
 
 Owns:
-  SpecDDSectionCompletion.kt
+  ./SpecDDSectionCompletion.kt
 
 Can modify:
-  SpecDDSectionCompletion.kt
+  ./SpecDDSectionCompletion.kt
 
 Can read:
-  ../parser/SpecDDLanguageFacts.kt
-  ../../../../../../test/kotlin/ai/specdd/idea/completion/SpecDDSectionCompletionBehaviorSpec.kt
+  /src/main/kotlin/ai/specdd/idea/parser/SpecDDLanguageFacts.kt
+  /src/test/kotlin/ai/specdd/idea/completion/SpecDDSectionCompletionBehaviorSpec.kt
 
 Must:
   Return no completion result when the caret offset is outside the text.

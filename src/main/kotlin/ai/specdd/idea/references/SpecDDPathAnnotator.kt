@@ -21,6 +21,8 @@ class SpecDDPathAnnotator(
 
     fun annotateText(text: String, resolutionContext: SpecDDPathResolutionContext, holder: AnnotationHolder) {
         for (candidate in extractor.extract(text)) {
+            if (!candidate.warnIfUnresolved) continue
+
             val resolution = resolver.resolve(candidate, resolutionContext)
             if (SpecDDPathResolutionStatus.UNRESOLVED != resolution.status) continue
 

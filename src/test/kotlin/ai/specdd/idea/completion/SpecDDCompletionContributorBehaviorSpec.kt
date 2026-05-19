@@ -2,6 +2,8 @@ package ai.specdd.idea.completion
 
 import ai.specdd.idea.SpecDDFileType
 import ai.specdd.idea.SpecDDLanguage
+import ai.specdd.idea.file
+import ai.specdd.idea.testVirtualRoot
 import com.intellij.codeInsight.completion.*
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.openapi.application.Application
@@ -11,6 +13,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import io.kotest.core.spec.style.BehaviorSpec
@@ -20,8 +23,6 @@ import io.kotest.matchers.shouldBe
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Proxy
 import java.util.function.Consumer
-import kotlin.io.path.createFile
-import kotlin.io.path.createTempDirectory
 
 class SpecDDCompletionContributorBehaviorSpec : BehaviorSpec({
     given("a SpecDD completion contributor") {
@@ -99,9 +100,10 @@ class SpecDDCompletionContributorBehaviorSpec : BehaviorSpec({
 
         `when`("completion is requested for an inline project path prefix") {
             then("it adds project path lookup elements") {
-                val root = createTempDirectory()
-                root.resolve("main.sdd").createFile()
-                val text = "References:\n  main"
+                val root = testVirtualRoot()
+                val specFile = root.file("app.sdd")
+                root.file("main.sdd")
+                val text = "References:\n  /main"
                 val result = RecordingCompletionResultSet(contributor)
 
                 contributor.fillCompletionVariants(
@@ -110,13 +112,13 @@ class SpecDDCompletionContributorBehaviorSpec : BehaviorSpec({
                         offset = text.length,
                         fileType = SpecDDFileType(),
                         completionType = CompletionType.BASIC,
-                        basePath = root.toString(),
+                        virtualFile = specFile,
                     ),
                     result = result,
                 )
 
-                result.prefixes shouldContain "main"
-                result.lookupStrings shouldContain "main.sdd"
+                result.prefixes shouldContain "/main"
+                result.lookupStrings shouldContain "/main.sdd"
             }
         }
     }
@@ -160,11 +162,11 @@ private fun completionParameters(
     offset: Int,
     fileType: FileType,
     completionType: CompletionType,
-    basePath: String? = null,
+    virtualFile: VirtualFile? = null,
 ): CompletionParameters =
     CompletionParameters(
         psiElement(text, fileType),
-        psiFile(text, fileType, basePath),
+        psiFile(text, fileType, virtualFile),
         completionType,
         offset,
         1,
@@ -209,7 +211,7 @@ private fun completionProcess(): CompletionProcess =
         },
     ) as CompletionProcess
 
-private fun psiFile(text: String, fileType: FileType, basePath: String? = null): PsiFile =
+private fun psiFile(text: String, fileType: FileType, virtualFile: VirtualFile? = null): PsiFile =
     Proxy.newProxyInstance(
         PsiFile::class.java.classLoader,
         arrayOf(PsiFile::class.java),
@@ -218,7 +220,8 @@ private fun psiFile(text: String, fileType: FileType, basePath: String? = null):
                 "getText" -> text
                 "getFileType" -> fileType
                 "getLanguage" -> SpecDDLanguage
-                "getProject" -> project(basePath)
+                "getProject" -> project(virtualFile?.path)
+                "getVirtualFile" -> virtualFile
                 else -> defaultValue(method.returnType, args)
             }
         },

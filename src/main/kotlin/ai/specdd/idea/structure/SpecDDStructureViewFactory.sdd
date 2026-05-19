@@ -6,15 +6,15 @@ Purpose:
   Connect SpecDD structure entries to IntelliJ Structure view.
 
 Owns:
-  SpecDDStructureViewFactory.kt
+  ./SpecDDStructureViewFactory.kt
 
 Can modify:
-  SpecDDStructureViewFactory.kt
+  ./SpecDDStructureViewFactory.kt
 
 Can read:
-  SpecDDStructureModel.kt
-  ../SpecDDPsiFile.kt
-  ../../../../../../test/kotlin/ai/specdd/idea/structure/SpecDDStructureViewFactoryBehaviorSpec.kt
+  ./SpecDDStructureModel.kt
+  /src/main/kotlin/ai/specdd/idea/SpecDDPsiFile.kt
+  /src/test/kotlin/ai/specdd/idea/structure/SpecDDStructureViewFactoryBehaviorSpec.kt
 
 Must:
   Implement IntelliJ `PsiStructureViewFactory`.

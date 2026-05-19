@@ -6,16 +6,16 @@ Purpose:
   Load and render help text for known SpecDD section labels.
 
 Owns:
-  SpecDDSectionDocumentation.kt
-  ../../../../../resources/ai/specdd/idea/documentation/sections.txt
+  ./SpecDDSectionDocumentation.kt
+  /src/main/resources/ai/specdd/idea/documentation/sections.txt
 
 Can modify:
-  SpecDDSectionDocumentation.kt
-  ../../../../../resources/ai/specdd/idea/documentation/sections.txt
+  ./SpecDDSectionDocumentation.kt
+  /src/main/resources/ai/specdd/idea/documentation/sections.txt
 
 Can read:
-  ../parser/*
-  ../../../../../../test/kotlin/ai/specdd/idea/documentation/SpecDDSectionDocumentationBehaviorSpec.kt
+  /src/main/kotlin/ai/specdd/idea/parser/*
+  /src/test/kotlin/ai/specdd/idea/documentation/SpecDDSectionDocumentationBehaviorSpec.kt
 
 Must:
   Provide one documentation entry for every known SpecDD section label.

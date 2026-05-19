@@ -6,22 +6,22 @@ Purpose:
   Define IntelliJ file type metadata for SpecDD `.sdd` files.
 
 Owns:
-  SpecDDFileType.kt
+  ./SpecDDFileType.kt
 
 Can modify:
-  SpecDDFileType.kt
+  ./SpecDDFileType.kt
 
 Can read:
-  ../../../../../resources/META-INF/logo.svg
-  ../../../../../resources/META-INF/plugin.xml
-  ../../../../../../test/kotlin/ai/specdd/idea/SpecDDLanguageBehaviorSpec.kt
+  /src/main/resources/META-INF/logo.svg
+  /src/main/resources/META-INF/plugin.xml
+  /src/test/kotlin/ai/specdd/idea/SpecDDLanguageBehaviorSpec.kt
 
 Must:
   Use `SpecDDLanguage` as the file type language.
   Use `SpecDD` as the file type name.
   Use `SpecDD specification file` as the file type description.
   Use `sdd` as the default extension.
-  Use `/META-INF/logo.svg` as the file type icon.
+  Use the packaged `META-INF/logo.svg` resource as the file type icon.
   Remain an instantiable class for IntelliJ extension point compatibility.
 
 Must not:

@@ -2,6 +2,26 @@
 
 # SpecDD IntelliJ Plugin Changelog
 
+## [Unreleased]
+
+## [1.0.1] - 2026-05-19
+
+### Fixed
+
+- Resolve project-root `/` SpecDD path references from the IntelliJ project root instead of module or content roots.
+- Resolve SpecDD file and glob references through IntelliJ VFS for consistent local and remote development behavior.
+
+### Added
+
+- Recursive `**` glob support for SpecDD file and glob references.
+- Inline backtick code-span highlighting.
+- Clickable references for backticked explicit paths and unambiguous IntelliJ symbols.
+
+### Changed
+
+- Use `/` as the only project-root path prefix, alongside `./` and `../` spec-relative prefixes.
+- Keep unresolved or ambiguous backticked symbol references warning-free.
+
 ## [1.0.0] - 2026-05-17
 
 ### Added

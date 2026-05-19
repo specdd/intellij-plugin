@@ -304,6 +304,40 @@ class SpecDDSyntaxHighlighterBehaviorSpec : BehaviorSpec({
             }
         }
 
+        `when`("body text contains inline code spans") {
+            then("it highlights balanced single-line backtick spans") {
+                val tokens = highlighter.highlight("  use `SpecDD.Parser` and `./fixtures/*.sdd`")
+
+                tokens.map { it.text to it.keys } shouldContain
+                        ("SpecDD.Parser" to listOf(SpecDDHighlightingColors.CODE_SPAN))
+                tokens.map { it.text to it.keys } shouldContain
+                        ("./fixtures/*.sdd" to listOf(SpecDDHighlightingColors.CODE_SPAN))
+                tokens.withKey(SpecDDHighlightingColors.CODE_SPAN_DELIMITER).map { it.text } shouldBe
+                        listOf("`", "`", "`", "`")
+                tokens.withKey(SpecDDHighlightingColors.PATH) shouldBe emptyList()
+                tokens.withKey(SpecDDHighlightingColors.SYMBOL) shouldBe emptyList()
+            }
+        }
+
+        `when`("a task line contains an inline code span with a task id") {
+            then("the code span wins over inline task-id highlighting") {
+                val tokens = highlighter.highlight("  [ ] compare `#123` with #124")
+
+                tokens.map { it.text to it.keys } shouldContain
+                        ("#123" to listOf(SpecDDHighlightingColors.CODE_SPAN))
+                tokens.withKey(SpecDDHighlightingColors.TASK_ID).map { it.text } shouldBe listOf("#124")
+            }
+        }
+
+        `when`("body text contains an unmatched backtick") {
+            then("it does not highlight a code span") {
+                val tokens = highlighter.highlight("  use `SpecDD.Parser")
+
+                tokens.withKey(SpecDDHighlightingColors.CODE_SPAN) shouldBe emptyList()
+                tokens.withKey(SpecDDHighlightingColors.SYMBOL).map { it.text } shouldBe listOf("SpecDD.Parser")
+            }
+        }
+
         `when`("an invalid task state is lexed") {
             then("it highlights the full invalid state") {
                 val tokens = highlighter.highlight("  [invalid] #9 unsupported state")

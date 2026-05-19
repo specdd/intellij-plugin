@@ -1,5 +1,7 @@
 package ai.specdd.idea.references
 
+import ai.specdd.idea.directory
+import ai.specdd.idea.testVirtualRoot
 import ai.specdd.idea.SpecDDFileType
 import com.intellij.codeInsight.intention.IntentionAction
 import com.intellij.lang.annotation.AnnotationBuilder
@@ -8,6 +10,7 @@ import com.intellij.lang.annotation.HighlightSeverity
 import com.intellij.openapi.fileTypes.PlainTextFileType
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.collections.shouldContainExactly
@@ -20,13 +23,13 @@ class SpecDDPathAnnotatorBehaviorSpec : BehaviorSpec({
     given("a SpecDD path annotator") {
         `when`("path references are annotated directly") {
             then("it reports warning annotations only for unresolved path-like candidates") {
-                val root = createTempDirectory()
-                root.resolve("src").toFile().mkdirs()
+                val root = testVirtualRoot()
+                root.directory("src")
                 val holder = RecordingPathAnnotationHolder()
                 val text = """
                     |Structure:
                     |  src: Existing directory
-                    |  missing/file.sdd
+                    |  ./missing/file.sdd
                     |  Missing prose
                     """.trimMargin()
 
@@ -34,10 +37,30 @@ class SpecDDPathAnnotatorBehaviorSpec : BehaviorSpec({
 
                 holder.warnings.shouldContainExactly(
                     RecordedPathAnnotation(
-                        range = TextRange(text.indexOf("missing/file.sdd"), text.indexOf("missing/file.sdd") + 16),
-                        message = "SpecDD path 'missing/file.sdd' does not resolve.",
+                        range = TextRange(text.indexOf("./missing/file.sdd"), text.indexOf("./missing/file.sdd") + 18),
+                        message = "SpecDD path './missing/file.sdd' does not resolve.",
                     ),
                 )
+            }
+        }
+
+        `when`("path sections contain prose and URLs") {
+            then("it does not report unresolved file warnings for them") {
+                val root = testVirtualRoot()
+                val holder = RecordingPathAnnotationHolder()
+                val text = """
+                    |Owns:
+                    |  Plugin metadata and icons
+                    |References:
+                    |  https://github.com/specdd/intellij-plugin
+                    |Purpose:
+                    |  See docs/readme.md
+                    """.trimMargin()
+
+                SpecDDPathAnnotator().annotateText(text, SpecDDPathResolutionContext(root, root), holder.proxy)
+
+                holder.warnings shouldBe emptyList()
+                holder.fixTexts shouldBe emptyList()
             }
         }
 
@@ -73,19 +96,19 @@ class SpecDDPathAnnotatorBehaviorSpec : BehaviorSpec({
 
         `when`("a SpecDD PSI file has a path resolution context") {
             then("it annotates unresolved path candidates with create-path fixes") {
-                val root = createTempDirectory()
+                val root = testVirtualRoot()
                 val holder = RecordingPathAnnotationHolder()
-                val text = "References:\n  missing.sdd"
+                val text = "References:\n  ./missing.sdd"
 
-                SpecDDPathAnnotator().annotate(psiFile(text, true, root.toString()), holder.proxy)
+                SpecDDPathAnnotator().annotate(psiFile(text, true, root), holder.proxy)
 
                 holder.warnings.shouldContainExactly(
                     RecordedPathAnnotation(
-                        range = TextRange(text.indexOf("missing.sdd"), text.length),
-                        message = "SpecDD path 'missing.sdd' does not resolve.",
+                        range = TextRange(text.indexOf("./missing.sdd"), text.length),
+                        message = "SpecDD path './missing.sdd' does not resolve.",
                     ),
                 )
-                holder.fixTexts.shouldContainExactly("Create file 'missing.sdd'")
+                holder.fixTexts.shouldContainExactly("Create file './missing.sdd'")
             }
         }
     }
@@ -143,7 +166,7 @@ private class RecordingPathAnnotationHolder {
         ) as AnnotationBuilder
 }
 
-private fun psiFile(text: String, specDD: Boolean, basePath: String? = null): PsiFile =
+private fun psiFile(text: String, specDD: Boolean, virtualFile: VirtualFile? = null): PsiFile =
     Proxy.newProxyInstance(
         PsiFile::class.java.classLoader,
         arrayOf(PsiFile::class.java),
@@ -151,7 +174,8 @@ private fun psiFile(text: String, specDD: Boolean, basePath: String? = null): Ps
             when (method.name) {
                 "getFileType" -> if (specDD) SpecDDFileType() else PlainTextFileType.INSTANCE
                 "getText" -> text
-                "getProject" -> project(basePath)
+                "getProject" -> project(virtualFile?.path)
+                "getVirtualFile" -> virtualFile
                 "getContainingFile" -> null
                 else -> null
             }

@@ -6,18 +6,19 @@ Purpose:
   Register SpecDD path references with IntelliJ.
 
 Owns:
-  SpecDDPathReferenceContributor.kt
+  ./SpecDDPathReferenceContributor.kt
 
 Can modify:
-  SpecDDPathReferenceContributor.kt
+  ./SpecDDPathReferenceContributor.kt
 
 Can read:
-  SpecDDPathReferenceProvider.kt
-  ../../../../../../test/kotlin/ai/specdd/idea/references/SpecDDPathReferenceContributorBehaviorSpec.kt
+  ./SpecDDPathReferenceProvider.kt
+  /src/test/kotlin/ai/specdd/idea/references/SpecDDPathReferenceContributorBehaviorSpec.kt
 
 Must:
   Extend IntelliJ `PsiReferenceContributor`.
   Register `SpecDDPathReferenceProvider` for SpecDD PSI elements.
+  Register references on the SpecDD PSI text token emitted by the minimal parser.
 
 Must not:
   Resolve paths directly.

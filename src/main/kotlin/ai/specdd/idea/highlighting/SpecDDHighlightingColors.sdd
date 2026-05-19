@@ -6,13 +6,13 @@ Purpose:
   Define SpecDD highlighting attribute keys and default visual attributes.
 
 Owns:
-  SpecDDHighlightingColors.kt
+  ./SpecDDHighlightingColors.kt
 
 Can modify:
-  SpecDDHighlightingColors.kt
+  ./SpecDDHighlightingColors.kt
 
 Can read:
-  ../../../../../../test/kotlin/ai/specdd/idea/highlighting/SpecDDHighlightingColorsBehaviorSpec.kt
+  /src/test/kotlin/ai/specdd/idea/highlighting/SpecDDHighlightingColorsBehaviorSpec.kt
 
 Must:
   Define stable external names for every SpecDD highlighting key.
@@ -21,7 +21,7 @@ Must:
   Define a continuation text highlight key.
   Define separate keys for default section labels, body key-value keys, meta section labels, positive section labels, negative section labels, required section labels, section colons, and section values.
   Define separate task marker keys for done, open, blocked, question, skipped, and invalid states.
-  Define task id, scenario step, path, symbol, and bad-character keys.
+  Define task id, scenario step, inline code span content, inline code span delimiter, path, symbol, and bad-character keys.
   Use default section label color light blue `#58A6FF` with bold text.
   Use meta section label color `#7A004B` with bold text.
   Use positive section label color `#22863A` with bold text.
@@ -29,6 +29,8 @@ Must:
   Use required section label color `#B26A00` with bold text.
   Use indentation color muted gray `#6E7781`.
   Use continuation text color muted gray `#7A828E`.
+  Use inline code span content color blue-gray `#3A6EA5`.
+  Use inline code span delimiter color muted gray `#7A828E`.
   Use blocked task marker color `#D32F2F` with bold text and no diagnostic underline.
   Use platform bad-character fallback for invalid task markers and bad characters.
   Keep body key-value keys distinct from top-level section label keys.

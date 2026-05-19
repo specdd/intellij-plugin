@@ -163,7 +163,7 @@ class SpecDDLanguageBehaviorSpec : BehaviorSpec({
                 indentOptions.shouldNotBeNull()
 
                 provider.language shouldBeSameInstanceAs SpecDDLanguage
-                indentOptions!!.INDENT_SIZE shouldBe 2
+                indentOptions.INDENT_SIZE shouldBe 2
                 indentOptions.CONTINUATION_INDENT_SIZE shouldBe 2
                 indentOptions.TAB_SIZE shouldBe 2
                 indentOptions.USE_TAB_CHARACTER shouldBe false

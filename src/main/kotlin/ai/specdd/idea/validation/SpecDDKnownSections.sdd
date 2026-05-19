@@ -6,14 +6,14 @@ Purpose:
   Provide known SpecDD section lookup and typo suggestions for validation.
 
 Owns:
-  SpecDDKnownSections.kt
+  ./SpecDDKnownSections.kt
 
 Can modify:
-  SpecDDKnownSections.kt
+  ./SpecDDKnownSections.kt
 
 Can read:
-  ../parser/*
-  ../../../../../../test/kotlin/ai/specdd/idea/validation/SpecDDKnownSectionsBehaviorSpec.kt
+  /src/main/kotlin/ai/specdd/idea/parser/*
+  /src/test/kotlin/ai/specdd/idea/validation/SpecDDKnownSectionsBehaviorSpec.kt
 
 Must:
   Mirror known section labels from shared language facts.

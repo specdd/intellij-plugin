@@ -6,25 +6,31 @@ Purpose:
   Extract path and glob candidates from SpecDD text.
 
 Owns:
-  SpecDDPathReferenceExtractor.kt
+  ./SpecDDPathReferenceExtractor.kt
 
 Can modify:
-  SpecDDPathReferenceExtractor.kt
+  ./SpecDDPathReferenceExtractor.kt
 
 Can read:
-  ../parser/*
-  ../../../../../../test/kotlin/ai/specdd/idea/references/SpecDDPathReferenceExtractorBehaviorSpec.kt
+  /src/main/kotlin/ai/specdd/idea/parser/*
+  /src/test/kotlin/ai/specdd/idea/references/SpecDDPathReferenceExtractorBehaviorSpec.kt
 
 Must:
   Use `SpecDDLineClassifier` to identify sections and body line shapes.
   Track the current known section while scanning lines.
-  Extract bare key text before `:` from key-value lines only inside `Structure`, `Owns`, `Can modify`, `Can read`, `References`, `Depends on`, `Forbids`, and `Exposes`.
-  Treat bare key candidates from path-bearing sections as path candidates even when they do not contain explicit path syntax.
+  Extract file reference candidates only when the candidate starts with `./`, `../`, or `/`.
+  Treat `/` prefixes as project-root-relative paths.
+  Treat `./` and `../` prefixes as spec-file-directory-relative paths.
+  Treat matching body entries in path-bearing sections as unresolved-warning candidates.
   Extract inline path-like candidates from task lines, scenario steps, key-value lines, and ordinary body text.
-  Recognize inline candidates with relative path prefixes, slash-separated path segments, glob characters, or known source, spec, data, and markup file extensions.
+  Treat inline path-like candidates outside path-bearing entries as navigation-only candidates that do not warn when unresolved.
+  Recognize inline candidates only when they use explicit path prefixes.
+  Ignore URL text when extracting file path candidates.
+  Ignore path-like text inside balanced single-line inline code spans delimited with single backticks.
+  Exclude trailing sentence periods from inline path candidate ranges.
   Ignore blank lines, comments, section headers, and non-path prose.
   Preserve exact candidate text ranges in file coordinates.
-  Mark candidates with path syntax when they contain `/`, `.`, `*`, `?`, `[`, `]`, `{`, `}`, or start with `~`.
+  Mark candidates with path syntax when they start with `./`, `../`, or `/`.
 
 Must not:
   Resolve paths.

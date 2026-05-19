@@ -6,13 +6,13 @@ Purpose:
   Provide default IntelliJ code style settings for SpecDD files.
 
 Owns:
-  SpecDDCodeStyleSettingsProvider.kt
+  ./SpecDDCodeStyleSettingsProvider.kt
 
 Can modify:
-  SpecDDCodeStyleSettingsProvider.kt
+  ./SpecDDCodeStyleSettingsProvider.kt
 
 Can read:
-  ../../../../../../test/kotlin/ai/specdd/idea/SpecDDLanguageBehaviorSpec.kt
+  /src/test/kotlin/ai/specdd/idea/SpecDDLanguageBehaviorSpec.kt
 
 Must:
   Provide settings for `SpecDDLanguage`.

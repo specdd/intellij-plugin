@@ -1,0 +1,27 @@
+Spec: SpecDD Code Reference Extractor
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Extract explicit backticked code reference candidates from SpecDD text.
+
+Owns:
+  ./SpecDDCodeReferenceExtractor.kt
+
+Can modify:
+  ./SpecDDCodeReferenceExtractor.kt
+
+Can read:
+  /src/test/kotlin/ai/specdd/idea/references/SpecDDCodeReferenceExtractorBehaviorSpec.kt
+
+Must:
+  Extract only balanced single-line spans delimited with single backticks.
+  Use the text inside the backticks as the candidate text.
+  Expose the inner content range separately from the full backtick span range.
+  Ignore empty code spans.
+  Ignore unmatched opening backticks.
+  Never cross line boundaries.
+
+Must not:
+  Resolve paths or symbols.
+  Report diagnostics.

@@ -32,6 +32,8 @@ class SpecDDHighlightingColorsBehaviorSpec : BehaviorSpec({
                     SpecDDHighlightingColors.TASK_INVALID.externalName,
                     SpecDDHighlightingColors.TASK_ID.externalName,
                     SpecDDHighlightingColors.SCENARIO_STEP.externalName,
+                    SpecDDHighlightingColors.CODE_SPAN.externalName,
+                    SpecDDHighlightingColors.CODE_SPAN_DELIMITER.externalName,
                     SpecDDHighlightingColors.PATH.externalName,
                     SpecDDHighlightingColors.SYMBOL.externalName,
                     SpecDDHighlightingColors.BAD_CHARACTER.externalName,
@@ -55,6 +57,8 @@ class SpecDDHighlightingColorsBehaviorSpec : BehaviorSpec({
                     "SPECDD_TASK_INVALID",
                     "SPECDD_TASK_ID",
                     "SPECDD_SCENARIO_STEP",
+                    "SPECDD_CODE_SPAN",
+                    "SPECDD_CODE_SPAN_DELIMITER",
                     "SPECDD_PATH",
                     "SPECDD_SYMBOL",
                     "SPECDD_BAD_CHARACTER",
@@ -80,10 +84,12 @@ class SpecDDHighlightingColorsBehaviorSpec : BehaviorSpec({
                     SpecDDHighlightingColors.TASK_INVALID,
                     SpecDDHighlightingColors.TASK_ID,
                     SpecDDHighlightingColors.SCENARIO_STEP,
+                    SpecDDHighlightingColors.CODE_SPAN,
+                    SpecDDHighlightingColors.CODE_SPAN_DELIMITER,
                     SpecDDHighlightingColors.PATH,
                     SpecDDHighlightingColors.SYMBOL,
                     SpecDDHighlightingColors.BAD_CHARACTER,
-                ).distinct().size shouldBe 22
+                ).distinct().size shouldBe 24
             }
         }
 
@@ -137,6 +143,19 @@ class SpecDDHighlightingColorsBehaviorSpec : BehaviorSpec({
                 attributes.effectColor.shouldBeNull()
                 attributes.effectType.shouldBeNull()
                 attributes.fontType shouldBe Font.BOLD
+            }
+        }
+
+        `when`("inline code defaults are requested") {
+            then("they provide readable code text and quieter delimiters") {
+                val codeAttributes = SpecDDHighlightingColors.CODE_SPAN.defaultAttributes
+                val delimiterAttributes = SpecDDHighlightingColors.CODE_SPAN_DELIMITER.defaultAttributes
+
+                codeAttributes.foregroundColor shouldBe Color(0x3A6EA5)
+                codeAttributes.fontType shouldBe Font.PLAIN
+                delimiterAttributes.foregroundColor shouldBe Color(0x7A828E)
+                delimiterAttributes.fontType shouldBe Font.PLAIN
+                SpecDDHighlightingColors.CODE_SPAN shouldNotBe SpecDDHighlightingColors.CODE_SPAN_DELIMITER
             }
         }
 

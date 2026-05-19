@@ -6,16 +6,16 @@ Purpose:
   Connect SpecDD section documentation to IntelliJ hover documentation.
 
 Owns:
-  SpecDDDocumentationProvider.kt
+  ./SpecDDDocumentationProvider.kt
 
 Can modify:
-  SpecDDDocumentationProvider.kt
+  ./SpecDDDocumentationProvider.kt
 
 Can read:
-  SpecDDSectionDocumentation.kt
-  ../parser/*
-  ../SpecDDFileType.kt
-  ../../../../../../test/kotlin/ai/specdd/idea/documentation/SpecDDDocumentationProviderBehaviorSpec.kt
+  ./SpecDDSectionDocumentation.kt
+  /src/main/kotlin/ai/specdd/idea/parser/*
+  /src/main/kotlin/ai/specdd/idea/SpecDDFileType.kt
+  /src/test/kotlin/ai/specdd/idea/documentation/SpecDDDocumentationProviderBehaviorSpec.kt
 
 Must:
   Implement IntelliJ `DocumentationProvider`.

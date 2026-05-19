@@ -6,27 +6,27 @@ Purpose:
   Provide IntelliJ Structure view entries for SpecDD `.sdd` files.
 
 Structure:
-  SpecDDStructureModel.kt: Text-level section extraction model.
-  SpecDDStructureViewFactory.kt: IntelliJ structure view factory, model, and tree elements.
+  ./SpecDDStructureModel.kt: Text-level section extraction model.
+  ./SpecDDStructureViewFactory.kt: IntelliJ structure view factory, model, and tree elements.
 
 Owns:
-  structure.sdd
-  SpecDDStructureModel.sdd
-  SpecDDStructureViewFactory.sdd
-  SpecDDStructureModel.kt
-  SpecDDStructureViewFactory.kt
+  ./structure.sdd
+  ./SpecDDStructureModel.sdd
+  ./SpecDDStructureViewFactory.sdd
+  ./SpecDDStructureModel.kt
+  ./SpecDDStructureViewFactory.kt
 
 Can modify:
-  structure.sdd
-  SpecDDStructureModel.sdd
-  SpecDDStructureViewFactory.sdd
-  SpecDDStructureModel.kt
-  SpecDDStructureViewFactory.kt
+  ./structure.sdd
+  ./SpecDDStructureModel.sdd
+  ./SpecDDStructureViewFactory.sdd
+  ./SpecDDStructureModel.kt
+  ./SpecDDStructureViewFactory.kt
 
 Can read:
-  ../parser/*
-  ../SpecDDPsiFile.kt
-  ../../../../../../test/kotlin/ai/specdd/idea/structure/*
+  /src/main/kotlin/ai/specdd/idea/parser/*
+  /src/main/kotlin/ai/specdd/idea/SpecDDPsiFile.kt
+  /src/test/kotlin/ai/specdd/idea/structure/*
 
 Must:
   Keep structure behavior independent from syntax highlighting and validation diagnostics.

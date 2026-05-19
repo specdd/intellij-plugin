@@ -1,11 +1,11 @@
 package ai.specdd.idea.completion
 
 import ai.specdd.idea.SpecDDFileType
+import ai.specdd.idea.references.pathResolutionContext
 import com.intellij.codeInsight.completion.CompletionContributor
 import com.intellij.codeInsight.completion.CompletionParameters
 import com.intellij.codeInsight.completion.CompletionResultSet
 import com.intellij.codeInsight.completion.CompletionType
-import java.nio.file.Path
 
 class SpecDDCompletionContributor : CompletionContributor() {
     override fun fillCompletionVariants(parameters: CompletionParameters, result: CompletionResultSet) {
@@ -24,11 +24,13 @@ class SpecDDCompletionContributor : CompletionContributor() {
             return
         }
 
+        val pathContext = parameters.originalFile.pathResolutionContext()
         val inlineCompletion = SpecDDInlineCompletion.complete(
             text = parameters.editor.document.charsSequence,
             offset = parameters.offset,
-            projectRoot = parameters.originalFile.project.basePath?.let { basePath -> Path.of(basePath) },
-            specDirectory = parameters.originalFile.virtualFile?.parent?.path?.let { path -> Path.of(path) },
+            projectRoot = pathContext?.projectRoot,
+            specDirectory = pathContext?.specDirectory,
+            isInProject = pathContext?.isInProject ?: SpecDDInlineCompletion::defaultProjectFilter,
         ) ?: return
 
         result

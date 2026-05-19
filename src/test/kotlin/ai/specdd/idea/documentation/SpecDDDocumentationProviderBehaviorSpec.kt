@@ -55,7 +55,7 @@ class SpecDDDocumentationProviderBehaviorSpec : BehaviorSpec({
                 )
 
                 element.shouldNotBeNull()
-                element!!.text shouldBe "Can modify"
+                element.text shouldBe "Can modify"
                 (element as PsiNamedElement).name shouldBe "Can modify"
                 (element.parent === element.containingFile) shouldBe true
                 element.textOffset shouldBe 14

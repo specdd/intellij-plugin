@@ -9,28 +9,28 @@ Owns:
   Repository-level plugin structure and development contracts.
 
 Structure:
-  app.sdd: Repository-level SpecDD contract.
-  Makefile: Convenience build targets for local and release workflows.
-  src/main.sdd: Implementation-root SpecDD contract.
-  src/main/kotlin/ai/specdd/idea: SpecDD language package namespace.
-  src/test/kotlin/ai/specdd/idea: SpecDD language test package namespace.
-  src/main/kotlin/ai/specdd/idea/highlighting: Syntax highlighting concern.
-  src/main/kotlin/ai/specdd/idea/validation: Language validation concern.
-  src/main/kotlin/ai/specdd/idea/structure: Structure view concern.
-  src/main/kotlin/ai/specdd/idea/documentation: Hover documentation concern.
-  src/main/kotlin/ai/specdd/idea/completion: Completion concern.
-  src/main/kotlin/ai/specdd/idea/references: Path and glob reference concern.
+  ./app.sdd: Repository-level SpecDD contract.
+  ./Makefile: Convenience build targets for local and release workflows.
+  ./src/main.sdd: Implementation-root SpecDD contract.
+  ./src/main/kotlin/ai/specdd/idea: SpecDD language package namespace.
+  ./src/test/kotlin/ai/specdd/idea: SpecDD language test package namespace.
+  ./src/main/kotlin/ai/specdd/idea/highlighting: Syntax highlighting concern.
+  ./src/main/kotlin/ai/specdd/idea/validation: Language validation concern.
+  ./src/main/kotlin/ai/specdd/idea/structure: Structure view concern.
+  ./src/main/kotlin/ai/specdd/idea/documentation: Hover documentation concern.
+  ./src/main/kotlin/ai/specdd/idea/completion: Completion concern.
+  ./src/main/kotlin/ai/specdd/idea/references: Path and glob reference concern.
 
 Can modify:
-  app.sdd
-  Makefile
-  README.md
-  CHANGELOG.md
-  build.gradle.kts
-  gradle.properties
-  settings.gradle.kts
-  src/*
-  fixtures/*
+  ./app.sdd
+  ./Makefile
+  ./README.md
+  ./CHANGELOG.md
+  ./build.gradle.kts
+  ./gradle.properties
+  ./settings.gradle.kts
+  ./src/*
+  ./fixtures/*
 
 Must:
   Keep plugin behavior focused on SpecDD language support.

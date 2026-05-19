@@ -6,16 +6,16 @@ Purpose:
   Connect SpecDD completion models to IntelliJ basic completion.
 
 Owns:
-  SpecDDCompletionContributor.kt
+  ./SpecDDCompletionContributor.kt
 
 Can modify:
-  SpecDDCompletionContributor.kt
+  ./SpecDDCompletionContributor.kt
 
 Can read:
-  SpecDDSectionCompletion.kt
-  SpecDDInlineCompletion.kt
-  ../SpecDDFileType.kt
-  ../../../../../../test/kotlin/ai/specdd/idea/completion/SpecDDCompletionContributorBehaviorSpec.kt
+  ./SpecDDSectionCompletion.kt
+  ./SpecDDInlineCompletion.kt
+  /src/main/kotlin/ai/specdd/idea/SpecDDFileType.kt
+  /src/test/kotlin/ai/specdd/idea/completion/SpecDDCompletionContributorBehaviorSpec.kt
 
 Must:
   Extend IntelliJ `CompletionContributor`.

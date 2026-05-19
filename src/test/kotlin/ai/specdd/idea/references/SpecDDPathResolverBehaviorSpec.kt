@@ -1,14 +1,12 @@
 package ai.specdd.idea.references
 
+import ai.specdd.idea.directory
+import ai.specdd.idea.file
+import ai.specdd.idea.testVirtualRoot
 import com.intellij.openapi.util.TextRange
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
-import java.nio.file.Files
-import java.nio.file.attribute.PosixFilePermissions
-import kotlin.io.path.createDirectories
-import kotlin.io.path.createFile
-import kotlin.io.path.createTempDirectory
 
 class SpecDDPathResolverBehaviorSpec : BehaviorSpec({
     given("a SpecDD path resolver") {
@@ -16,9 +14,9 @@ class SpecDDPathResolverBehaviorSpec : BehaviorSpec({
 
         `when`("an exact existing file is resolved") {
             then("it returns the normalized target") {
-                val root = createTempDirectory()
-                val specDirectory = root.resolve("specs").createDirectories()
-                val target = specDirectory.resolve("main.sdd").createFile()
+                val root = testVirtualRoot()
+                val specDirectory = root.directory("specs")
+                val target = specDirectory.file("main.sdd")
 
                 val resolution = resolver.resolve(candidate("main.sdd"), context(root, specDirectory))
 
@@ -29,12 +27,11 @@ class SpecDDPathResolverBehaviorSpec : BehaviorSpec({
 
         `when`("a glob matches files and directories") {
             then("it returns all matching project targets") {
-                val root = createTempDirectory()
+                val root = testVirtualRoot()
                 val specDirectory = root
-                val directory = root.resolve("src/main").createDirectories()
-                val file = root.resolve("src/App.kt").createFile()
-                root.resolve("other/App.kt").parent.createDirectories()
-                root.resolve("other/App.kt").createFile()
+                val directory = root.directory("src/main")
+                val file = root.file("src/App.kt")
+                root.file("other/App.kt")
 
                 val resolution = resolver.resolve(candidate("src/*"), context(root, specDirectory))
 
@@ -45,18 +42,138 @@ class SpecDDPathResolverBehaviorSpec : BehaviorSpec({
 
         `when`("a glob pattern is malformed") {
             then("it is unresolved without throwing") {
-                val root = createTempDirectory()
+                val root = testVirtualRoot()
 
                 resolver.resolve(candidate("src/[broken"), context(root, root)).status shouldBe
                         SpecDDPathResolutionStatus.UNRESOLVED
             }
         }
 
+        `when`("a glob pattern compiles to an invalid regex") {
+            then("it is unresolved without throwing") {
+                val root = testVirtualRoot()
+
+                resolver.resolve(candidate("[z-a]"), context(root, root)).status shouldBe
+                        SpecDDPathResolutionStatus.UNRESOLVED
+            }
+        }
+
+        `when`("glob patterns use single-character, character-class, and brace syntax") {
+            then("it matches the supported pattern forms") {
+                val root = testVirtualRoot()
+                val first = root.file("src/a.sdd")
+                val second = root.file("src/b.sdd")
+                root.file("src/long.sdd")
+
+                resolver.resolve(candidate("src/?.sdd"), context(root, root)).targets
+                    .shouldContainExactly(first, second)
+                resolver.resolve(candidate("src/[ab].sdd"), context(root, root)).targets
+                    .shouldContainExactly(first, second)
+                resolver.resolve(candidate("src/{a,b}.sdd"), context(root, root)).targets
+                    .shouldContainExactly(first, second)
+            }
+        }
+
+        `when`("a current-directory glob uses a single segment wildcard") {
+            then("it matches only direct children of the spec directory") {
+                val root = testVirtualRoot()
+                val specDirectory = root.directory("specs")
+                val target = specDirectory.file("root.sdd")
+                specDirectory.file("nested/example.sdd")
+
+                resolver.resolve(candidate("./*.sdd"), context(root, specDirectory)).targets
+                    .shouldContainExactly(target)
+            }
+        }
+
+        `when`("a current-directory glob uses a globstar directory wildcard") {
+            then("it matches direct and nested children of the spec directory") {
+                val root = testVirtualRoot()
+                val specDirectory = root.directory("specs")
+                val nested = specDirectory.file("nested/deep/example.sdd")
+                val rootLevel = specDirectory.file("root.sdd")
+                specDirectory.file("nested/deep/example.txt")
+                root.file("outside.sdd")
+
+                resolver.resolve(candidate("./**/*.sdd"), context(root, specDirectory)).targets
+                    .shouldContainExactly(nested, rootLevel)
+            }
+        }
+
+        `when`("a current-directory glob uses a bare globstar wildcard") {
+            then("it matches across directory boundaries") {
+                val root = testVirtualRoot()
+                val specDirectory = root.directory("specs")
+                val nested = specDirectory.file("nested/deep/example.sdd")
+                val rootLevel = specDirectory.file("root.sdd")
+                specDirectory.file("nested/deep/example.txt")
+
+                resolver.resolve(candidate("./**.sdd"), context(root, specDirectory)).targets
+                    .shouldContainExactly(nested, rootLevel)
+            }
+        }
+
+        `when`("a project-root glob uses a globstar directory wildcard") {
+            then("it matches recursively from the project root") {
+                val root = testVirtualRoot()
+                val specDirectory = root.directory("specs")
+                val target = root.file("src/main/App.kt")
+                root.file("src/main/App.txt")
+
+                resolver.resolve(candidate("/src/**/*.kt"), context(root, specDirectory)).targets
+                    .shouldContainExactly(target)
+            }
+        }
+
+        `when`("a parent-directory glob uses a globstar directory wildcard") {
+            then("it matches recursively from the spec directory parent") {
+                val root = testVirtualRoot()
+                val specDirectory = root.directory("specs/local")
+                val target = root.file("specs/shared/nested/example.sdd")
+                specDirectory.file("nested/local.sdd")
+                root.file("outside.sdd")
+
+                resolver.resolve(candidate("../shared/**/*.sdd"), context(root, specDirectory)).targets
+                    .shouldContainExactly(target)
+            }
+        }
+
+        `when`("an exact path contains current-directory segments") {
+            then("it resolves the normalized target") {
+                val root = testVirtualRoot()
+                val target = root.file("main.sdd")
+
+                resolver.resolve(candidate("./main.sdd"), context(root, root)).targets
+                    .shouldContainExactly(target)
+            }
+        }
+
+        `when`("an exact path uses a project-root prefix") {
+            then("it resolves from the project root") {
+                val root = testVirtualRoot()
+                val specDirectory = root.directory("specs")
+                val target = root.file("main.sdd")
+
+                resolver.resolve(candidate("/main.sdd"), context(root, specDirectory)).targets
+                    .shouldContainExactly(target)
+            }
+        }
+
+        `when`("an exact path uses a project-root prefix from a nested source spec") {
+            then("it resolves from the project root instead of the nested source directory") {
+                val root = testVirtualRoot()
+                val specDirectory = root.directory("src/main/kotlin/ai/specdd/idea/references")
+                val target = root.file("Makefile")
+
+                resolver.resolve(candidate("/Makefile"), context(root, specDirectory)).targets
+                    .shouldContainExactly(target)
+            }
+        }
+
         `when`("a glob walks skipped directories") {
             then("it does not return targets from heavy directories") {
-                val root = createTempDirectory()
-                root.resolve(".git/hidden.sdd").parent.createDirectories()
-                root.resolve(".git/hidden.sdd").createFile()
+                val root = testVirtualRoot()
+                root.file(".git/hidden.sdd")
 
                 resolver.resolve(candidate(".git/*"), context(root, root)).status shouldBe
                         SpecDDPathResolutionStatus.UNRESOLVED
@@ -65,9 +182,9 @@ class SpecDDPathResolverBehaviorSpec : BehaviorSpec({
 
         `when`("a glob matches more than the result cap") {
             then("it caps returned targets") {
-                val root = createTempDirectory()
+                val root = testVirtualRoot()
                 repeat(505) { index ->
-                    root.resolve("file-$index.sdd").createFile()
+                    root.file("file-$index.sdd")
                 }
 
                 val resolution = resolver.resolve(candidate("*.sdd"), context(root, root))
@@ -79,9 +196,9 @@ class SpecDDPathResolverBehaviorSpec : BehaviorSpec({
 
         `when`("a glob matches more directories than the result cap") {
             then("it caps returned directory targets") {
-                val root = createTempDirectory()
+                val root = testVirtualRoot()
                 repeat(505) { index ->
-                    root.resolve("dir-$index").createDirectories()
+                    root.directory("dir-$index")
                 }
 
                 val resolution = resolver.resolve(candidate("dir-*"), context(root, root))
@@ -91,25 +208,9 @@ class SpecDDPathResolverBehaviorSpec : BehaviorSpec({
             }
         }
 
-        `when`("a glob encounters an unreadable directory") {
-            then("it continues without throwing") {
-                val root = createTempDirectory()
-                val unreadable = root.resolve("unreadable").createDirectories()
-                root.resolve("visible.sdd").createFile()
-                Files.setPosixFilePermissions(unreadable, PosixFilePermissions.fromString("---------"))
-
-                try {
-                    resolver.resolve(candidate("*"), context(root, root)).status shouldBe
-                            SpecDDPathResolutionStatus.RESOLVED
-                } finally {
-                    Files.setPosixFilePermissions(unreadable, PosixFilePermissions.fromString("rwx------"))
-                }
-            }
-        }
-
         `when`("a missing path-like candidate is resolved") {
             then("it is unresolved") {
-                val root = createTempDirectory()
+                val root = testVirtualRoot()
 
                 resolver.resolve(candidate("missing/file.sdd"), context(root, root)).status shouldBe
                         SpecDDPathResolutionStatus.UNRESOLVED
@@ -118,7 +219,7 @@ class SpecDDPathResolverBehaviorSpec : BehaviorSpec({
 
         `when`("a missing prose-like candidate is resolved") {
             then("it is ignored") {
-                val root = createTempDirectory()
+                val root = testVirtualRoot()
 
                 resolver.resolve(candidate("Shared parser", hasPathSyntax = false), context(root, root)).status shouldBe
                         SpecDDPathResolutionStatus.IGNORED
@@ -127,7 +228,7 @@ class SpecDDPathResolverBehaviorSpec : BehaviorSpec({
 
         `when`("a candidate escapes the project root") {
             then("it is unresolved when it has path syntax") {
-                val root = createTempDirectory()
+                val root = testVirtualRoot()
 
                 resolver.resolve(candidate("../outside.txt"), context(root, root)).status shouldBe
                         SpecDDPathResolutionStatus.UNRESOLVED
@@ -136,8 +237,8 @@ class SpecDDPathResolverBehaviorSpec : BehaviorSpec({
 
         `when`("the spec directory is outside the project root") {
             then("it ignores the candidate") {
-                val root = createTempDirectory()
-                val outside = createTempDirectory()
+                val root = testVirtualRoot()
+                val outside = testVirtualRoot("outside")
 
                 resolver.resolve(candidate("file.sdd"), context(root, outside)).status shouldBe
                         SpecDDPathResolutionStatus.IGNORED
@@ -149,5 +250,5 @@ class SpecDDPathResolverBehaviorSpec : BehaviorSpec({
 private fun candidate(text: String, hasPathSyntax: Boolean = true): SpecDDPathCandidate =
     SpecDDPathCandidate(text, TextRange(0, text.length), hasPathSyntax)
 
-private fun context(root: java.nio.file.Path, specDirectory: java.nio.file.Path): SpecDDPathResolutionContext =
+private fun context(root: com.intellij.openapi.vfs.VirtualFile, specDirectory: com.intellij.openapi.vfs.VirtualFile): SpecDDPathResolutionContext =
     SpecDDPathResolutionContext(root, specDirectory)

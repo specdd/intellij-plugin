@@ -1,26 +1,27 @@
 package ai.specdd.idea.completion
 
+import ai.specdd.idea.references.isInRoot
+import ai.specdd.idea.references.relativePath
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
-import java.io.IOException
-import java.nio.file.FileVisitResult
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.SimpleFileVisitor
-import java.nio.file.attribute.BasicFileAttributes
+import com.intellij.openapi.vfs.VirtualFile
 
 object SpecDDInlineCompletion {
+    @Suppress("UNUSED_PARAMETER")
+    fun defaultProjectFilter(file: VirtualFile): Boolean = true
+
     fun complete(
         text: CharSequence,
         offset: Int,
-        projectRoot: Path?,
-        specDirectory: Path? = projectRoot,
+        projectRoot: VirtualFile?,
+        specDirectory: VirtualFile? = projectRoot,
+        isInProject: (VirtualFile) -> Boolean = { true },
     ): SpecDDInlineCompletionResult? {
         val prefix = prefixAt(text, offset) ?: return null
         val variants = linkedSetOf<SpecDDInlineCompletionVariant>()
 
         if (null != projectRoot) {
-            variants.addAll(pathVariants(projectRoot, specDirectory ?: projectRoot, prefix))
+            variants.addAll(pathVariants(projectRoot, specDirectory ?: projectRoot, prefix, isInProject))
         }
         variants.addAll(symbolVariants(text, prefix))
 
@@ -41,66 +42,54 @@ object SpecDDInlineCompletion {
     }
 
     private fun pathVariants(
-        projectRoot: Path,
-        specDirectory: Path,
+        projectRoot: VirtualFile,
+        specDirectory: VirtualFile,
         prefix: String,
+        isInProject: (VirtualFile) -> Boolean,
     ): List<SpecDDInlineCompletionVariant> {
-        val root = projectRoot.toAbsolutePath().normalize()
-        val base = specDirectory.toAbsolutePath().normalize()
-        if (!Files.isDirectory(root)) return emptyList()
-        if (!base.startsWith(root)) return emptyList()
+        if (!projectRoot.isDirectory) return emptyList()
+        if (!isInRoot(specDirectory, projectRoot)) return emptyList()
+        if (!hasExplicitPathPrefix(prefix)) return emptyList()
 
         val variants = mutableListOf<String>()
-        Files.walkFileTree(
-            root,
-            object : SimpleFileVisitor<Path>() {
-                override fun preVisitDirectory(dir: Path, attrs: BasicFileAttributes): FileVisitResult {
-                    if (dir != root && dir.fileName?.toString() in SKIPPED_DIRECTORIES) {
-                        return FileVisitResult.SKIP_SUBTREE
-                    }
-                    addIfMatching(dir)
-                    return if (MAX_PATH_VARIANTS <= variants.size) {
-                        FileVisitResult.TERMINATE
-                    } else {
-                        FileVisitResult.CONTINUE
-                    }
-                }
+        val stack = ArrayDeque<VirtualFile>()
+        stack.add(projectRoot)
 
-                override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
-                    addIfMatching(file)
-                    return if (MAX_PATH_VARIANTS <= variants.size) {
-                        FileVisitResult.TERMINATE
-                    } else {
-                        FileVisitResult.CONTINUE
-                    }
-                }
+        while (stack.isNotEmpty() && variants.size < MAX_PATH_VARIANTS) {
+            val file = stack.removeLast()
+            if (file != projectRoot && file.isDirectory && file.name in SKIPPED_DIRECTORIES) continue
+            if (file != projectRoot && !isInProject(file)) continue
 
-                override fun visitFileFailed(file: Path, exc: IOException): FileVisitResult =
-                    FileVisitResult.CONTINUE
-
-                private fun addIfMatching(path: Path) {
-                    if (path == root) return
-                    val lookupString = pathLookupString(root, base, path.toAbsolutePath().normalize(), prefix)
-                    if (lookupString.startsWith(prefix, ignoreCase = true)) {
-                        variants.add(lookupString)
-                    }
+            if (file != projectRoot) {
+                val lookupString = pathLookupString(projectRoot, specDirectory, file, prefix)
+                if (lookupString.startsWith(prefix, ignoreCase = true)) {
+                    variants.add(lookupString)
                 }
             }
-        )
+
+            if (file.isDirectory) {
+                file.children.reversedArray().forEach { child -> stack.add(child) }
+            }
+        }
 
         return variants
             .sorted()
             .map { lookupString -> SpecDDInlineCompletionVariant(lookupString) }
     }
 
-    private fun pathLookupString(projectRoot: Path, specDirectory: Path, path: Path, prefix: String): String {
-        if (prefix.startsWith("./")) {
-            return "./${specDirectory.relativize(path).joinToString("/")}"
-        }
+    private fun pathLookupString(
+        projectRoot: VirtualFile,
+        specDirectory: VirtualFile,
+        path: VirtualFile,
+        prefix: String,
+    ): String {
         if (prefix.startsWith("../")) {
-            return specDirectory.relativize(path).joinToString("/")
+            return relativePath(specDirectory, path)
         }
-        return projectRoot.relativize(path).joinToString("/")
+        if (prefix.startsWith("/")) {
+            return "/${relativePath(projectRoot, path)}"
+        }
+        return "./${relativePath(specDirectory, path)}"
     }
 
     private fun symbolVariants(text: CharSequence, prefix: String): List<SpecDDInlineCompletionVariant> =
@@ -125,10 +114,13 @@ data class SpecDDInlineCompletionVariant(
         LookupElementBuilder.create(lookupString)
 }
 
-private val INLINE_PREFIX_CHARS = setOf('/', '.', '*', '?', '[', ']', '{', '}', '_', '-')
+private val INLINE_PREFIX_CHARS = setOf('/', '.', '~', '*', '?', '[', ']', '{', '}', '_', '-')
 private val SYMBOL_PATTERN = Regex("""\b[A-Z][A-Za-z0-9_]*(?:\.[A-Za-z_$][A-Za-z0-9_$]*)+(?:\([^)]*\))?""")
 private const val MAX_PATH_VARIANTS = 200
 private val SKIPPED_DIRECTORIES = setOf(".git", ".gradle", ".idea", "build", "node_modules", "out")
 
 private fun isInlinePrefixCharacter(character: Char): Boolean =
     character.isLetterOrDigit() || character in INLINE_PREFIX_CHARS
+
+private fun hasExplicitPathPrefix(text: String): Boolean =
+    text.startsWith("./") || text.startsWith("../") || text.startsWith("/")

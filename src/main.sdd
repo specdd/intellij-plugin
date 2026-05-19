@@ -6,25 +6,25 @@ Purpose:
   Govern implementation files under the `src` project root.
 
 Structure:
-  main/kotlin/ai/specdd/idea: SpecDD language package namespace.
-  main/resources/META-INF: IntelliJ plugin metadata.
-  main/resources/ai/specdd/idea/documentation: Packaged SpecDD documentation text.
+  ./main/kotlin/ai/specdd/idea: SpecDD language package namespace.
+  ./main/resources/META-INF: IntelliJ plugin metadata.
+  ./main/resources/ai/specdd/idea/documentation: Packaged SpecDD documentation text.
 
 Owns:
-  main/kotlin/ai/specdd/idea/*
-  main/resources/META-INF/plugin.sdd
-  main/resources/META-INF/plugin.xml
-  main/resources/META-INF/logo.svg
-  main/resources/META-INF/pluginIcon.svg
-  main/resources/ai/specdd/idea/documentation/*
+  ./main/kotlin/ai/specdd/idea/*
+  ./main/resources/META-INF/plugin.sdd
+  ./main/resources/META-INF/plugin.xml
+  ./main/resources/META-INF/logo.svg
+  ./main/resources/META-INF/pluginIcon.svg
+  ./main/resources/ai/specdd/idea/documentation/*
 
 Can modify:
-  main/kotlin/ai/specdd/idea/*
-  main/resources/META-INF/plugin.sdd
-  main/resources/META-INF/plugin.xml
-  main/resources/META-INF/logo.svg
-  main/resources/META-INF/pluginIcon.svg
-  main/resources/ai/specdd/idea/documentation/*
+  ./main/kotlin/ai/specdd/idea/*
+  ./main/resources/META-INF/plugin.sdd
+  ./main/resources/META-INF/plugin.xml
+  ./main/resources/META-INF/logo.svg
+  ./main/resources/META-INF/pluginIcon.svg
+  ./main/resources/ai/specdd/idea/documentation/*
 
 Must:
   Keep implementation code under the `ai.specdd.idea` package namespace.

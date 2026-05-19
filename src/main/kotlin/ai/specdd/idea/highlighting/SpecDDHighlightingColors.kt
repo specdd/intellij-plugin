@@ -100,6 +100,17 @@ object SpecDDHighlightingColors {
         "SPECDD_SCENARIO_STEP",
         DefaultLanguageHighlighterColors.KEYWORD,
     )
+    @Suppress("DEPRECATION")
+    val CODE_SPAN: TextAttributesKey = TextAttributesKey.createTextAttributesKey(
+        "SPECDD_CODE_SPAN",
+        TextAttributes(Color(0x3A6EA5), null, null, null, Font.PLAIN),
+    )
+
+    @Suppress("DEPRECATION")
+    val CODE_SPAN_DELIMITER: TextAttributesKey = TextAttributesKey.createTextAttributesKey(
+        "SPECDD_CODE_SPAN_DELIMITER",
+        TextAttributes(Color(0x7A828E), null, null, null, Font.PLAIN),
+    )
     val PATH: TextAttributesKey = TextAttributesKey.createTextAttributesKey(
         "SPECDD_PATH",
         DefaultLanguageHighlighterColors.STRING,

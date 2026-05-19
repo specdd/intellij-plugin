@@ -1,4 +1,4 @@
 .PHONY: production
 
 production:
-	./gradlew clean test koverVerify buildPlugin
+	./gradlew --no-build-cache clean test koverVerify buildPlugin

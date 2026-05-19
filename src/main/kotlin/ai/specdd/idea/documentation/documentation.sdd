@@ -6,30 +6,30 @@ Purpose:
   Provide hover documentation for SpecDD section labels.
 
 Structure:
-  SpecDDSectionDocumentation.kt: Known section documentation registry.
-  SpecDDDocumentationProvider.kt: IntelliJ documentation provider.
-  ../../../../../resources/ai/specdd/idea/documentation/sections.txt: Packaged section documentation text.
+  ./SpecDDSectionDocumentation.kt: Known section documentation registry.
+  ./SpecDDDocumentationProvider.kt: IntelliJ documentation provider.
+  /src/main/resources/ai/specdd/idea/documentation/sections.txt: Packaged section documentation text.
 
 Owns:
-  documentation.sdd
-  SpecDDSectionDocumentation.sdd
-  SpecDDDocumentationProvider.sdd
-  SpecDDSectionDocumentation.kt
-  SpecDDDocumentationProvider.kt
-  ../../../../../resources/ai/specdd/idea/documentation/sections.txt
+  ./documentation.sdd
+  ./SpecDDSectionDocumentation.sdd
+  ./SpecDDDocumentationProvider.sdd
+  ./SpecDDSectionDocumentation.kt
+  ./SpecDDDocumentationProvider.kt
+  /src/main/resources/ai/specdd/idea/documentation/sections.txt
 
 Can modify:
-  documentation.sdd
-  SpecDDSectionDocumentation.sdd
-  SpecDDDocumentationProvider.sdd
-  SpecDDSectionDocumentation.kt
-  SpecDDDocumentationProvider.kt
-  ../../../../../resources/ai/specdd/idea/documentation/sections.txt
+  ./documentation.sdd
+  ./SpecDDSectionDocumentation.sdd
+  ./SpecDDDocumentationProvider.sdd
+  ./SpecDDSectionDocumentation.kt
+  ./SpecDDDocumentationProvider.kt
+  /src/main/resources/ai/specdd/idea/documentation/sections.txt
 
 Can read:
-  ../parser/*
-  ../SpecDDFileType.kt
-  ../../../../../../test/kotlin/ai/specdd/idea/documentation/*
+  /src/main/kotlin/ai/specdd/idea/parser/*
+  /src/main/kotlin/ai/specdd/idea/SpecDDFileType.kt
+  /src/test/kotlin/ai/specdd/idea/documentation/*
 
 Must:
   Keep documentation behavior independent from syntax highlighting and validation diagnostics.

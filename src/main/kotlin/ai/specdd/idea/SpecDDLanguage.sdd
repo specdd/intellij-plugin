@@ -6,13 +6,13 @@ Purpose:
   Define the IntelliJ language identity for SpecDD files.
 
 Owns:
-  SpecDDLanguage.kt
+  ./SpecDDLanguage.kt
 
 Can modify:
-  SpecDDLanguage.kt
+  ./SpecDDLanguage.kt
 
 Can read:
-  ../../../../../../test/kotlin/ai/specdd/idea/SpecDDLanguageBehaviorSpec.kt
+  /src/test/kotlin/ai/specdd/idea/SpecDDLanguageBehaviorSpec.kt
 
 Must:
   Expose a singleton `Language` instance for SpecDD.

@@ -6,19 +6,19 @@ Purpose:
   Provide shared line-level SpecDD classification for editor features.
 
 Structure:
-  SpecDDLanguageFacts.kt: Known SpecDD language facts shared by editor concerns.
-  SpecDDLineClassifier.kt: Line classifier, classification model, and task status model.
+  ./SpecDDLanguageFacts.kt: Known SpecDD language facts shared by editor concerns.
+  ./SpecDDLineClassifier.kt: Line classifier, classification model, and task status model.
 
 Owns:
-  SpecDDLanguageFacts.kt
-  SpecDDLineClassifier.kt
+  ./SpecDDLanguageFacts.kt
+  ./SpecDDLineClassifier.kt
 
 Can modify:
-  SpecDDLanguageFacts.kt
-  SpecDDLineClassifier.kt
+  ./SpecDDLanguageFacts.kt
+  ./SpecDDLineClassifier.kt
 
 Can read:
-  ../../../../../../test/kotlin/ai/specdd/idea/parser/*
+  /src/test/kotlin/ai/specdd/idea/parser/*
 
 Must:
   Define known SpecDD section labels.

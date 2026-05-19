@@ -1,5 +1,7 @@
 package ai.specdd.idea.references
 
+import ai.specdd.idea.file
+import ai.specdd.idea.testVirtualRoot
 import com.intellij.codeInsight.multiverse.CodeInsightContext
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.Application
@@ -18,22 +20,20 @@ import java.io.*
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Proxy
 import java.nio.file.Path
-import kotlin.io.path.createFile
-import kotlin.io.path.createTempDirectory
 
 class SpecDDPathReferenceBehaviorSpec : BehaviorSpec({
     given("a SpecDD path reference") {
         `when`("a candidate resolves") {
             then("it returns mapped PSI resolve results") {
-                val root = createTempDirectory()
-                val target = root.resolve("main.sdd").createFile()
+                val root = testVirtualRoot()
+                val target = root.file("main.sdd")
                 val targetElement = psiElement("target")
                 val reference = SpecDDPathReference(
                     element = psiElement("main.sdd"),
                     rangeInElement = TextRange(0, 8),
                     candidate = SpecDDPathCandidate("main.sdd", TextRange(0, 8), true),
                     context = SpecDDPathResolutionContext(root, root),
-                    targetMapper = { path, _ -> if (target == path) targetElement else null },
+                    targetMapper = { virtualFile, _ -> if (target == virtualFile) targetElement else null },
                 )
 
                 reference.canonicalText shouldBe "main.sdd"
@@ -60,7 +60,7 @@ class SpecDDPathReferenceBehaviorSpec : BehaviorSpec({
 
         `when`("a candidate is unresolved") {
             then("it returns no resolve results") {
-                val root = createTempDirectory()
+                val root = testVirtualRoot()
                 val reference = SpecDDPathReference(
                     element = psiElement("missing.sdd"),
                     rangeInElement = TextRange(0, 11),
@@ -73,20 +73,6 @@ class SpecDDPathReferenceBehaviorSpec : BehaviorSpec({
             }
         }
 
-        `when`("the default target mapper cannot find a virtual file") {
-            then("it returns no PSI element") {
-                val root = createTempDirectory()
-                val previousApplication = ApplicationManager.getApplication()
-                ApplicationManager.setApplication(applicationWithLocalFileSystem())
-
-                try {
-                    pathToPsiElement(root.resolve("missing.sdd"), psiElement("missing.sdd")).shouldBeNull()
-                } finally {
-                    ApplicationManager.setApplication(previousApplication)
-                }
-            }
-        }
-
         `when`("the default target mapper finds a directory virtual file") {
             then("it returns the mapped PSI directory") {
                 val targetDirectory = psiDirectory("docs")
@@ -94,10 +80,9 @@ class SpecDDPathReferenceBehaviorSpec : BehaviorSpec({
                 val project = projectWithPsiManager(psiManager)
                 psiManager.projectRef = project
 
-                val resolved = pathToPsiElement(
-                    Path.of("docs"),
+                val resolved = virtualFileToPsiElement(
+                    fakeVirtualFile(directory = true),
                     psiElement("docs", project),
-                    findVirtualFile = { fakeVirtualFile(directory = true) },
                 )
 
                 (resolved === targetDirectory) shouldBe true
@@ -111,34 +96,30 @@ class SpecDDPathReferenceBehaviorSpec : BehaviorSpec({
                 val project = projectWithPsiManager(psiManager)
                 psiManager.projectRef = project
 
-                val resolved = pathToPsiElement(
-                    Path.of("docs/app.sdd"),
+                val resolved = virtualFileToPsiElement(
+                    fakeVirtualFile(directory = false),
                     psiElement("docs/app.sdd", project),
-                    findVirtualFile = { fakeVirtualFile(directory = false) },
                 )
 
                 (resolved === targetFile) shouldBe true
             }
         }
 
-        `when`("the default target mapper is used for an existing path that is not in VFS") {
+        `when`("the default target mapper is used without a PSI manager") {
             then("it returns no resolve results") {
-                val root = createTempDirectory()
-                root.resolve("main.sdd").createFile()
-                val previousApplication = ApplicationManager.getApplication()
-                ApplicationManager.setApplication(applicationWithLocalFileSystem())
+                val root = testVirtualRoot()
+                root.file("main.sdd")
+                val psiManager = fakePsiManager(directory = null, file = null)
+                val project = projectWithPsiManager(psiManager)
+                psiManager.projectRef = project
                 val reference = SpecDDPathReference(
-                    element = psiElement("main.sdd"),
+                    element = psiElement("main.sdd", project),
                     rangeInElement = TextRange(0, 8),
                     candidate = SpecDDPathCandidate("main.sdd", TextRange(0, 8), true),
                     context = SpecDDPathResolutionContext(root, root),
                 )
 
-                try {
-                    reference.multiResolve(false) shouldBe emptyArray()
-                } finally {
-                    ApplicationManager.setApplication(previousApplication)
-                }
+                reference.multiResolve(false) shouldBe emptyArray()
             }
         }
     }

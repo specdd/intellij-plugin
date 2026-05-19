@@ -1,0 +1,30 @@
+Spec: SpecDD Symbol Reference
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Resolve backticked SpecDD code candidates to IntelliJ PSI symbols when possible.
+
+Owns:
+  ./SpecDDSymbolReference.kt
+
+Can modify:
+  ./SpecDDSymbolReference.kt
+
+Can read:
+  /src/test/kotlin/ai/specdd/idea/references/SpecDDSymbolReferenceBehaviorSpec.kt
+
+Must:
+  Keep symbol references soft.
+  Resolve only explicit backticked code candidates supplied by the reference provider.
+  Resolve symbol text through IntelliJ registered name contributors when available.
+  Resolve dotted candidates by also querying the final symbol segment with the full dotted text as the contributor pattern.
+  Return all valid PSI results up to a maximum of 50 targets so IntelliJ can present ambiguous choices.
+  Return no target for unresolved symbol candidates.
+  Ignore explicit file path candidates because they are handled by path references.
+  Avoid compile-time dependencies on language-specific plugins.
+
+Must not:
+  Link plain prose.
+  Report diagnostics.
+  Add unresolved-symbol warnings.

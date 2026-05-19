@@ -6,13 +6,13 @@ Purpose:
   Represent validation results and diagnostic issue messages.
 
 Owns:
-  SpecDDValidationResult.kt
+  ./SpecDDValidationResult.kt
 
 Can modify:
-  SpecDDValidationResult.kt
+  ./SpecDDValidationResult.kt
 
 Can read:
-  ../../../../../../test/kotlin/ai/specdd/idea/validation/SpecDDValidationResultBehaviorSpec.kt
+  /src/test/kotlin/ai/specdd/idea/validation/SpecDDValidationResultBehaviorSpec.kt
 
 Must:
   Store validation issues in `SpecDDValidationResult`.

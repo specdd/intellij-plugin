@@ -6,15 +6,15 @@ Purpose:
   Tokenize SpecDD text for IntelliJ syntax highlighting.
 
 Owns:
-  SpecDDSyntaxHighlighter.kt
+  ./SpecDDSyntaxHighlighter.kt
 
 Can modify:
-  SpecDDSyntaxHighlighter.kt
+  ./SpecDDSyntaxHighlighter.kt
 
 Can read:
-  ../parser/*
-  SpecDDHighlightingColors.kt
-  ../../../../../../test/kotlin/ai/specdd/idea/highlighting/SpecDDSyntaxHighlighterBehaviorSpec.kt
+  /src/main/kotlin/ai/specdd/idea/parser/*
+  ./SpecDDHighlightingColors.kt
+  /src/test/kotlin/ai/specdd/idea/highlighting/SpecDDSyntaxHighlighterBehaviorSpec.kt
 
 Must:
   Extend IntelliJ `SyntaxHighlighterBase`.
@@ -46,6 +46,10 @@ Must:
   Treat task ids after task markers as task ids, not comments.
   Highlight scenario step keywords `Given`, `When`, `Then`, `And`, and `But`.
   Highlight only exact scenario step keywords, not words that merely start with a step keyword.
+  Highlight balanced single-line inline code spans delimited with single backticks.
+  Highlight inline code span content separately from the opening and closing backtick delimiters.
+  Let inline code spans take precedence over path, symbol, and task-id highlighting inside the span.
+  Ignore unmatched inline code opening backticks.
   Highlight path-like values and filenames with known source/spec/data extensions.
   Highlight dotted code symbols and call-like dotted symbols.
   Highlight `Spec` and `Platform` as meta section labels.
@@ -56,7 +60,7 @@ Must:
   Cover all supported section label groups in tests.
   Cover comments, indentation, continuation text, section colons, section values, and body `key: value` keys in tests.
   Cover each supported task marker state and invalid task marker states in tests.
-  Cover task ids, scenario step keywords, paths, symbols, line-ending handling, and lexer restart slices in tests.
+  Cover task ids, scenario step keywords, inline code spans, paths, symbols, line-ending handling, and lexer restart slices in tests.
   Cover that body `key: value` keys do not inherit top-level section label styling in tests.
 
 Must not:

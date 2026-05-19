@@ -6,14 +6,14 @@ Purpose:
   Represent clickable IntelliJ references for SpecDD path and glob candidates.
 
 Owns:
-  SpecDDPathReference.kt
+  ./SpecDDPathReference.kt
 
 Can modify:
-  SpecDDPathReference.kt
+  ./SpecDDPathReference.kt
 
 Can read:
-  SpecDDPathResolver.kt
-  ../../../../../../test/kotlin/ai/specdd/idea/references/SpecDDPathReferenceBehaviorSpec.kt
+  ./SpecDDPathResolver.kt
+  /src/test/kotlin/ai/specdd/idea/references/SpecDDPathReferenceBehaviorSpec.kt
 
 Must:
   Resolve exact path candidates to one PSI target when possible.

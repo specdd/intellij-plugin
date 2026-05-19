@@ -1,10 +1,8 @@
 package ai.specdd.idea.references
 
 import com.intellij.openapi.util.TextRange
-import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.*
-import java.nio.file.Path
 
 class SpecDDPathReference(
     element: PsiElement,
@@ -12,8 +10,8 @@ class SpecDDPathReference(
     private val candidate: SpecDDPathCandidate,
     private val context: SpecDDPathResolutionContext?,
     private val resolver: SpecDDPathResolver = SpecDDPathResolver(),
-    private val targetMapper: (Path, PsiElement) -> PsiElement? = { path, sourceElement ->
-        pathToPsiElement(path, sourceElement)
+    private val targetMapper: (VirtualFile, PsiElement) -> PsiElement? = { virtualFile, sourceElement ->
+        virtualFileToPsiElement(virtualFile, sourceElement)
     },
 ) : PsiPolyVariantReferenceBase<PsiElement>(element, rangeInElement, true) {
     override fun multiResolve(incompleteCode: Boolean): Array<ResolveResult> {
@@ -22,7 +20,7 @@ class SpecDDPathReference(
         if (SpecDDPathResolutionStatus.RESOLVED != resolution.status) return ResolveResult.EMPTY_ARRAY
 
         return resolution.targets
-            .mapNotNull { path -> targetMapper(path, element) }
+            .mapNotNull { virtualFile -> targetMapper(virtualFile, element) }
             .map { target -> PsiElementResolveResult(target) }
             .toTypedArray()
     }
@@ -30,18 +28,10 @@ class SpecDDPathReference(
     override fun getCanonicalText(): String = candidate.text
 }
 
-internal fun pathToPsiElement(
-    path: Path,
+internal fun virtualFileToPsiElement(
+    virtualFile: VirtualFile,
     element: PsiElement,
-    findVirtualFile: (Path) -> VirtualFile? = { targetPath ->
-        LocalFileSystem.getInstance().refreshAndFindFileByNioFile(targetPath)
-    },
 ): PsiElement? =
-    findVirtualFile(path)?.let { virtualFile ->
-        val psiManager = PsiManager.getInstance(element.project)
-        if (virtualFile.isDirectory) {
-            psiManager.findDirectory(virtualFile)
-        } else {
-            psiManager.findFile(virtualFile)
-        }
+    PsiManager.getInstance(element.project).let { psiManager ->
+        if (virtualFile.isDirectory) psiManager.findDirectory(virtualFile) else psiManager.findFile(virtualFile)
     }

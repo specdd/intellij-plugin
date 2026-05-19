@@ -6,13 +6,13 @@ Purpose:
   Create syntax highlighters for SpecDD files through IntelliJ extension registration.
 
 Owns:
-  SpecDDSyntaxHighlighterFactory.kt
+  ./SpecDDSyntaxHighlighterFactory.kt
 
 Can modify:
-  SpecDDSyntaxHighlighterFactory.kt
+  ./SpecDDSyntaxHighlighterFactory.kt
 
 Can read:
-  ../../../../../../test/kotlin/ai/specdd/idea/highlighting/SpecDDSyntaxHighlighterFactoryBehaviorSpec.kt
+  /src/test/kotlin/ai/specdd/idea/highlighting/SpecDDSyntaxHighlighterFactoryBehaviorSpec.kt
 
 Must:
   Extend IntelliJ `SyntaxHighlighterFactory`.

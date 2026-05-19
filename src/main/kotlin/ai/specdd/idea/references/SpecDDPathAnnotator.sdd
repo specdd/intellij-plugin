@@ -6,16 +6,16 @@ Purpose:
   Report unresolved SpecDD path and glob candidates as editor warnings.
 
 Owns:
-  SpecDDPathAnnotator.kt
+  ./SpecDDPathAnnotator.kt
 
 Can modify:
-  SpecDDPathAnnotator.kt
+  ./SpecDDPathAnnotator.kt
 
 Can read:
-  SpecDDPathReferenceExtractor.kt
-  SpecDDPathResolver.kt
-  ../SpecDDFileType.kt
-  ../../../../../../test/kotlin/ai/specdd/idea/references/SpecDDPathAnnotatorBehaviorSpec.kt
+  ./SpecDDPathReferenceExtractor.kt
+  ./SpecDDPathResolver.kt
+  /src/main/kotlin/ai/specdd/idea/SpecDDFileType.kt
+  /src/test/kotlin/ai/specdd/idea/references/SpecDDPathAnnotatorBehaviorSpec.kt
 
 Must:
   Extend IntelliJ `Annotator`.

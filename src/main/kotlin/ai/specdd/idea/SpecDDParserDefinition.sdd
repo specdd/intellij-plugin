@@ -6,13 +6,13 @@ Purpose:
   Provide minimal IntelliJ PSI parser support for SpecDD language services.
 
 Owns:
-  SpecDDParserDefinition.kt
+  ./SpecDDParserDefinition.kt
 
 Can modify:
-  SpecDDParserDefinition.kt
+  ./SpecDDParserDefinition.kt
 
 Can read:
-  ../../../../../../test/kotlin/ai/specdd/idea/SpecDDLanguageBehaviorSpec.kt
+  /src/test/kotlin/ai/specdd/idea/SpecDDLanguageBehaviorSpec.kt
 
 Must:
   Create a PSI lexer that emits one text token over the requested buffer slice.

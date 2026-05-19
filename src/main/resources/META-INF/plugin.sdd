@@ -6,18 +6,18 @@ Purpose:
   Define IntelliJ plugin metadata and extension registration for SpecDD language support.
 
 Owns:
-  plugin.xml
-  logo.svg
-  pluginIcon.svg
+  ./plugin.xml
+  ./logo.svg
+  ./pluginIcon.svg
 
 Can modify:
-  plugin.xml
-  logo.svg
-  pluginIcon.svg
+  ./plugin.xml
+  ./logo.svg
+  ./pluginIcon.svg
 
 Can read:
-  ../../../test/kotlin/ai/specdd/idea/SpecDDPluginMetadataBehaviorSpec.kt
-  ../../kotlin/ai/specdd/idea/*
+  /src/test/kotlin/ai/specdd/idea/SpecDDPluginMetadataBehaviorSpec.kt
+  /src/main/kotlin/ai/specdd/idea/*
 
 Must:
   Use `ai.specdd.idea` as the plugin id.

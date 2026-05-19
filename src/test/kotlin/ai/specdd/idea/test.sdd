@@ -6,38 +6,38 @@ Purpose:
   Govern tests for SpecDD IntelliJ language support.
 
 Structure:
-  highlighting: Syntax highlighting tests.
-  parser: Shared parser and line-classifier tests.
-  validation: Validation and annotator tests.
-  structure: Structure view tests.
-  documentation: Hover documentation tests.
-  completion: Completion contributor tests.
-  references: Path and glob reference tests.
+  ./highlighting: Syntax highlighting tests.
+  ./parser: Shared parser and line-classifier tests.
+  ./validation: Validation and annotator tests.
+  ./structure: Structure view tests.
+  ./documentation: Hover documentation tests.
+  ./completion: Completion contributor tests.
+  ./references: Path and glob reference tests.
 
 Owns:
-  *.kt
-  highlighting/*
-  parser/*
-  validation/*
-  structure/*
-  documentation/*
-  completion/*
-  references/*
+  ./*.kt
+  ./highlighting/*
+  ./parser/*
+  ./validation/*
+  ./structure/*
+  ./documentation/*
+  ./completion/*
+  ./references/*
 
 Can modify:
-  *.kt
-  highlighting/*
-  parser/*
-  validation/*
-  structure/*
-  documentation/*
-  completion/*
-  references/*
+  ./*.kt
+  ./highlighting/*
+  ./parser/*
+  ./validation/*
+  ./structure/*
+  ./documentation/*
+  ./completion/*
+  ./references/*
 
 Can read:
-  ../../../../../main/kotlin/ai/specdd/idea/*
-  ../../../../../main/resources/META-INF/plugin.xml
-  ../../../../../../fixtures/*
+  /src/main/kotlin/ai/specdd/idea/*
+  /src/main/resources/META-INF/plugin.xml
+  /fixtures/*
 
 Must:
   Use Kotest `BehaviorSpec` style.

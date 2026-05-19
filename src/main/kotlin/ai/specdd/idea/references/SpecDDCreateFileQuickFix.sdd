@@ -6,13 +6,13 @@ Purpose:
   Create missing files or directories for unresolved exact SpecDD path references.
 
 Owns:
-  SpecDDCreateFileQuickFix.kt
+  ./SpecDDCreateFileQuickFix.kt
 
 Can modify:
-  SpecDDCreateFileQuickFix.kt
+  ./SpecDDCreateFileQuickFix.kt
 
 Can read:
-  ../../../../../../test/kotlin/ai/specdd/idea/references/*
+  /src/test/kotlin/ai/specdd/idea/references/*
 
 Must:
   Implement an IntelliJ intention action.

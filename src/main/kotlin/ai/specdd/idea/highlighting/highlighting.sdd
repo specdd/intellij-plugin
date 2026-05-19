@@ -6,31 +6,31 @@ Purpose:
   Provide syntax highlighting for SpecDD `.sdd` files.
 
 Structure:
-  SpecDDSyntaxHighlighter.kt: IntelliJ syntax highlighter and lexer tokenization boundary.
-  SpecDDSyntaxHighlighterFactory.kt: IntelliJ syntax highlighter factory.
-  SpecDDHighlightingColors.kt: Highlighting attribute keys and default attributes.
+  ./SpecDDSyntaxHighlighter.kt: IntelliJ syntax highlighter and lexer tokenization boundary.
+  ./SpecDDSyntaxHighlighterFactory.kt: IntelliJ syntax highlighter factory.
+  ./SpecDDHighlightingColors.kt: Highlighting attribute keys and default attributes.
 
 Owns:
-  highlighting.sdd
-  SpecDDSyntaxHighlighter.sdd
-  SpecDDSyntaxHighlighterFactory.sdd
-  SpecDDHighlightingColors.sdd
-  SpecDDSyntaxHighlighter.kt
-  SpecDDSyntaxHighlighterFactory.kt
-  SpecDDHighlightingColors.kt
+  ./highlighting.sdd
+  ./SpecDDSyntaxHighlighter.sdd
+  ./SpecDDSyntaxHighlighterFactory.sdd
+  ./SpecDDHighlightingColors.sdd
+  ./SpecDDSyntaxHighlighter.kt
+  ./SpecDDSyntaxHighlighterFactory.kt
+  ./SpecDDHighlightingColors.kt
 
 Can modify:
-  highlighting.sdd
-  SpecDDSyntaxHighlighter.sdd
-  SpecDDSyntaxHighlighterFactory.sdd
-  SpecDDHighlightingColors.sdd
-  SpecDDSyntaxHighlighter.kt
-  SpecDDSyntaxHighlighterFactory.kt
-  SpecDDHighlightingColors.kt
+  ./highlighting.sdd
+  ./SpecDDSyntaxHighlighter.sdd
+  ./SpecDDSyntaxHighlighterFactory.sdd
+  ./SpecDDHighlightingColors.sdd
+  ./SpecDDSyntaxHighlighter.kt
+  ./SpecDDSyntaxHighlighterFactory.kt
+  ./SpecDDHighlightingColors.kt
 
 Can read:
-  ../parser/*
-  ../../../../../../test/kotlin/ai/specdd/idea/highlighting/*
+  /src/main/kotlin/ai/specdd/idea/parser/*
+  /src/test/kotlin/ai/specdd/idea/highlighting/*
 
 Must:
   Highlight SpecDD syntax without validating document correctness.

@@ -4,15 +4,13 @@ import com.intellij.codeInsight.intention.IntentionAction
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.vfs.LocalFileSystem
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiFile
-import java.nio.file.Files
-import java.nio.file.Path
 
 internal class SpecDDCreateFileQuickFix(
     private val displayPath: String,
-    private val targetPath: Path,
-    private val projectRoot: Path,
+    private val projectRoot: VirtualFile,
+    private val targetSegments: List<String>,
     private val targetKind: SpecDDCreatePathKind,
 ) : IntentionAction {
     override fun getText(): String = "Create ${targetKind.label} '$displayPath'"
@@ -20,46 +18,43 @@ internal class SpecDDCreateFileQuickFix(
     override fun getFamilyName(): String = "Create SpecDD referenced path"
 
     override fun isAvailable(project: Project, editor: Editor?, file: PsiFile?): Boolean =
-        canCreatePath(targetPath, projectRoot)
+        canCreatePath(projectRoot, targetSegments)
 
     override fun invoke(project: Project, editor: Editor?, file: PsiFile?) {
-        if (!canCreatePath(targetPath, projectRoot)) return
+        if (!canCreatePath(projectRoot, targetSegments)) return
 
         val application = ApplicationManager.getApplication()
         var actionExecuted = false
         application.runWriteAction {
-            createPathAndRefresh()
+            createPath()
             actionExecuted = true
         }
         if (!actionExecuted) {
-            createPathAndRefresh()
-        }
-    }
-
-    private fun createPathAndRefresh() {
-        createPath()
-        try {
-            if (null != ApplicationManager.getApplication()) {
-                LocalFileSystem.getInstance().refreshAndFindFileByNioFile(targetPath)
-            }
-        } catch (_: IllegalStateException) {
-            return
+            createPath()
         }
     }
 
     override fun startInWriteAction(): Boolean = false
 
     private fun createPath() {
+        val finalName = targetSegments.lastOrNull() ?: return
+        var directory = projectRoot
+        targetSegments.dropLast(1).forEach { segment ->
+            val child = directory.findChild(segment)
+            directory = when {
+                null == child -> directory.createChildDirectory(this, segment)
+                child.isDirectory -> child
+                else -> return
+            }
+        }
+
+        if (null != directory.findChild(finalName)) return
         if (SpecDDCreatePathKind.DIRECTORY == targetKind) {
-            Files.createDirectories(targetPath)
+            directory.createChildDirectory(this, finalName)
             return
         }
 
-        val parent = targetPath.parent
-        if (null != parent) {
-            Files.createDirectories(parent)
-        }
-        Files.createFile(targetPath)
+        directory.createChildData(this, finalName)
     }
 }
 
@@ -68,32 +63,65 @@ internal fun createFileQuickFix(
     context: SpecDDPathResolutionContext,
 ): SpecDDCreateFileQuickFix? {
     if (candidate.text.any { character -> character in GLOB_CHARS }) return null
+    if (!isInRoot(context.specDirectory, context.projectRoot)) return null
 
-    val projectRoot = context.projectRoot.toAbsolutePath().normalize()
-    val specDirectory = context.specDirectory.toAbsolutePath().normalize()
-    if (!specDirectory.startsWith(projectRoot)) return null
+    val targetSegments = targetSegments(context.projectRoot, context.specDirectory, candidate.text) ?: return null
+    if (!canCreatePath(context.projectRoot, targetSegments)) return null
 
-    val targetPath = specDirectory.resolve(candidate.text).normalize()
-    if (!canCreatePath(targetPath, projectRoot)) return null
-
-    return SpecDDCreateFileQuickFix(candidate.text, targetPath, projectRoot, createPathKind(candidate.text))
+    return SpecDDCreateFileQuickFix(candidate.text, context.projectRoot, targetSegments, createPathKind(candidate.text))
 }
 
-private fun canCreatePath(targetPath: Path, projectRoot: Path): Boolean {
-    val target = targetPath.toAbsolutePath().normalize()
-    val root = projectRoot.toAbsolutePath().normalize()
-    if (!target.startsWith(root)) return false
-    if (Files.exists(target)) return false
+private fun canCreatePath(projectRoot: VirtualFile, targetSegments: List<String>): Boolean {
+    if (targetSegments.isEmpty()) return false
+    if (null != findBySegments(projectRoot, targetSegments)) return false
 
-    val parent = target.parent ?: return false
-    return parent.startsWith(root)
+    var current = projectRoot
+    targetSegments.dropLast(1).forEach { segment ->
+        val child = current.findChild(segment) ?: return true
+        if (!child.isDirectory) return false
+        current = child
+    }
+    return true
 }
 
 private fun createPathKind(candidateText: String): SpecDDCreatePathKind {
     val normalizedText = candidateText.trimEnd('/')
-    val name = Path.of(normalizedText).fileName?.toString() ?: return SpecDDCreatePathKind.DIRECTORY
+    val name = normalizedText.substringAfterLast('/', missingDelimiterValue = normalizedText)
     if (!name.contains(".")) return SpecDDCreatePathKind.DIRECTORY
     return SpecDDCreatePathKind.FILE
+}
+
+private fun targetSegments(projectRoot: VirtualFile, specDirectory: VirtualFile, text: String): List<String>? {
+    val normalizedText = text.replace('\\', '/')
+    val rootRelative = normalizedText.startsWith("/")
+    val rootToSpec = if (rootRelative) "" else relativePath(projectRoot, specDirectory)
+    val candidateText = when {
+        normalizedText.startsWith("/") -> normalizedText.removePrefix("/")
+        else -> normalizedText
+    }
+    val segments = if (rootToSpec.isBlank()) {
+        mutableListOf()
+    } else {
+        rootToSpec.split('/').filterTo(mutableListOf()) { segment -> segment.isNotBlank() }
+    }
+
+    candidateText.split('/').forEach { segment ->
+        when (segment) {
+            "", "." -> Unit
+            ".." -> if (segments.isNotEmpty()) segments.removeAt(segments.lastIndex) else return null
+            else -> segments.add(segment)
+        }
+    }
+
+    return segments
+}
+
+private fun findBySegments(projectRoot: VirtualFile, segments: List<String>): VirtualFile? {
+    var current: VirtualFile = projectRoot
+    segments.forEach { segment ->
+        current = current.findChild(segment) ?: return null
+    }
+    return current
 }
 
 internal enum class SpecDDCreatePathKind(val label: String) {

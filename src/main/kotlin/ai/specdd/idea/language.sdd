@@ -6,69 +6,69 @@ Purpose:
   Define shared SpecDD language registration and file identity.
 
 Structure:
-  SpecDDLanguage.kt: SpecDD language id singleton.
-  SpecDDFileType.kt: `.sdd` file type identity and icon.
-  SpecDDCodeStyleSettingsProvider.kt: Default editor code style for `.sdd` files.
-  SpecDDParserDefinition.kt: Minimal PSI parser definition required by IntelliJ language services.
-  SpecDDPsiFile.kt: PSI file wrapper for SpecDD files.
-  parser: Shared SpecDD line classification and language facts.
-  highlighting: Syntax highlighting concern.
-  validation: Language validation concern.
-  structure: Structure view concern.
-  documentation: Hover documentation concern.
-  completion: Section name, file path, and local symbol completion concern.
-  references: Path and glob reference concern.
+  ./SpecDDLanguage.kt: SpecDD language id singleton.
+  ./SpecDDFileType.kt: `.sdd` file type identity and icon.
+  ./SpecDDCodeStyleSettingsProvider.kt: Default editor code style for `.sdd` files.
+  ./SpecDDParserDefinition.kt: Minimal PSI parser definition required by IntelliJ language services.
+  ./SpecDDPsiFile.kt: PSI file wrapper for SpecDD files.
+  ./parser: Shared SpecDD line classification and language facts.
+  ./highlighting: Syntax highlighting concern.
+  ./validation: Language validation concern.
+  ./structure: Structure view concern.
+  ./documentation: Hover documentation concern.
+  ./completion: Section name, file path, and local symbol completion concern.
+  ./references: Path and glob reference concern.
 
 Owns:
-  language.sdd
-  SpecDDLanguage.sdd
-  SpecDDFileType.sdd
-  SpecDDCodeStyleSettingsProvider.sdd
-  SpecDDParserDefinition.sdd
-  SpecDDPsiFile.sdd
-  SpecDDCodeStyleSettingsProvider.kt
-  SpecDDLanguage.kt
-  SpecDDFileType.kt
-  SpecDDParserDefinition.kt
-  SpecDDPsiFile.kt
-  parser/*
-  highlighting/*
-  validation/*
-  structure/*
-  documentation/*
-  completion/*
-  references/*
+  ./language.sdd
+  ./SpecDDLanguage.sdd
+  ./SpecDDFileType.sdd
+  ./SpecDDCodeStyleSettingsProvider.sdd
+  ./SpecDDParserDefinition.sdd
+  ./SpecDDPsiFile.sdd
+  ./SpecDDCodeStyleSettingsProvider.kt
+  ./SpecDDLanguage.kt
+  ./SpecDDFileType.kt
+  ./SpecDDParserDefinition.kt
+  ./SpecDDPsiFile.kt
+  ./parser/*
+  ./highlighting/*
+  ./validation/*
+  ./structure/*
+  ./documentation/*
+  ./completion/*
+  ./references/*
 
 Can modify:
-  language.sdd
-  SpecDDLanguage.sdd
-  SpecDDFileType.sdd
-  SpecDDCodeStyleSettingsProvider.sdd
-  SpecDDParserDefinition.sdd
-  SpecDDPsiFile.sdd
-  SpecDDCodeStyleSettingsProvider.kt
-  SpecDDLanguage.kt
-  SpecDDFileType.kt
-  SpecDDParserDefinition.kt
-  SpecDDPsiFile.kt
-  parser/*
-  highlighting/*
-  validation/*
-  structure/*
-  documentation/*
-  completion/*
-  references/*
+  ./language.sdd
+  ./SpecDDLanguage.sdd
+  ./SpecDDFileType.sdd
+  ./SpecDDCodeStyleSettingsProvider.sdd
+  ./SpecDDParserDefinition.sdd
+  ./SpecDDPsiFile.sdd
+  ./SpecDDCodeStyleSettingsProvider.kt
+  ./SpecDDLanguage.kt
+  ./SpecDDFileType.kt
+  ./SpecDDParserDefinition.kt
+  ./SpecDDPsiFile.kt
+  ./parser/*
+  ./highlighting/*
+  ./validation/*
+  ./structure/*
+  ./documentation/*
+  ./completion/*
+  ./references/*
 
 Can read:
-  ../../../../../resources/META-INF/plugin.xml
-  ../../../../../../test/kotlin/ai/specdd/idea/*
-  parser/*
-  highlighting/*
-  validation/*
-  structure/*
-  documentation/*
-  completion/*
-  references/*
+  /src/main/resources/META-INF/plugin.xml
+  /src/test/kotlin/ai/specdd/idea/*
+  ./parser/*
+  ./highlighting/*
+  ./validation/*
+  ./structure/*
+  ./documentation/*
+  ./completion/*
+  ./references/*
 
 Must:
   Provide default editor code style for `.sdd` files.
@@ -82,7 +82,7 @@ Must:
   Use `sdd` as the default file extension.
   Use `SpecDD` as the file type name.
   Use `SpecDD specification file` as the file type description.
-  Use `/META-INF/logo.svg` as the file type icon.
+  Use the packaged `META-INF/logo.svg` resource as the file type icon.
   Keep the file type as an instantiable class for IntelliJ extension point compatibility.
   Register file type, parser definition, code style provider, syntax highlighter factory, annotator, structure view factory, documentation provider, completion contributor, path reference contributor, and path warning annotator through plugin metadata.
   Use `lang.parserDefinition` for parser registration.

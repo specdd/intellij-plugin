@@ -6,16 +6,16 @@ Purpose:
   Validate SpecDD text structure against known section and line rules.
 
 Owns:
-  SpecDDStructureValidator.kt
+  ./SpecDDStructureValidator.kt
 
 Can modify:
-  SpecDDStructureValidator.kt
+  ./SpecDDStructureValidator.kt
 
 Can read:
-  ../parser/*
-  SpecDDKnownSections.kt
-  SpecDDValidationResult.kt
-  ../../../../../../test/kotlin/ai/specdd/idea/validation/SpecDDStructureValidatorBehaviorSpec.kt
+  /src/main/kotlin/ai/specdd/idea/parser/*
+  ./SpecDDKnownSections.kt
+  ./SpecDDValidationResult.kt
+  /src/test/kotlin/ai/specdd/idea/validation/SpecDDStructureValidatorBehaviorSpec.kt
 
 Must:
   Use the shared `SpecDDLineClassifier` line classification boundary.

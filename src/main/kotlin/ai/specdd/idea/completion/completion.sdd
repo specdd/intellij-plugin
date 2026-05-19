@@ -6,32 +6,32 @@ Purpose:
   Provide section, file path, and local symbol completion for SpecDD files.
 
 Structure:
-  SpecDDSectionCompletion.kt: Section completion decision model and lookup element creation.
-  SpecDDInlineCompletion.kt: Inline file path and local symbol completion decision model.
-  SpecDDCompletionContributor.kt: IntelliJ completion contributor entry point.
+  ./SpecDDSectionCompletion.kt: Section completion decision model and lookup element creation.
+  ./SpecDDInlineCompletion.kt: Inline file path and local symbol completion decision model.
+  ./SpecDDCompletionContributor.kt: IntelliJ completion contributor entry point.
 
 Owns:
-  completion.sdd
-  SpecDDSectionCompletion.sdd
-  SpecDDInlineCompletion.sdd
-  SpecDDCompletionContributor.sdd
-  SpecDDSectionCompletion.kt
-  SpecDDInlineCompletion.kt
-  SpecDDCompletionContributor.kt
+  ./completion.sdd
+  ./SpecDDSectionCompletion.sdd
+  ./SpecDDInlineCompletion.sdd
+  ./SpecDDCompletionContributor.sdd
+  ./SpecDDSectionCompletion.kt
+  ./SpecDDInlineCompletion.kt
+  ./SpecDDCompletionContributor.kt
 
 Can modify:
-  completion.sdd
-  SpecDDSectionCompletion.sdd
-  SpecDDInlineCompletion.sdd
-  SpecDDCompletionContributor.sdd
-  SpecDDSectionCompletion.kt
-  SpecDDInlineCompletion.kt
-  SpecDDCompletionContributor.kt
+  ./completion.sdd
+  ./SpecDDSectionCompletion.sdd
+  ./SpecDDInlineCompletion.sdd
+  ./SpecDDCompletionContributor.sdd
+  ./SpecDDSectionCompletion.kt
+  ./SpecDDInlineCompletion.kt
+  ./SpecDDCompletionContributor.kt
 
 Can read:
-  ../parser/*
-  ../SpecDDFileType.kt
-  ../../../../../../test/kotlin/ai/specdd/idea/completion/*
+  /src/main/kotlin/ai/specdd/idea/parser/*
+  /src/main/kotlin/ai/specdd/idea/SpecDDFileType.kt
+  /src/test/kotlin/ai/specdd/idea/completion/*
 
 Must:
   Provide basic completion for known SpecDD section labels.

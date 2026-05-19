@@ -6,13 +6,13 @@ Purpose:
   Represent SpecDD files in IntelliJ PSI.
 
 Owns:
-  SpecDDPsiFile.kt
+  ./SpecDDPsiFile.kt
 
 Can modify:
-  SpecDDPsiFile.kt
+  ./SpecDDPsiFile.kt
 
 Can read:
-  ../../../../../../test/kotlin/ai/specdd/idea/SpecDDLanguageBehaviorSpec.kt
+  /src/test/kotlin/ai/specdd/idea/SpecDDLanguageBehaviorSpec.kt
 
 Must:
   Extend IntelliJ `PsiFileBase`.

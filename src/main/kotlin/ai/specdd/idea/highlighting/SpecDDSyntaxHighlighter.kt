@@ -34,6 +34,8 @@ class SpecDDSyntaxHighlighter : SyntaxHighlighterBase() {
         SpecDDHighlightingTokenTypes.TASK_INVALID -> TASK_INVALID_KEYS
         SpecDDHighlightingTokenTypes.TASK_ID -> TASK_ID_KEYS
         SpecDDHighlightingTokenTypes.SCENARIO_STEP -> SCENARIO_STEP_KEYS
+        SpecDDHighlightingTokenTypes.CODE_SPAN -> CODE_SPAN_KEYS
+        SpecDDHighlightingTokenTypes.CODE_SPAN_DELIMITER -> CODE_SPAN_DELIMITER_KEYS
         SpecDDHighlightingTokenTypes.PATH -> PATH_KEYS
         SpecDDHighlightingTokenTypes.SYMBOL -> SYMBOL_KEYS
         TokenType.BAD_CHARACTER -> BAD_CHARACTER_KEYS
@@ -61,6 +63,8 @@ private val TASK_SKIPPED_KEYS = arrayOf(SpecDDHighlightingColors.TASK_SKIPPED)
 private val TASK_INVALID_KEYS = arrayOf(SpecDDHighlightingColors.TASK_INVALID)
 private val TASK_ID_KEYS = arrayOf(SpecDDHighlightingColors.TASK_ID)
 private val SCENARIO_STEP_KEYS = arrayOf(SpecDDHighlightingColors.SCENARIO_STEP)
+private val CODE_SPAN_KEYS = arrayOf(SpecDDHighlightingColors.CODE_SPAN)
+private val CODE_SPAN_DELIMITER_KEYS = arrayOf(SpecDDHighlightingColors.CODE_SPAN_DELIMITER)
 private val PATH_KEYS = arrayOf(SpecDDHighlightingColors.PATH)
 private val SYMBOL_KEYS = arrayOf(SpecDDHighlightingColors.SYMBOL)
 private val BAD_CHARACTER_KEYS = arrayOf(SpecDDHighlightingColors.BAD_CHARACTER)
@@ -213,9 +217,36 @@ private class SpecDDTokenBuilder(
     }
 
     private fun classifyInlinePatterns(contentStart: Int, lineEnd: Int) {
+        addCodeSpanMatches(contentStart, lineEnd)
         addRegexMatches(PATH_PATTERN, contentStart, lineEnd, SpecDDHighlightingTokenTypes.PATH)
         addRegexMatches(SYMBOL_PATTERN, contentStart, lineEnd, SpecDDHighlightingTokenTypes.SYMBOL)
         addRegexMatches(TASK_ID_PATTERN, contentStart, lineEnd, SpecDDHighlightingTokenTypes.TASK_ID)
+    }
+
+    private fun addCodeSpanMatches(contentStart: Int, lineEnd: Int) {
+        var offset = contentStart
+        while (offset < lineEnd) {
+            if ('`' != buffer[offset]) {
+                offset += 1
+                continue
+            }
+
+            val closingOffset = indexOf('`', offset + 1, lineEnd)
+            if (NO_OFFSET == closingOffset) return
+
+            if (isRangeFree(offset, closingOffset + 1)) {
+                classifiedTokens.add(SpecDDToken(offset, offset + 1, SpecDDHighlightingTokenTypes.CODE_SPAN_DELIMITER))
+                classifiedTokens.add(SpecDDToken(offset + 1, closingOffset, SpecDDHighlightingTokenTypes.CODE_SPAN))
+                classifiedTokens.add(
+                    SpecDDToken(
+                        closingOffset,
+                        closingOffset + 1,
+                        SpecDDHighlightingTokenTypes.CODE_SPAN_DELIMITER,
+                    ),
+                )
+            }
+            offset = closingOffset + 1
+        }
     }
 
     private fun shouldHighlightAsContinuation(kind: SpecDDLineKind, lineStart: Int, contentStart: Int): Boolean {
@@ -294,10 +325,20 @@ private class SpecDDTokenBuilder(
         }
         return offset
     }
+
+    private fun indexOf(target: Char, start: Int, end: Int): Int {
+        var offset = start
+        while (offset < end) {
+            if (target == buffer[offset]) return offset
+            offset += 1
+        }
+        return NO_OFFSET
+    }
 }
 
 private val TASK_ID_PATTERN = Regex("""#\d+\b""")
 private const val CONTINUATION_INDENT_SIZE = 4
+private const val NO_OFFSET = -1
 private val PATH_PATTERN = Regex(
     """(?:\.{1,2}/)?[A-Za-z0-9_*.-]+(?:/[A-Za-z0-9_*.-]+)+|[A-Za-z0-9_.-]+\.(?:sdd|js|ts|tsx|jsx|py|go|rs|java|cs|rb|php|md|json|ya?ml|toml|css|html)\b""",
 )
@@ -330,6 +371,8 @@ private object SpecDDHighlightingTokenTypes {
     val TASK_INVALID = SpecDDHighlightingTokenType("TASK_INVALID")
     val TASK_ID = SpecDDHighlightingTokenType("TASK_ID")
     val SCENARIO_STEP = SpecDDHighlightingTokenType("SCENARIO_STEP")
+    val CODE_SPAN = SpecDDHighlightingTokenType("CODE_SPAN")
+    val CODE_SPAN_DELIMITER = SpecDDHighlightingTokenType("CODE_SPAN_DELIMITER")
     val PATH = SpecDDHighlightingTokenType("PATH")
     val SYMBOL = SpecDDHighlightingTokenType("SYMBOL")
 }

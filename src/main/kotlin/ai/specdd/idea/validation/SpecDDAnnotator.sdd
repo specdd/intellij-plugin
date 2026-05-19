@@ -6,15 +6,15 @@ Purpose:
   Convert SpecDD validation issues into IntelliJ editor annotations.
 
 Owns:
-  SpecDDAnnotator.kt
+  ./SpecDDAnnotator.kt
 
 Can modify:
-  SpecDDAnnotator.kt
+  ./SpecDDAnnotator.kt
 
 Can read:
-  SpecDDStructureValidator.kt
-  SpecDDValidationResult.kt
-  ../../../../../../test/kotlin/ai/specdd/idea/validation/SpecDDAnnotatorBehaviorSpec.kt
+  ./SpecDDStructureValidator.kt
+  ./SpecDDValidationResult.kt
+  /src/test/kotlin/ai/specdd/idea/validation/SpecDDAnnotatorBehaviorSpec.kt
 
 Must:
   Validate only PSI files.

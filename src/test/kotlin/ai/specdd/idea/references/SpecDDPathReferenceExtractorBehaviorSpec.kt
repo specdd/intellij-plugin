@@ -13,42 +13,42 @@ class SpecDDPathReferenceExtractorBehaviorSpec : BehaviorSpec({
                 val text = """
                     |Spec: Demo
                     |Structure:
-                    |  src/main: Main sources
+                    |  ./src/main: Main sources
                     |Owns:
-                    |  fixtures/*.sdd
+                    |  ./fixtures/*.sdd
                     |Purpose:
                     |  src/not-a-path
                     |References:
-                    |  docs/readme.md
+                    |  ./docs/readme.md
                     |  # ignored comment
-                    |  [ ] ignored task
+                    |  [ ] check ./generated/report.json
                     |  Given ignored step
-                    |  generated: ignored value text
+                    |  ./generated: ignored value text
                     """.trimMargin()
 
                 extractor.extract(text).shouldContainExactly(
-                    SpecDDPathCandidate("src/main", TextRange(24, 32), true),
-                    SpecDDPathCandidate("fixtures/*.sdd", TextRange(55, 69), true),
-                    SpecDDPathCandidate("src/not-a-path", TextRange(81, 95), true),
-                    SpecDDPathCandidate("docs/readme.md", TextRange(110, 124), true),
-                    SpecDDPathCandidate("generated", TextRange(187, 196), true),
+                    SpecDDPathCandidate("./src/main", TextRange(24, 34), true),
+                    SpecDDPathCandidate("./fixtures/*.sdd", TextRange(57, 73), true),
+                    SpecDDPathCandidate("./docs/readme.md", TextRange(114, 130), true),
+                    SpecDDPathCandidate("./generated/report.json", TextRange(163, 186), true),
+                    SpecDDPathCandidate("./generated", TextRange(210, 221), true),
                 )
             }
         }
 
         `when`("non-path-bearing sections contain path-shaped text") {
-            then("it extracts inline paths") {
+            then("it extracts inline paths as navigation-only candidates") {
                 val text = """
                     |Spec: Demo
                     |Must:
-                    |  src/main
+                    |  ./src/main
                     |Done when:
-                    |  docs/readme.md
+                    |  ./docs/readme.md
                     """.trimMargin()
 
                 extractor.extract(text).shouldContainExactly(
-                    SpecDDPathCandidate("src/main", TextRange(19, 27), true),
-                    SpecDDPathCandidate("docs/readme.md", TextRange(41, 55), true),
+                    SpecDDPathCandidate("./src/main", TextRange(19, 29), true, warnIfUnresolved = false),
+                    SpecDDPathCandidate("./docs/readme.md", TextRange(43, 59), true, warnIfUnresolved = false),
                 )
             }
         }
@@ -57,15 +57,32 @@ class SpecDDPathReferenceExtractorBehaviorSpec : BehaviorSpec({
             then("it extracts inline references from step text") {
                 val text = """
                     |Scenario: write authority remains local
-                    |  Given this fixture owns kitchen-sink.sdd and generated/*
+                    |  Given this fixture owns ./kitchen-sink.sdd and ./generated/*
                     |  And ../README.md and ../src/.specdd/bootstrap.md may be read
                     """.trimMargin()
 
                 extractor.extract(text).shouldContainExactly(
-                    SpecDDPathCandidate("kitchen-sink.sdd", TextRange(66, 82), true),
-                    SpecDDPathCandidate("generated/*", TextRange(87, 98), true),
-                    SpecDDPathCandidate("../README.md", TextRange(105, 117), true),
-                    SpecDDPathCandidate("../src/.specdd/bootstrap.md", TextRange(122, 149), true),
+                    SpecDDPathCandidate("./kitchen-sink.sdd", TextRange(66, 84), true, warnIfUnresolved = false),
+                    SpecDDPathCandidate("./generated/*", TextRange(89, 102), true, warnIfUnresolved = false),
+                    SpecDDPathCandidate("../README.md", TextRange(109, 121), true, warnIfUnresolved = false),
+                    SpecDDPathCandidate("../src/.specdd/bootstrap.md", TextRange(126, 153), true, warnIfUnresolved = false),
+                )
+            }
+        }
+
+        `when`("path candidates use recursive globstar syntax") {
+            then("it extracts globstar references with explicit path prefixes") {
+                val text = """
+                    |References:
+                    |  ./**/*.sdd
+                    |  ../fixtures/**/*.sdd
+                    |  /src/**/*.kt
+                """.trimMargin()
+
+                extractor.extract(text).shouldContainExactly(
+                    SpecDDPathCandidate("./**/*.sdd", TextRange(14, 24), true),
+                    SpecDDPathCandidate("../fixtures/**/*.sdd", TextRange(27, 47), true),
+                    SpecDDPathCandidate("/src/**/*.kt", TextRange(50, 62), true),
                 )
             }
         }
@@ -74,32 +91,87 @@ class SpecDDPathReferenceExtractorBehaviorSpec : BehaviorSpec({
             then("it treats the keys as concrete path candidates") {
                 val text = """
                     |Structure:
-                    |  parser: Shared parser
+                    |  ./parser: Shared parser
                 """.trimMargin()
 
                 extractor.extract(text).shouldContainExactly(
-                    SpecDDPathCandidate("parser", TextRange(13, 19), true),
+                    SpecDDPathCandidate("./parser", TextRange(13, 21), true),
+                )
+            }
+        }
+
+        `when`("path-bearing sections contain prose and common resource filenames") {
+            then("it extracts only the strong path candidates") {
+                val text = """
+                    |Owns:
+                    |  Plugin metadata and icons
+                    |  ./plugin.xml
+                    |  ./logo.svg
+                    |  ./module.custom-ext
+                    |  ./Makefile
+                    |Can modify:
+                    |  UI resource files
+                    |  ./pluginIcon.svg
+                """.trimMargin()
+
+                extractor.extract(text).shouldContainExactly(
+                    SpecDDPathCandidate("./plugin.xml", TextRange(36, 48), true),
+                    SpecDDPathCandidate("./logo.svg", TextRange(51, 61), true),
+                    SpecDDPathCandidate("./module.custom-ext", TextRange(64, 83), true),
+                    SpecDDPathCandidate("./Makefile", TextRange(86, 96), true),
+                    SpecDDPathCandidate("./pluginIcon.svg", TextRange(131, 147), true),
+                )
+            }
+        }
+
+        `when`("spec text contains URLs") {
+            then("it does not extract URL host paths as file candidates") {
+                val text = """
+                    |References:
+                    |  https://github.com/specdd/intellij-plugin
+                    |Purpose:
+                    |  See https://specdd.ai for ./docs/readme.md
+                """.trimMargin()
+
+                extractor.extract(text).shouldContainExactly(
+                    SpecDDPathCandidate("./docs/readme.md", TextRange(93, 109), true, warnIfUnresolved = false),
+                )
+            }
+        }
+
+        `when`("spec text contains path-like text inside inline code spans") {
+            then("it does not extract candidates from balanced code spans") {
+                val text = """
+                    |References:
+                    |  Use `./docs/missing.md` as an example.
+                    |  Use ./docs/readme.md as a reference.
+                    |  Use `./unterminated.md as ordinary text with ./docs/open.md.
+                """.trimMargin()
+
+                extractor.extract(text).shouldContainExactly(
+                    SpecDDPathCandidate("./docs/readme.md", TextRange(59, 75), true),
+                    SpecDDPathCandidate("./docs/open.md", TextRange(139, 153), true),
                 )
             }
         }
 
         `when`("path candidates use trailing whitespace and CRLF line endings") {
             then("it trims candidate ranges and advances over CRLF") {
-                val text = "References:\r\n  docs/readme.md  \r\n  src/*"
+                val text = "References:\r\n  ./docs/readme.md  \r\n  ./src/*"
 
                 extractor.extract(text).shouldContainExactly(
-                    SpecDDPathCandidate("docs/readme.md", TextRange(15, 29), true),
-                    SpecDDPathCandidate("src/*", TextRange(35, 40), true),
+                    SpecDDPathCandidate("./docs/readme.md", TextRange(15, 31), true),
+                    SpecDDPathCandidate("./src/*", TextRange(37, 44), true),
                 )
             }
         }
 
         `when`("path candidates use CR line endings") {
             then("it advances over CR") {
-                val text = "References:\r  docs/readme.md"
+                val text = "References:\r  ./docs/readme.md"
 
                 extractor.extract(text).shouldContainExactly(
-                    SpecDDPathCandidate("docs/readme.md", TextRange(14, 28), true),
+                    SpecDDPathCandidate("./docs/readme.md", TextRange(14, 30), true),
                 )
             }
         }

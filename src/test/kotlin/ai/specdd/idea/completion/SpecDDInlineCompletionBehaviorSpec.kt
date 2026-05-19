@@ -1,51 +1,57 @@
 package ai.specdd.idea.completion
 
+import ai.specdd.idea.directory
+import ai.specdd.idea.file
+import ai.specdd.idea.testVirtualRoot
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
-import java.nio.file.Files
-import java.nio.file.attribute.PosixFilePermissions
-import kotlin.io.path.createDirectories
-import kotlin.io.path.createFile
-import kotlin.io.path.createTempDirectory
 
 class SpecDDInlineCompletionBehaviorSpec : BehaviorSpec({
     given("SpecDD inline completion") {
-        `when`("completion is requested for a project path prefix") {
+        `when`("completion is requested for a project-root path prefix") {
             then("it returns matching project-relative paths") {
-                val root = createTempDirectory()
-                root.resolve("src/main").createDirectories()
-                root.resolve("src/main/App.kt").createFile()
-                root.resolve("README.md").createFile()
+                val root = testVirtualRoot()
+                root.directory("src/main")
+                root.file("src/main/App.kt")
+                root.file("README.md")
 
-                val completion = SpecDDInlineCompletion.complete("Can read:\n  src/ma", 18, root)
+                val completion = SpecDDInlineCompletion.complete("Can read:\n  /src/ma", 19, root)
 
-                completion!!.prefix shouldBe "src/ma"
+                completion!!.prefix shouldBe "/src/ma"
                 completion.variants.map { variant -> variant.lookupString }
-                    .shouldContainExactly("src/main", "src/main/App.kt")
+                    .shouldContainExactly("/src/main", "/src/main/App.kt")
+            }
+        }
+
+        `when`("completion is requested without an explicit path prefix") {
+            then("it returns no path variants") {
+                val root = testVirtualRoot()
+                root.directory("src/main")
+
+                SpecDDInlineCompletion.complete("Can read:\n  src/ma", 18, root).shouldBeNull()
             }
         }
 
         `when`("completion walks skipped directories") {
             then("it does not return variants from heavy directories") {
-                val root = createTempDirectory()
-                root.resolve("node_modules/pkg/index.js").parent.createDirectories()
-                root.resolve("node_modules/pkg/index.js").createFile()
+                val root = testVirtualRoot()
+                root.file("node_modules/pkg/index.js")
 
-                SpecDDInlineCompletion.complete("References:\n  node", 17, root).shouldBeNull()
+                SpecDDInlineCompletion.complete("References:\n  /node", 18, root).shouldBeNull()
             }
         }
 
         `when`("completion has more path matches than the variant cap") {
             then("it caps returned variants") {
-                val root = createTempDirectory()
-                val source = root.resolve("src").createDirectories()
+                val root = testVirtualRoot()
+                val source = root.directory("src")
                 repeat(205) { index ->
-                    source.resolve("file-$index.sdd").createFile()
+                    source.file("file-$index.sdd")
                 }
 
-                val text = "References:\n  src/file"
+                val text = "References:\n  /src/file"
                 val completion = SpecDDInlineCompletion.complete(text, text.length, root)
 
                 completion!!.variants.size shouldBe 200
@@ -54,45 +60,26 @@ class SpecDDInlineCompletionBehaviorSpec : BehaviorSpec({
 
         `when`("completion has more directory matches than the variant cap") {
             then("it caps returned directory variants") {
-                val root = createTempDirectory()
-                val source = root.resolve("src").createDirectories()
+                val root = testVirtualRoot()
+                val source = root.directory("src")
                 repeat(205) { index ->
-                    source.resolve("dir-$index").createDirectories()
+                    source.directory("dir-$index")
                 }
 
-                val text = "References:\n  src/dir"
+                val text = "References:\n  /src/dir"
                 val completion = SpecDDInlineCompletion.complete(text, text.length, root)
 
                 completion!!.variants.size shouldBe 200
             }
         }
 
-        `when`("completion encounters an unreadable directory") {
-            then("it continues without throwing") {
-                val root = createTempDirectory()
-                val unreadable = root.resolve("src/unreadable").createDirectories()
-                Files.setPosixFilePermissions(unreadable, PosixFilePermissions.fromString("---------"))
-
-                try {
-                    val text = "References:\n  src"
-                    val completion = SpecDDInlineCompletion.complete(text, text.length, root)
-
-                    completion!!.variants.map { variant -> variant.lookupString }
-                        .shouldContainExactly("src")
-                } finally {
-                    Files.setPosixFilePermissions(unreadable, PosixFilePermissions.fromString("rwx------"))
-                }
-            }
-        }
-
         `when`("completion is requested for a current-directory relative path prefix") {
             then("it returns paths relative to the current spec directory") {
-                val root = createTempDirectory()
-                val specDirectory = root.resolve("specs").createDirectories()
-                specDirectory.resolve("local").createDirectories()
-                specDirectory.resolve("local/example.sdd").createFile()
-                root.resolve("src/main.sdd").parent.createDirectories()
-                root.resolve("src/main.sdd").createFile()
+                val root = testVirtualRoot()
+                val specDirectory = root.directory("specs")
+                specDirectory.directory("local")
+                specDirectory.file("local/example.sdd")
+                root.file("src/main.sdd")
 
                 val text = "References:\n  ./loc"
                 val completion = SpecDDInlineCompletion.complete(text, text.length, root, specDirectory)
@@ -105,10 +92,9 @@ class SpecDDInlineCompletionBehaviorSpec : BehaviorSpec({
 
         `when`("completion is requested for a parent-directory relative path prefix") {
             then("it returns paths relative to the current spec directory") {
-                val root = createTempDirectory()
-                val specDirectory = root.resolve("specs").createDirectories()
-                root.resolve("fixtures/kitchen-sink.sdd").parent.createDirectories()
-                root.resolve("fixtures/kitchen-sink.sdd").createFile()
+                val root = testVirtualRoot()
+                val specDirectory = root.directory("specs")
+                root.file("fixtures/kitchen-sink.sdd")
 
                 val text = "References:\n  ../fi"
                 val completion = SpecDDInlineCompletion.complete(text, text.length, root, specDirectory)
@@ -121,9 +107,9 @@ class SpecDDInlineCompletionBehaviorSpec : BehaviorSpec({
 
         `when`("the spec directory is outside the project root") {
             then("it returns no path variants") {
-                val root = createTempDirectory()
-                root.resolve("main.sdd").createFile()
-                val outside = createTempDirectory()
+                val root = testVirtualRoot()
+                root.file("main.sdd")
+                val outside = testVirtualRoot("outside")
 
                 SpecDDInlineCompletion.complete("References:\n  ./m", 17, root, outside).shouldBeNull()
             }
@@ -131,7 +117,7 @@ class SpecDDInlineCompletionBehaviorSpec : BehaviorSpec({
 
         `when`("the project root is not a directory") {
             then("it returns no path variants") {
-                val root = createTempDirectory().resolve("main.sdd").createFile()
+                val root = testVirtualRoot().file("main.sdd")
 
                 SpecDDInlineCompletion.complete("References:\n  main", 17, root).shouldBeNull()
             }
@@ -151,8 +137,8 @@ class SpecDDInlineCompletionBehaviorSpec : BehaviorSpec({
 
         `when`("file paths and local symbols overlap") {
             then("it deduplicates variants while keeping paths first") {
-                val root = createTempDirectory()
-                root.resolve("SpecDD.Parser.classify").createFile()
+                val root = testVirtualRoot()
+                root.file("SpecDD.Parser.classify")
                 val text = "Purpose:\n  SpecDD.Parser.classify\nMust:\n  SpecDD.P"
 
                 val completion = SpecDDInlineCompletion.complete(text, text.length, root)
@@ -175,6 +161,12 @@ class SpecDDInlineCompletionBehaviorSpec : BehaviorSpec({
                 val variant = SpecDDInlineCompletionVariant("src/main")
 
                 variant.toLookupElement().lookupString shouldBe "src/main"
+            }
+        }
+
+        `when`("the default project filter is used") {
+            then("it accepts VFS entries") {
+                SpecDDInlineCompletion.defaultProjectFilter(testVirtualRoot()) shouldBe true
             }
         }
     }
