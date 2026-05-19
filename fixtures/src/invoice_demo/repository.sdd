@@ -1,0 +1,46 @@
+Spec: Invoice Repository
+
+Platform: Python 3
+
+Purpose:
+  Store invoices in memory for the fixture service.
+
+Structure:
+  ./repository.py: Repository implementation.
+  ./models.py: Stored invoice model.
+  ./service.py: Repository caller.
+
+Owns:
+  ./repository.py
+  ./repository.sdd
+
+Can modify:
+  ./repository.py
+  ./repository.sdd
+
+Can read:
+  ./models.py
+  ./service.py
+  ../../tests/test_service.py
+
+Must:
+  Save invoices by invoice id.
+  Return None for missing invoice ids.
+  Return customer invoice lists without exposing internal storage.
+  Stay in memory for the fixture.
+
+Must not:
+  Add filesystem persistence.
+  Add database clients or network dependencies.
+
+Depends on:
+  @invoice_demo.models.Invoice
+
+Scenario: saved invoices can be queried
+  Given @invoice_demo.repository.InvoiceRepository.save stores an invoice
+  When @invoice_demo.repository.InvoiceRepository.get receives the same id
+  Then it returns the saved invoice
+
+Example:
+  implementation: ./repository.py
+  behavior test: ../../tests/test_service.py

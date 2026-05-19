@@ -64,6 +64,108 @@ class SpecDDPathAnnotatorBehaviorSpec : BehaviorSpec({
             }
         }
 
+        `when`("explicit paths are unresolved outside path-bearing sections") {
+            then("it reports warnings everywhere explicit paths are recognized") {
+                val root = testVirtualRoot()
+                val holder = RecordingPathAnnotationHolder()
+                val text = """
+                    |Spec: Demo
+                    |Must:
+                    |  Use ./missing/must.sdd
+                    |Tasks:
+                    |  [ ] Check ./missing/task.sdd
+                    |Scenario: missing paths
+                    |  Given ./missing/scenario.sdd is referenced
+                    |  And `./missing/code.sdd` is referenced inside code
+                    |Purpose:
+                    |  Body entry
+                    |    Continue with ./missing/continuation.sdd
+                """.trimMargin()
+
+                SpecDDPathAnnotator().annotateText(text, SpecDDPathResolutionContext(root, root), holder.proxy)
+
+                holder.warnings.shouldContainExactly(
+                    RecordedPathAnnotation(
+                        range = rangeOf(text, "./missing/must.sdd"),
+                        message = "SpecDD path './missing/must.sdd' does not resolve.",
+                    ),
+                    RecordedPathAnnotation(
+                        range = rangeOf(text, "./missing/task.sdd"),
+                        message = "SpecDD path './missing/task.sdd' does not resolve.",
+                    ),
+                    RecordedPathAnnotation(
+                        range = rangeOf(text, "./missing/scenario.sdd"),
+                        message = "SpecDD path './missing/scenario.sdd' does not resolve.",
+                    ),
+                    RecordedPathAnnotation(
+                        range = rangeOf(text, "./missing/code.sdd"),
+                        message = "SpecDD path './missing/code.sdd' does not resolve.",
+                    ),
+                    RecordedPathAnnotation(
+                        range = rangeOf(text, "./missing/continuation.sdd"),
+                        message = "SpecDD path './missing/continuation.sdd' does not resolve.",
+                    ),
+                )
+            }
+        }
+
+        `when`("explicit symbols are unresolved") {
+            then("it reports symbol warnings while ignoring comments and section headers") {
+                val root = testVirtualRoot()
+                val holder = RecordingPathAnnotationHolder()
+                val text = """
+                    |# @CommentSymbol
+                    |Spec: @TitleSymbol
+                    |Must:
+                    |  Call @MissingSymbol.
+                    |  Use email@example.com and \@literal.
+                    |  # @IndentedCommentSymbol
+                """.trimMargin()
+
+                SpecDDPathAnnotator().annotateText(
+                    text = text,
+                    resolutionContext = SpecDDPathResolutionContext(root, root),
+                    holder = holder.proxy,
+                    project = project(root.path),
+                )
+
+                holder.warnings.shouldContainExactly(
+                    RecordedPathAnnotation(
+                        range = rangeOf(text, "@MissingSymbol"),
+                        message = "SpecDD symbol '@MissingSymbol' does not resolve.",
+                    ),
+                )
+                holder.fixTexts shouldBe emptyList()
+            }
+        }
+
+        `when`("explicit symbols resolve") {
+            then("it does not report symbol warnings") {
+                val root = testVirtualRoot()
+                val holder = RecordingPathAnnotationHolder()
+                val text = "Spec: Demo\nMust:\n  Call @ExistingSymbol"
+                val target = psiElement("ExistingSymbol", project(root.path))
+                val annotator = SpecDDPathAnnotator(
+                    symbolResolver = SpecDDSymbolResolver {
+                        listOf(
+                            FakeAnnotatorChooseByNameContributor(
+                                mapOf(AnnotatorSymbolLookupCall("ExistingSymbol", "ExistingSymbol") to listOf(target)),
+                            ),
+                        )
+                    },
+                )
+
+                annotator.annotateText(
+                    text = text,
+                    resolutionContext = SpecDDPathResolutionContext(root, root),
+                    holder = holder.proxy,
+                    project = project(root.path),
+                )
+
+                holder.warnings shouldBe emptyList()
+            }
+        }
+
         `when`("a non-file PSI element is annotated") {
             then("it does nothing") {
                 val holder = RecordingPathAnnotationHolder()
@@ -117,6 +219,28 @@ class SpecDDPathAnnotatorBehaviorSpec : BehaviorSpec({
 private data class RecordedPathAnnotation(
     val range: TextRange,
     val message: String,
+)
+
+private fun rangeOf(text: String, fragment: String): TextRange {
+    val start = text.indexOf(fragment)
+    return TextRange(start, start + fragment.length)
+}
+
+private class FakeAnnotatorChooseByNameContributor(
+    private val targetsByLookup: Map<AnnotatorSymbolLookupCall, List<com.intellij.psi.PsiElement>>,
+) {
+    @Suppress("UNUSED_PARAMETER")
+    fun getItemsByName(
+        name: String,
+        pattern: String,
+        project: Project,
+        includeNonProjectItems: Boolean,
+    ): Array<Any> = targetsByLookup[AnnotatorSymbolLookupCall(name, pattern)]?.toTypedArray() ?: emptyArray()
+}
+
+private data class AnnotatorSymbolLookupCall(
+    val name: String,
+    val pattern: String,
 )
 
 private class RecordingPathAnnotationHolder {

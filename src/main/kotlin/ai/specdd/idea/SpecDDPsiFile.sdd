@@ -15,9 +15,9 @@ Can read:
   /src/test/kotlin/ai/specdd/idea/SpecDDLanguageBehaviorSpec.kt
 
 Must:
-  Extend IntelliJ `PsiFileBase`.
-  Use `SpecDDLanguage`.
-  Return a `SpecDDFileType` file type.
+  Extend IntelliJ `@PsiFileBase`.
+  Use `@SpecDDLanguage`.
+  Return a `@SpecDDFileType` file type.
   Delegate `findReferenceAt` to the path reference concern so Go to Declaration can resolve paths in minimal PSI files.
   Use `SpecDD file` as the debug string.
 

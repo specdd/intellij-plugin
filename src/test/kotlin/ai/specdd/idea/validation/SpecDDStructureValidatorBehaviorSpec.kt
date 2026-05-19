@@ -32,6 +32,32 @@ class SpecDDStructureValidatorBehaviorSpec : BehaviorSpec({
             }
         }
 
+        `when`("formal mixed-entry examples from the language specification are validated") {
+            then("it accepts paths, prose dependencies, explicit symbols, and inline code text") {
+                val result = validator.validate(
+                    """
+                    |Spec: Invoice Service
+                    |Platform: TypeScript/Node
+                    |Purpose:
+                    |  Coordinate invoice creation.
+                    |Structure:
+                    |  ./src: Source code
+                    |  ./tests: Test suite
+                    |  ./docs
+                    |  Generated files are not committed.
+                    |Depends on:
+                    |  FetchClient
+                    |Must:
+                    |  Call @InvoiceService.createInvoice before returning.
+                    |  Use `@dataclass` as a symbol reference inside code text.
+                    |  Treat `InvoiceService.createInvoice` as code text, not a symbol reference.
+                    """.trimMargin(),
+                )
+
+                result.issues shouldBe emptyList()
+            }
+        }
+
         `when`("unknown and misspelled sections are validated") {
             then("it reports unknown section names with likely typo suggestions") {
                 val text = """
@@ -99,6 +125,7 @@ class SpecDDStructureValidatorBehaviorSpec : BehaviorSpec({
                 val text = """
                     |Spec:
                     |Platform:
+                    |Scenario:
                     |Purpose:
                 """.trimMargin()
 
@@ -117,13 +144,20 @@ class SpecDDStructureValidatorBehaviorSpec : BehaviorSpec({
                         ),
                         message = "Section 'Platform' requires an inline value.",
                     ),
+                    SpecDDValidationIssue(
+                        range = TextRange(
+                            text.indexOf("Scenario:") + "Scenario".length,
+                            text.indexOf("Scenario:") + "Scenario:".length,
+                        ),
+                        message = "Section 'Scenario' requires an inline value.",
+                    ),
                 )
             }
         }
 
         `when`("required inline section values contain only spaces") {
             then("it reports the blank inline value range") {
-                val text = "Spec:  \nPlatform:  \nPurpose:"
+                val text = "Spec:  \nPlatform:  \nScenario:  \nPurpose:"
 
                 validator.validate(text).issues.shouldContainExactly(
                     SpecDDValidationIssue(
@@ -131,8 +165,12 @@ class SpecDDStructureValidatorBehaviorSpec : BehaviorSpec({
                         message = "Section 'Spec' requires an inline value.",
                     ),
                     SpecDDValidationIssue(
-                        range = TextRange(text.indexOf("Platform:") + "Platform:".length, text.indexOf("Purpose:") - 1),
+                        range = TextRange(text.indexOf("Platform:") + "Platform:".length, text.indexOf("Scenario:") - 1),
                         message = "Section 'Platform' requires an inline value.",
+                    ),
+                    SpecDDValidationIssue(
+                        range = TextRange(text.indexOf("Scenario:") + "Scenario:".length, text.indexOf("Purpose:") - 1),
+                        message = "Section 'Scenario' requires an inline value.",
                     ),
                 )
             }
@@ -144,6 +182,7 @@ class SpecDDStructureValidatorBehaviorSpec : BehaviorSpec({
                     |Spec: Example
                     |Platform: IntelliJ Platform / Kotlin
                     |Scenario: inline scenario titles are supported
+                    |Example: optional example titles are supported
                     |Can modify: bla bla bla
                     |Purpose: this should move to the next line
                     |Must:
@@ -157,6 +196,22 @@ class SpecDDStructureValidatorBehaviorSpec : BehaviorSpec({
                         "Section 'Purpose' does not support inline text after ':'.",
                     ),
                 )
+            }
+        }
+
+        `when`("example sections have optional inline titles") {
+            then("it accepts titled and untitled repeated examples") {
+                val result = validator.validate(
+                    """
+                    |Spec: Example
+                    |Example: titled example
+                    |  output: generated/result.json
+                    |Example:
+                    |  output: generated/other.json
+                    """.trimMargin(),
+                )
+
+                result.issues shouldBe emptyList()
             }
         }
 
@@ -192,6 +247,141 @@ class SpecDDStructureValidatorBehaviorSpec : BehaviorSpec({
 
                 validator.validate(text).issues.shouldContainExactly(
                     issueAt(text, "this is not a task", "Invalid SpecDD syntax."),
+                )
+            }
+        }
+
+        `when`("task-looking text appears outside the Tasks section") {
+            then("it is validated as ordinary body text") {
+                val result = validator.validate(
+                    """
+                    |Spec: Example
+                    |Purpose:
+                    |  [ ] prose that is not a task.
+                    |  [invalid] prose that is not an invalid task state.
+                    """.trimMargin(),
+                )
+
+                result.issues shouldBe emptyList()
+            }
+        }
+
+        `when`("task entries do not include task text") {
+            then("it reports marker-only and task-id-only entries") {
+                val text = """
+                    |Spec: Example
+                    |Tasks:
+                    |  [ ]
+                    |  [ ] #1
+                    |  [ ] #2 Valid task.
+                """.trimMargin()
+
+                validator.validate(text).issues.shouldContainExactly(
+                    SpecDDValidationIssue(
+                        range = TextRange(text.indexOf("[ ]"), text.indexOf("[ ]") + "[ ]".length),
+                        message = "Task entries must include task text.",
+                    ),
+                    SpecDDValidationIssue(
+                        range = TextRange(text.indexOf("#1"), text.indexOf("#1") + "#1".length),
+                        message = "Task entries must include task text.",
+                    ),
+                )
+            }
+        }
+
+        `when`("task entries are not indented by exactly two spaces") {
+            then("it reports task entry indentation issues") {
+                val text = """
+                    |Spec: Example
+                    |Tasks:
+                    |[ ] unindented task.
+                    |  [ ] valid task.
+                """.trimMargin()
+
+                validator.validate(text).issues.shouldContainExactly(
+                    issueAt(text, "[ ] unindented task.", "Body entries must be indented by exactly 2 spaces."),
+                )
+            }
+        }
+
+        `when`("continuation lines follow body entries in body-capable sections") {
+            then("it accepts continuation text under prose and task entries") {
+                val result = validator.validate(
+                    """
+                    |Spec: Example
+                    |Purpose:
+                    |  First body entry
+                    |    continued purpose text
+                    |Tasks:
+                    |  [ ] First task
+                    |    [ ] continued task-looking text
+                    """.trimMargin(),
+                )
+
+                result.issues shouldBe emptyList()
+            }
+        }
+
+        `when`("continuation lines have no preceding body entry in the current section") {
+            then("it reports invalid continuation placement") {
+                val text = """
+                    |Spec: Example
+                    |Purpose:
+                    |    orphan continuation
+                    |Must:
+                    |  First body entry
+                    |    valid continuation
+                    |References:
+                    |    orphan after section reset
+                """.trimMargin()
+
+                validator.validate(text).issues.shouldContainExactly(
+                    issueAt(
+                        text,
+                        "orphan continuation",
+                        "Continuation line must follow a body entry in the same section.",
+                    ),
+                    issueAt(
+                        text,
+                        "orphan after section reset",
+                        "Continuation line must follow a body entry in the same section.",
+                    ),
+                )
+            }
+        }
+
+        `when`("body entries use invalid indentation widths") {
+            then("it requires body entries to use exactly two spaces") {
+                val text = """
+                    |Spec: Example
+                    |Purpose:
+                    |unindented body
+                    |  valid body
+                    |    valid continuation
+                    |      valid deeper continuation
+                    |Must:
+                    |unindented requirement
+                """.trimMargin()
+
+                validator.validate(text).issues.shouldContainExactly(
+                    issueAt(text, "unindented body", "Body entries must be indented by exactly 2 spaces."),
+                    issueAt(text, "unindented requirement", "Body entries must be indented by exactly 2 spaces."),
+                )
+            }
+        }
+
+        `when`("scenario steps use different indentation widths") {
+            then("it requires scenario steps to be body entries or continuations") {
+                val text = """
+                    |Spec: Example
+                    |Scenario: flow
+                    |Given unindented step
+                    |  When valid step
+                    |    Then continuation text, not a new step
+                """.trimMargin()
+
+                validator.validate(text).issues.shouldContainExactly(
+                    issueAt(text, "Given unindented step", "Body entries must be indented by exactly 2 spaces."),
                 )
             }
         }
@@ -255,20 +445,41 @@ class SpecDDStructureValidatorBehaviorSpec : BehaviorSpec({
             }
         }
 
-        `when`("line indentation is not a multiple of two spaces") {
+        `when`("line indentation is not ASCII spaces in multiples of two") {
             then("it reports indentation issues") {
-                val text = "Spec: Example\nPurpose:\n   odd\n\tbad\n    ok\n"
+                val text = "Spec: Example\nPurpose:\n  body\n   odd\n\tbad\n\u00A0\u00A0nbsp\n    ok\n"
 
                 validator.validate(text).issues.shouldContainExactly(
                     SpecDDValidationIssue(
-                        range = TextRange(23, 26),
+                        range = TextRange(text.indexOf("   odd"), text.indexOf("   odd") + 3),
                         message = "Indentation must use spaces in multiples of 2.",
                     ),
                     SpecDDValidationIssue(
-                        range = TextRange(30, 31),
+                        range = TextRange(text.indexOf("\tbad"), text.indexOf("\tbad") + 1),
+                        message = "Indentation must use spaces in multiples of 2.",
+                    ),
+                    SpecDDValidationIssue(
+                        range = TextRange(text.indexOf("\u00A0\u00A0nbsp"), text.indexOf("\u00A0\u00A0nbsp") + 2),
                         message = "Indentation must use spaces in multiples of 2.",
                     ),
                 )
+            }
+        }
+
+        `when`("comment lines have arbitrary indentation") {
+            then("it ignores comment indentation") {
+                val result = validator.validate(
+                    """
+                    |Spec: Example
+                    |Purpose:
+                    |  valid body
+                    |   # odd space comment
+                    |	# tab comment
+                    |      # deeper comment
+                    """.trimMargin(),
+                )
+
+                result.issues shouldBe emptyList()
             }
         }
 
@@ -334,9 +545,19 @@ class SpecDDStructureValidatorBehaviorSpec : BehaviorSpec({
             }
         }
 
-        `when`("text has no sections") {
-            then("it reports no structure issue") {
-                validator.validate("plain text\n# comment\n").issues shouldBe emptyList()
+        `when`("text appears before the first section") {
+            then("it reports invalid syntax for nonblank non-comment lines") {
+                val text = "# leading comment\nplain text\nSpec: Example\n"
+
+                validator.validate(text).issues.shouldContainExactly(
+                    issueAt(text, "plain text", "Invalid SpecDD syntax."),
+                )
+            }
+        }
+
+        `when`("text has no sections but only comments and blanks") {
+            then("it reports no issues") {
+                validator.validate("# comment\n\n  # indented comment\n").issues shouldBe emptyList()
             }
         }
 

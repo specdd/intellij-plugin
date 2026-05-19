@@ -30,7 +30,7 @@ Can read:
 
 Must:
   Keep structure behavior independent from syntax highlighting and validation diagnostics.
-  Use the shared `SpecDDLineClassifier` line classification boundary.
+  Use the shared `@SpecDDLineClassifier` line classification boundary.
   List every known section header in file order.
   Preserve repeated `Scenario` and `Example` entries as separate structure nodes.
   Display section labels with inline values when present.

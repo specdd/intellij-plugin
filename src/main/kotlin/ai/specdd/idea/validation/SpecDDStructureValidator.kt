@@ -2,6 +2,7 @@ package ai.specdd.idea.validation
 
 import ai.specdd.idea.parser.SpecDDLineClassifier
 import ai.specdd.idea.parser.SpecDDLineKind
+import ai.specdd.idea.parser.SpecDDTaskMarker
 import ai.specdd.idea.parser.SpecDDTaskStatus
 import com.intellij.openapi.util.TextRange
 
@@ -13,18 +14,20 @@ class SpecDDStructureValidator(
         var firstKnownSectionLabel: String? = null
         var firstKnownSectionRange: TextRange? = null
         var currentSectionLabel: String? = null
+        var currentSectionHasBodyEntry = false
         val seenSectionLabels = mutableSetOf<String>()
         val seenScenarioValues = mutableSetOf<String>()
 
         forEachLine(text) { lineStart, lineEnd ->
-            val classification = lineClassifier.classify(text, lineStart, lineEnd)
-            val indentationIssue = validateIndentation(text, lineStart, classification.contentStart, lineEnd)
+            val classification = lineClassifier.classify(text, lineStart, lineEnd, currentSectionLabel)
+            val indentationIssue = validateIndentation(text, lineStart, classification.contentStart, lineEnd, classification.kind)
             if (null != indentationIssue) issues.add(indentationIssue)
 
             when (classification.kind) {
                 SpecDDLineKind.SECTION -> {
                     val sectionHeader = classification.sectionHeader ?: return@forEachLine
                     currentSectionLabel = sectionHeader.label
+                    currentSectionHasBodyEntry = false
                     if (lineStart != sectionHeader.labelStart) {
                         issues.add(
                             SpecDDValidationIssue(
@@ -64,8 +67,12 @@ class SpecDDStructureValidator(
                         lineEnd = lineEnd,
                         currentSectionLabel = currentSectionLabel,
                         lineKind = classification.kind,
+                        hasPreviousBodyEntry = currentSectionHasBodyEntry,
                     )
                     if (null != issue) issues.add(issue)
+                    if (null == issue && classification.kind in BODY_ENTRY_LINE_KINDS) {
+                        currentSectionHasBodyEntry = true
+                    }
                 }
 
                 SpecDDLineKind.TASK -> {
@@ -83,6 +90,8 @@ class SpecDDStructureValidator(
                             ),
                         )
                     }
+                    val taskTextIssue = validateTaskText(text, lineEnd, taskMarker)
+                    if (null != taskTextIssue) issues.add(taskTextIssue)
                     val issue = validateNonSectionLine(
                         text = text,
                         lineStart = lineStart,
@@ -90,10 +99,15 @@ class SpecDDStructureValidator(
                         lineEnd = lineEnd,
                         currentSectionLabel = currentSectionLabel,
                         lineKind = classification.kind,
+                        hasPreviousBodyEntry = currentSectionHasBodyEntry,
                     )
                     if (null != issue) issues.add(issue)
+                    if (null == issue && null == taskTextIssue && classification.kind in BODY_ENTRY_LINE_KINDS) {
+                        currentSectionHasBodyEntry = true
+                    }
                 }
 
+                SpecDDLineKind.CONTINUATION,
                 SpecDDLineKind.SCENARIO_STEP,
                 SpecDDLineKind.KEY_VALUE -> {
                     val issue = validateNonSectionLine(
@@ -103,8 +117,12 @@ class SpecDDStructureValidator(
                         lineEnd = lineEnd,
                         currentSectionLabel = currentSectionLabel,
                         lineKind = classification.kind,
+                        hasPreviousBodyEntry = currentSectionHasBodyEntry,
                     )
                     if (null != issue) issues.add(issue)
+                    if (null == issue && classification.kind in BODY_ENTRY_LINE_KINDS) {
+                        currentSectionHasBodyEntry = true
+                    }
                 }
 
                 SpecDDLineKind.BLANK,
@@ -130,12 +148,14 @@ class SpecDDStructureValidator(
         lineStart: Int,
         contentStart: Int,
         lineEnd: Int,
+        lineKind: SpecDDLineKind,
     ): SpecDDValidationIssue? {
         if (contentStart >= lineEnd) return null
+        if (SpecDDLineKind.COMMENT == lineKind) return null
         if (lineStart == contentStart) return null
 
         val indentation = text.subSequence(lineStart, contentStart)
-        if (indentation.any { character -> '\t' == character }) return invalidIndentation(lineStart, contentStart)
+        if (indentation.any { character -> ' ' != character }) return invalidIndentation(lineStart, contentStart)
         if (0 != indentation.length % INDENT_SIZE) return invalidIndentation(lineStart, contentStart)
 
         return null
@@ -146,6 +166,11 @@ class SpecDDStructureValidator(
             range = TextRange(lineStart, contentStart),
             message = "Indentation must use spaces in multiples of 2.",
         )
+
+    private fun bodyEntryIndentationRange(lineStart: Int, contentStart: Int, lineEnd: Int): TextRange {
+        if (lineStart < contentStart) return TextRange(lineStart, contentStart)
+        return TextRange(contentStart, lineEnd)
+    }
 
     private fun validateDuplicateSection(
         label: String,
@@ -180,13 +205,21 @@ class SpecDDStructureValidator(
         lineEnd: Int,
         currentSectionLabel: String?,
         lineKind: SpecDDLineKind,
+        hasPreviousBodyEntry: Boolean,
     ): SpecDDValidationIssue? {
         if (contentStart >= lineEnd) return null
 
         val sectionSyntaxIssue = validateSectionSyntaxCandidate(text, lineStart, contentStart, lineEnd)
         if (null != sectionSyntaxIssue) return sectionSyntaxIssue
 
-        return validateSectionBodyLine(currentSectionLabel, lineKind, contentStart, lineEnd)
+        return validateSectionBodyLine(
+            sectionLabel = currentSectionLabel,
+            lineKind = lineKind,
+            hasPreviousBodyEntry = hasPreviousBodyEntry,
+            lineStart = lineStart,
+            contentStart = contentStart,
+            lineEnd = lineEnd,
+        )
     }
 
     private fun validateSectionSyntaxCandidate(
@@ -222,16 +255,40 @@ class SpecDDStructureValidator(
     private fun validateSectionBodyLine(
         sectionLabel: String?,
         lineKind: SpecDDLineKind,
+        hasPreviousBodyEntry: Boolean,
+        lineStart: Int,
         contentStart: Int,
         lineEnd: Int,
     ): SpecDDValidationIssue? {
         if (contentStart >= lineEnd) return null
-        if (null == sectionLabel) return null
+        if (null == sectionLabel) {
+            return SpecDDValidationIssue(
+                range = TextRange(contentStart, lineEnd),
+                message = "Invalid SpecDD syntax.",
+            )
+        }
 
         if (sectionLabel in BODYLESS_SECTIONS) {
             return SpecDDValidationIssue(
                 range = TextRange(contentStart, lineEnd),
                 message = "Section '$sectionLabel' does not support follow-up lines.",
+            )
+        }
+        if (SpecDDLineKind.CONTINUATION == lineKind && !hasPreviousBodyEntry) {
+            return SpecDDValidationIssue(
+                range = TextRange(contentStart, lineEnd),
+                message = "Continuation line must follow a body entry in the same section.",
+            )
+        }
+        val indentationWidth = contentStart - lineStart
+        if (
+            lineKind in BODY_ENTRY_LINE_KINDS &&
+            0 == indentationWidth % INDENT_SIZE &&
+            BODY_ENTRY_INDENT_SIZE != indentationWidth
+        ) {
+            return SpecDDValidationIssue(
+                range = bodyEntryIndentationRange(lineStart, contentStart, lineEnd),
+                message = "Body entries must be indented by exactly 2 spaces.",
             )
         }
 
@@ -279,6 +336,21 @@ class SpecDDStructureValidator(
         return SpecDDValidationIssue(
             range = TextRange(contentStart, lineEnd),
             message = "Section '$label' does not support inline text after ':'.",
+        )
+    }
+
+    private fun validateTaskText(
+        text: CharSequence,
+        lineEnd: Int,
+        taskMarker: SpecDDTaskMarker,
+    ): SpecDDValidationIssue? {
+        val textStart = firstNonWhitespace(text, taskMarker.taskId?.end ?: taskMarker.markerEnd, lineEnd)
+        if (textStart < lineEnd) return null
+
+        val rangeStart = taskMarker.taskId?.start ?: taskMarker.markerStart
+        return SpecDDValidationIssue(
+            range = TextRange(rangeStart, lineEnd),
+            message = "Task entries must include task text.",
         )
     }
 
@@ -341,20 +413,27 @@ class SpecDDStructureValidator(
 
     private companion object {
         const val INDENT_SIZE = 2
+        const val BODY_ENTRY_INDENT_SIZE = 2
         const val NO_OFFSET = -1
     }
 }
 
-private val INLINE_VALUE_SECTIONS = setOf("Spec", "Platform", "Scenario")
-private val REQUIRED_INLINE_VALUE_SECTIONS = setOf("Spec", "Platform")
+private val INLINE_VALUE_SECTIONS = setOf("Spec", "Platform", "Scenario", "Example")
+private val REQUIRED_INLINE_VALUE_SECTIONS = setOf("Spec", "Platform", "Scenario")
 private val BODYLESS_SECTIONS = setOf("Spec", "Platform")
 private val REPEATABLE_SECTIONS = setOf("Scenario", "Example")
 private val DEFAULT_BODY_LINE_KINDS = setOf(
+    SpecDDLineKind.TEXT,
+    SpecDDLineKind.SCENARIO_STEP,
+    SpecDDLineKind.KEY_VALUE,
+    SpecDDLineKind.CONTINUATION,
+)
+private val BODY_ENTRY_LINE_KINDS = setOf(
     SpecDDLineKind.TEXT,
     SpecDDLineKind.TASK,
     SpecDDLineKind.SCENARIO_STEP,
     SpecDDLineKind.KEY_VALUE,
 )
 private val BODY_LINE_KINDS_BY_SECTION = mapOf(
-    "Tasks" to setOf(SpecDDLineKind.TASK),
+    "Tasks" to setOf(SpecDDLineKind.TASK, SpecDDLineKind.CONTINUATION),
 )

@@ -2,8 +2,6 @@ package ai.specdd.idea.references
 
 import ai.specdd.idea.SpecDDFileType
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.roots.ProjectFileIndex
-import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiElement
@@ -14,7 +12,7 @@ import com.intellij.util.ProcessingContext
 
 class SpecDDPathReferenceProvider(
     private val extractor: SpecDDPathReferenceExtractor = SpecDDPathReferenceExtractor(),
-    private val codeExtractor: SpecDDCodeReferenceExtractor = SpecDDCodeReferenceExtractor(),
+    private val symbolExtractor: SpecDDSymbolReferenceExtractor = SpecDDSymbolReferenceExtractor(),
     private val symbolResolver: SpecDDSymbolResolver = SpecDDSymbolResolver(),
 ) : PsiReferenceProvider() {
     override fun getReferencesByElement(element: PsiElement, context: ProcessingContext): Array<PsiReference> {
@@ -39,36 +37,22 @@ class SpecDDPathReferenceProvider(
                 )
             }
 
-        val codeReferences = codeExtractor
+        val symbolReferences = symbolExtractor
             .extract(containingFile.text)
             .filter { candidate ->
-                elementRange.startOffset <= candidate.contentRange.startOffset &&
-                        candidate.contentRange.endOffset <= elementRange.endOffset
+                elementRange.startOffset <= candidate.range.startOffset &&
+                        candidate.range.endOffset <= elementRange.endOffset
             }
             .map { candidate ->
-                if (candidate.text.hasExplicitPathPrefix()) {
-                    SpecDDPathReference(
-                        element = element,
-                        rangeInElement = candidate.contentRange.shiftLeft(elementRange.startOffset),
-                        candidate = SpecDDPathCandidate(
-                            text = candidate.text,
-                            range = candidate.contentRange,
-                            hasPathSyntax = true,
-                            warnIfUnresolved = false,
-                        ),
-                        context = resolutionContext,
-                    )
-                } else {
-                    SpecDDSymbolReference(
-                        element = element,
-                        rangeInElement = candidate.contentRange.shiftLeft(elementRange.startOffset),
-                        symbolText = candidate.text,
-                        resolver = symbolResolver,
-                    )
-                }
+                SpecDDSymbolReference(
+                    element = element,
+                    rangeInElement = candidate.range.shiftLeft(elementRange.startOffset),
+                    symbolText = candidate.text,
+                    resolver = symbolResolver,
+                )
             }
 
-        return (pathReferences + codeReferences).toTypedArray()
+        return (pathReferences + symbolReferences).toTypedArray()
     }
 
     fun getReferenceAt(element: PsiElement, offsetInFile: Int): PsiReference? {
@@ -95,41 +79,24 @@ class SpecDDPathReferenceProvider(
             )
         }
 
-        return codeExtractor
+        return symbolExtractor
             .extract(containingFile.text)
-            .firstOrNull { codeCandidate ->
-                codeCandidate.contentRange.startOffset <= offsetInFile &&
-                        offsetInFile < codeCandidate.contentRange.endOffset &&
-                        elementRange.startOffset <= codeCandidate.contentRange.startOffset &&
-                        codeCandidate.contentRange.endOffset <= elementRange.endOffset
+            .firstOrNull { symbolCandidate ->
+                symbolCandidate.range.startOffset <= offsetInFile &&
+                        offsetInFile < symbolCandidate.range.endOffset &&
+                        elementRange.startOffset <= symbolCandidate.range.startOffset &&
+                        symbolCandidate.range.endOffset <= elementRange.endOffset
             }
-            ?.let { codeCandidate ->
-                if (codeCandidate.text.hasExplicitPathPrefix()) {
-                    SpecDDPathReference(
-                        element = element,
-                        rangeInElement = codeCandidate.contentRange.shiftLeft(elementRange.startOffset),
-                        candidate = SpecDDPathCandidate(
-                            text = codeCandidate.text,
-                            range = codeCandidate.contentRange,
-                            hasPathSyntax = true,
-                            warnIfUnresolved = false,
-                        ),
-                        context = resolutionContext,
-                    )
-                } else {
-                    SpecDDSymbolReference(
-                        element = element,
-                        rangeInElement = codeCandidate.contentRange.shiftLeft(elementRange.startOffset),
-                        symbolText = codeCandidate.text,
-                        resolver = symbolResolver,
-                    )
-                }
+            ?.let { symbolCandidate ->
+                SpecDDSymbolReference(
+                    element = element,
+                    rangeInElement = symbolCandidate.range.shiftLeft(elementRange.startOffset),
+                    symbolText = symbolCandidate.text,
+                    resolver = symbolResolver,
+                )
             }
     }
 }
-
-private fun String.hasExplicitPathPrefix(): Boolean =
-    startsWith("./") || startsWith("../") || startsWith("/")
 
 internal fun PsiElement.pathResolutionContext(): SpecDDPathResolutionContext? {
     val file = (this as? PsiFile) ?: containingFile
@@ -146,9 +113,8 @@ internal fun PsiElement.pathResolutionContext(): SpecDDPathResolutionContext? {
 
 private fun PsiElement.projectRootFor(virtualFile: VirtualFile?): VirtualFile? =
     project.projectDirectory()
-        ?: runCatching { @Suppress("DEPRECATION") project.baseDir }.getOrNull()
-        ?: runCatching { ProjectRootManager.getInstance(project).contentRoots.firstOrNull() }.getOrNull()
-        ?: virtualFile?.contentRoot(project)
+        ?: project.projectFileRoot()
+        ?: project.workspaceFileRoot()
         ?: virtualFile?.topmostParent()
 
 private fun Project.projectDirectory(): VirtualFile? =
@@ -156,8 +122,24 @@ private fun Project.projectDirectory(): VirtualFile? =
         basePath?.let { path -> LocalFileSystem.getInstance().findFileByPath(path) }
     }.getOrNull()
 
-private fun VirtualFile.contentRoot(project: Project): VirtualFile? =
-    runCatching { ProjectFileIndex.getInstance(project).getContentRootForFile(this) }.getOrNull()
+private fun Project.projectFileRoot(): VirtualFile? =
+    runCatching { projectFile?.projectRootFromProjectMetadataFile() }.getOrNull()
+
+private fun Project.workspaceFileRoot(): VirtualFile? =
+    runCatching { workspaceFile?.projectRootFromProjectMetadataFile() }.getOrNull()
+
+private fun VirtualFile.projectRootFromProjectMetadataFile(): VirtualFile? {
+    if (isDirectory) {
+        return this
+    }
+
+    val metadataDirectory = parent ?: return null
+    if (".idea" == metadataDirectory.name) {
+        return metadataDirectory.parent
+    }
+
+    return metadataDirectory
+}
 
 private fun VirtualFile.topmostParent(): VirtualFile {
     var current = this

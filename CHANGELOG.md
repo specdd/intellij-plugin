@@ -4,6 +4,36 @@
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-05-19
+
+### Added
+
+- Improved symbol references with IntelliJ navigation, find usages, code-side rename discovery, and SDD-side rename
+  invocation.
+- Warnings for unresolved symbol, file, and glob references across supported SpecDD text contexts.
+- Automatic rename and move refactor support for exact SpecDD file path references.
+- Color settings page and bundled Default/Darcula color-scheme attributes for SpecDD highlighting.
+
+### Changed
+
+- Aligned language requirements to SpecDD language reference version 1.0.
+- Improve inline code and reference handling to reduce false positive warnings.
+- Improve highlighting for symbols, inline code spans, section labels, metadata, paths, globs, task states,
+  continuation indentation, and key-value syntax.
+- Require explicit project-root or spec-relative path prefixes for path resolution.
+
+### Fixed
+
+- Prevent SDD-side rename from shortening qualified symbol references.
+- Preserve symbol qualifiers when a referenced symbol is renamed.
+- Resolve dotted symbols through IntelliJ symbol/class contributors using both full and final-segment lookups.
+- Resolve project-root `/` SpecDD path references from the IntelliJ project root instead of module or content roots.
+- Resolve SpecDD file and glob references through IntelliJ VFS for consistent local and remote development behavior.
+- Avoid treating URLs and prose-like dependency names as file references unless they use explicit path prefixes.
+- Validate duplicate `Scenario` and `Example` sections only when their inline values repeat.
+- Report unsupported body text only for sections that do not allow follow-up body content.
+- Keep invalid task states highlighted and diagnosed as errors.
+
 ## [1.0.1] - 2026-05-19
 
 ### Fixed

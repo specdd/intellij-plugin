@@ -11,15 +11,21 @@ Owns:
 Structure:
   ./app.sdd: Repository-level SpecDD contract.
   ./Makefile: Convenience build targets for local and release workflows.
+  ./README.md: Repository overview and usage documentation.
+  ./CHANGELOG.md: Release notes.
+  ./build.gradle.kts: Gradle build and IntelliJ Platform plugin configuration.
+  ./gradle.properties: Project version and Gradle properties.
+  ./settings.gradle.kts: Gradle project identity.
   ./src/main.sdd: Implementation-root SpecDD contract.
   ./src/main/kotlin/ai/specdd/idea: SpecDD language package namespace.
   ./src/test/kotlin/ai/specdd/idea: SpecDD language test package namespace.
+  ./src/main/resources/META-INF/plugin.xml: IntelliJ plugin metadata.
   ./src/main/kotlin/ai/specdd/idea/highlighting: Syntax highlighting concern.
   ./src/main/kotlin/ai/specdd/idea/validation: Language validation concern.
   ./src/main/kotlin/ai/specdd/idea/structure: Structure view concern.
   ./src/main/kotlin/ai/specdd/idea/documentation: Hover documentation concern.
   ./src/main/kotlin/ai/specdd/idea/completion: Completion concern.
-  ./src/main/kotlin/ai/specdd/idea/references: Path and glob reference concern.
+  ./src/main/kotlin/ai/specdd/idea/references: Path, glob, and explicit symbol reference concern.
 
 Can modify:
   ./app.sdd
@@ -35,6 +41,8 @@ Can modify:
 Must:
   Keep plugin behavior focused on SpecDD language support.
   Keep Makefile targets as thin wrappers around Gradle tasks.
+  Keep Gradle plugin metadata aligned with the IntelliJ plugin descriptor.
+  Keep repository documentation and changelog aligned with released plugin behavior.
   Place plugin code under the `ai.specdd.idea` package namespace.
   Use Kotest BehaviorSpec style for Kotlin tests.
   Keep syntax highlighting and language validation as separate implementation concerns.
@@ -43,9 +51,10 @@ Must:
   Provide IntelliJ Structure view entries for `.sdd` file sections.
   Provide inline documentation for known `.sdd` section labels.
   Provide completion for known section labels, file paths, and local symbols.
-  Provide clickable navigation and unresolved-target warnings for file paths and globs.
+  Provide clickable navigation for file paths, globs, and explicit symbol references.
+  Provide unresolved-target warnings for explicit file paths and globs.
   Report likely section-name typos and unsupported section names.
 
 Must not:
   Add unrelated IDE features outside SpecDD language support.
-  Add user-facing settings or configuration UI.
+  Add plugin-specific settings or configuration UI.

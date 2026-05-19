@@ -1,0 +1,83 @@
+Spec: Invoice Demo Fixture
+
+Platform: Python 3
+
+Purpose:
+  Provide a small plausible code project for exercising SpecDD language support.
+  Keep the fixture simple enough to inspect while still using realistic source-adjacent specs.
+
+Structure:
+  ./app.sdd: Fixture project contract.
+  ./src/invoice_demo: Python package for invoice creation and storage.
+  ./src/invoice_demo/module.sdd: Package-level implementation contract.
+  ./src/invoice_demo/models.py: Domain model definitions.
+  ./src/invoice_demo/models.sdd: Domain model contract.
+  ./src/invoice_demo/repository.py: In-memory invoice repository.
+  ./src/invoice_demo/repository.sdd: Repository contract.
+  ./src/invoice_demo/service.py: Invoice service orchestration.
+  ./src/invoice_demo/service.sdd: Service contract.
+  ./src/invoice_demo/cli.py: Minimal command-line adapter.
+  ./src/invoice_demo/cli.sdd: CLI adapter contract.
+  ./tests/test_service.py: Service behavior tests.
+  ./tests/test_service.sdd: Service test contract.
+  ./kitchen-sink.sdd: Full language coverage fixture.
+  ./kitchen-sink-invalid.sdd: Deliberately invalid language diagnostics fixture.
+
+Owns:
+  ./src/invoice_demo/*
+  ./tests/*
+  ./kitchen-sink.sdd
+  ./kitchen-sink-invalid.sdd
+
+Can modify:
+  ./src/invoice_demo/*
+  ./tests/*
+  ./kitchen-sink.sdd
+  ./kitchen-sink-invalid.sdd
+
+Can read:
+  /README.md
+  ./src/invoice_demo/*.py
+  ./src/invoice_demo/*.sdd
+  ./tests/*.py
+  ./tests/*.sdd
+
+References:
+  ./src/invoice_demo/service.py
+  ./src/invoice_demo/service.sdd
+  ./tests/test_service.py
+  ./tests/test_service.sdd
+
+Must:
+  Keep the sample project dependency-free.
+  Keep source files small and readable.
+  Use explicit path prefixes for file and glob references.
+  Use explicit `@` prefixes for symbol references.
+  Keep positive fixture specs valid under the formal SpecDD language rules.
+  Keep ./kitchen-sink-invalid.sdd intentionally invalid for diagnostics coverage.
+
+Must not:
+  Add packaging metadata, dependency managers, or generated files.
+  Use network access, clocks, randomness, or external persistence.
+
+Depends on:
+  Python standard library
+  @invoice_demo.service.InvoiceService
+  @invoice_demo.repository.InvoiceRepository
+
+Tasks:
+  [x] #1 Add a minimal invoice domain model.
+  [x] #2 Add an in-memory repository.
+  [x] #3 Add service orchestration.
+  [x] #4 Add service tests and adjacent specs.
+  [ ] #5 Keep future fixture changes aligned with `/fixtures/README.md`.
+
+Scenario: invoice creation succeeds
+  Given a customer id and one positive invoice line
+  When @invoice_demo.service.InvoiceService.create_invoice creates the invoice
+  Then the returned invoice has a total greater than zero
+  And ./tests/test_service.py can verify the behavior
+
+Example: project-root references
+  source glob: ./src/invoice_demo/*.py
+  spec glob: ./src/invoice_demo/*.sdd

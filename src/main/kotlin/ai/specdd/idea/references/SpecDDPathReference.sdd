@@ -21,6 +21,12 @@ Must:
   Return no target when a candidate is unresolved or ignored.
   Expose candidate text as canonical reference text.
   Keep references soft so unresolved paths are handled by the path warning annotator.
+  Support target rename for exact path candidates by replacing only the final path segment.
+  Support target move/rebind for exact path candidates by recomputing the path from the original prefix style.
+  Preserve `/` project-root paths as project-root-relative paths during rebind.
+  Preserve `./` and `../` spec-relative paths as spec-relative paths during rebind.
+  Use document-backed text replacement when applying rename or rebind changes.
+  Leave glob candidates unchanged during rename and rebind.
 
 Must not:
   Report diagnostics.

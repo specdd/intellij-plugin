@@ -58,6 +58,9 @@
         <langCodeStyleSettingsProvider implementation="ai.specdd.idea.SpecDDCodeStyleSettingsProvider"/>
         <lang.syntaxHighlighterFactory language="SpecDD"
                                        implementationClass="ai.specdd.idea.highlighting.SpecDDSyntaxHighlighterFactory"/>
+        <colorSettingsPage implementation="ai.specdd.idea.highlighting.SpecDDColorSettingsPage"/>
+        <additionalTextAttributes scheme="Default" file="colorSchemes/SpecDDDefault.xml"/>
+        <additionalTextAttributes scheme="Darcula" file="colorSchemes/SpecDDDarcula.xml"/>
         <annotator language="SpecDD" implementationClass="ai.specdd.idea.validation.SpecDDAnnotator"/>
         <lang.psiStructureViewFactory language="SpecDD"
                                       implementationClass="ai.specdd.idea.structure.SpecDDStructureViewFactory"/>
@@ -66,6 +69,8 @@
                                 implementationClass="ai.specdd.idea.completion.SpecDDCompletionContributor"/>
         <psi.referenceContributor language="SpecDD"
                                   implementation="ai.specdd.idea.references.SpecDDPathReferenceContributor"/>
+        <referencesSearch implementation="ai.specdd.idea.references.SpecDDReferencesSearch"/>
+        <renameHandler implementation="ai.specdd.idea.references.SpecDDReferenceRenameHandler" order="first"/>
         <annotator language="SpecDD" implementationClass="ai.specdd.idea.references.SpecDDPathAnnotator"/>
     </extensions>
 

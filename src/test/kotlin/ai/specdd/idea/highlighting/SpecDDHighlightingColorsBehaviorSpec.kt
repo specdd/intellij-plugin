@@ -2,11 +2,8 @@ package ai.specdd.idea.highlighting
 
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.collections.shouldContainExactly
-import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
-import java.awt.Color
-import java.awt.Font
 
 class SpecDDHighlightingColorsBehaviorSpec : BehaviorSpec({
     given("SpecDD highlighting colors") {
@@ -93,69 +90,40 @@ class SpecDDHighlightingColorsBehaviorSpec : BehaviorSpec({
             }
         }
 
-        `when`("indent defaults are requested") {
-            then("they provide a muted non-comment color") {
-                val attributes = SpecDDHighlightingColors.INDENT.defaultAttributes
-
-                attributes.foregroundColor shouldBe Color(0x6E7781)
-                attributes.effectColor.shouldBeNull()
-                attributes.effectType.shouldBeNull()
-                attributes.fontType shouldBe Font.PLAIN
+        `when`("fallbacks are requested") {
+            then("they use non-deprecated platform fallback keys") {
+                SpecDDHighlightingColors.INDENT.fallbackAttributeKey shouldBe
+                        com.intellij.openapi.editor.DefaultLanguageHighlighterColors.LINE_COMMENT
+                SpecDDHighlightingColors.CONTINUATION_TEXT.fallbackAttributeKey shouldBe
+                        com.intellij.openapi.editor.DefaultLanguageHighlighterColors.DOC_COMMENT
+                SpecDDHighlightingColors.SECTION_LABEL.fallbackAttributeKey shouldBe
+                        com.intellij.openapi.editor.DefaultLanguageHighlighterColors.IDENTIFIER
+                SpecDDHighlightingColors.SECTION_META.fallbackAttributeKey shouldBe
+                        com.intellij.openapi.editor.DefaultLanguageHighlighterColors.METADATA
+                SpecDDHighlightingColors.SECTION_POSITIVE.fallbackAttributeKey shouldBe
+                        com.intellij.openapi.editor.DefaultLanguageHighlighterColors.MARKUP_TAG
+                SpecDDHighlightingColors.SECTION_NEGATIVE.fallbackAttributeKey shouldBe
+                        com.intellij.openapi.editor.DefaultLanguageHighlighterColors.IDENTIFIER
+                SpecDDHighlightingColors.SECTION_REQUIRED.fallbackAttributeKey shouldBe
+                        com.intellij.openapi.editor.DefaultLanguageHighlighterColors.KEYWORD
+                SpecDDHighlightingColors.TASK_BLOCKED.fallbackAttributeKey shouldBe
+                        com.intellij.openapi.editor.DefaultLanguageHighlighterColors.IDENTIFIER
+                SpecDDHighlightingColors.CODE_SPAN.fallbackAttributeKey shouldBe
+                        com.intellij.openapi.editor.DefaultLanguageHighlighterColors.INLINE_PARAMETER_HINT
+                SpecDDHighlightingColors.CODE_SPAN_DELIMITER.fallbackAttributeKey shouldBe
+                        com.intellij.openapi.editor.DefaultLanguageHighlighterColors.DOC_COMMENT_MARKUP
+                SpecDDHighlightingColors.SYMBOL.fallbackAttributeKey shouldBe
+                        com.intellij.openapi.editor.DefaultLanguageHighlighterColors.FUNCTION_CALL
                 SpecDDHighlightingColors.INDENT shouldNotBe SpecDDHighlightingColors.COMMENT
-            }
-        }
-
-        `when`("continuation text defaults are requested") {
-            then("they provide a muted visible non-comment color") {
-                val attributes = SpecDDHighlightingColors.CONTINUATION_TEXT.defaultAttributes
-
-                attributes.foregroundColor shouldBe Color(0x7A828E)
-                attributes.effectColor.shouldBeNull()
-                attributes.effectType.shouldBeNull()
-                attributes.fontType shouldBe Font.PLAIN
                 SpecDDHighlightingColors.CONTINUATION_TEXT shouldNotBe SpecDDHighlightingColors.COMMENT
                 SpecDDHighlightingColors.CONTINUATION_TEXT shouldNotBe SpecDDHighlightingColors.INDENT
             }
         }
 
-        `when`("semantic section group defaults are requested") {
-            then("they provide distinct grouped attributes") {
-                SpecDDHighlightingColors.SECTION_LABEL.defaultAttributes.foregroundColor shouldBe Color(0x58A6FF)
-                SpecDDHighlightingColors.SECTION_LABEL.defaultAttributes.fontType shouldBe Font.BOLD
-                SpecDDHighlightingColors.SECTION_META.defaultAttributes.foregroundColor shouldBe Color(0x7A004B)
-                SpecDDHighlightingColors.SECTION_META.defaultAttributes.fontType shouldBe Font.BOLD
-                SpecDDHighlightingColors.SECTION_POSITIVE.defaultAttributes.foregroundColor shouldBe Color(0x22863A)
-                SpecDDHighlightingColors.SECTION_POSITIVE.defaultAttributes.fontType shouldBe Font.BOLD
-                SpecDDHighlightingColors.SECTION_NEGATIVE.defaultAttributes.foregroundColor shouldBe Color(0xD32F2F)
-                SpecDDHighlightingColors.SECTION_NEGATIVE.defaultAttributes.fontType shouldBe Font.BOLD
-                SpecDDHighlightingColors.SECTION_REQUIRED.defaultAttributes.foregroundColor shouldBe Color(0xB26A00)
-                SpecDDHighlightingColors.SECTION_REQUIRED.defaultAttributes.fontType shouldBe Font.BOLD
+        `when`("semantic section group keys are requested") {
+            then("they provide distinct grouped keys") {
                 SpecDDHighlightingColors.KEY_VALUE_KEY shouldNotBe SpecDDHighlightingColors.SECTION_LABEL
                 SpecDDHighlightingColors.SECTION_META shouldNotBe SpecDDHighlightingColors.SECTION_LABEL
-            }
-        }
-
-        `when`("blocked task marker defaults are requested") {
-            then("they provide color without diagnostic underline") {
-                val attributes = SpecDDHighlightingColors.TASK_BLOCKED.defaultAttributes
-
-                attributes.foregroundColor shouldBe Color(0xD32F2F)
-                attributes.effectColor.shouldBeNull()
-                attributes.effectType.shouldBeNull()
-                attributes.fontType shouldBe Font.BOLD
-            }
-        }
-
-        `when`("inline code defaults are requested") {
-            then("they provide readable code text and quieter delimiters") {
-                val codeAttributes = SpecDDHighlightingColors.CODE_SPAN.defaultAttributes
-                val delimiterAttributes = SpecDDHighlightingColors.CODE_SPAN_DELIMITER.defaultAttributes
-
-                codeAttributes.foregroundColor shouldBe Color(0x3A6EA5)
-                codeAttributes.fontType shouldBe Font.PLAIN
-                delimiterAttributes.foregroundColor shouldBe Color(0x7A828E)
-                delimiterAttributes.fontType shouldBe Font.PLAIN
-                SpecDDHighlightingColors.CODE_SPAN shouldNotBe SpecDDHighlightingColors.CODE_SPAN_DELIMITER
             }
         }
 

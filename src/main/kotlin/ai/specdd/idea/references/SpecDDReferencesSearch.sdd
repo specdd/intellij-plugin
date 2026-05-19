@@ -1,0 +1,32 @@
+Spec: SpecDD References Search
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Expose SpecDD references to IntelliJ search, find usages, and code-side rename refactors.
+
+Owns:
+  ./SpecDDReferencesSearch.kt
+
+Can modify:
+  ./SpecDDReferencesSearch.kt
+
+Can read:
+  ./SpecDDPathReferenceProvider.kt
+  /src/test/kotlin/ai/specdd/idea/references/SpecDDReferencesSearchBehaviorSpec.kt
+
+Must:
+  Implement IntelliJ `@ReferencesSearch` query execution for SpecDD references.
+  Search SpecDD files by target name candidates supplied by IntelliJ target elements.
+  Read IntelliJ PSI target names only inside a read action because find usages can run on pooled threads.
+  Use the existing SpecDD path and symbol reference provider to produce references at text occurrences.
+  Return only references that resolve to the searched target.
+  Support code-side rename discovery for exact file path references.
+  Support code-side rename discovery for explicit `@` symbol references.
+  Keep symbol lookup language agnostic.
+  Do not create references for plain, non-`@` symbols.
+  Do not add structural diagnostics.
+
+Must not:
+  Resolve glob references for automatic rename.
+  Depend on language-specific plugins.

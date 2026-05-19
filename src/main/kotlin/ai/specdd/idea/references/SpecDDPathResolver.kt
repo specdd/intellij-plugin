@@ -113,7 +113,7 @@ enum class SpecDDPathResolutionStatus {
     IGNORED,
 }
 
-private val SpecDDPathCandidate.isGlob: Boolean
+internal val SpecDDPathCandidate.isGlob: Boolean
     get() = text.any { character -> character in GLOB_CHARS }
 
 internal fun resolveRelative(base: VirtualFile, relativePath: String): VirtualFile? {

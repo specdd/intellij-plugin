@@ -9,24 +9,31 @@ Structure:
   ./SpecDDSyntaxHighlighter.kt: IntelliJ syntax highlighter and lexer tokenization boundary.
   ./SpecDDSyntaxHighlighterFactory.kt: IntelliJ syntax highlighter factory.
   ./SpecDDHighlightingColors.kt: Highlighting attribute keys and default attributes.
+  ./SpecDDColorSettingsPage.kt: IntelliJ color scheme integration for SpecDD highlighting keys.
+  /src/main/resources/colorSchemes/SpecDDDefault.xml: Default editor color attributes for bundled light schemes.
+  /src/main/resources/colorSchemes/SpecDDDarcula.xml: Default editor color attributes for bundled dark schemes.
 
 Owns:
   ./highlighting.sdd
   ./SpecDDSyntaxHighlighter.sdd
   ./SpecDDSyntaxHighlighterFactory.sdd
   ./SpecDDHighlightingColors.sdd
+  ./SpecDDColorSettingsPage.sdd
   ./SpecDDSyntaxHighlighter.kt
   ./SpecDDSyntaxHighlighterFactory.kt
   ./SpecDDHighlightingColors.kt
+  ./SpecDDColorSettingsPage.kt
 
 Can modify:
   ./highlighting.sdd
   ./SpecDDSyntaxHighlighter.sdd
   ./SpecDDSyntaxHighlighterFactory.sdd
   ./SpecDDHighlightingColors.sdd
+  ./SpecDDColorSettingsPage.sdd
   ./SpecDDSyntaxHighlighter.kt
   ./SpecDDSyntaxHighlighterFactory.kt
   ./SpecDDHighlightingColors.kt
+  ./SpecDDColorSettingsPage.kt
 
 Can read:
   /src/main/kotlin/ai/specdd/idea/parser/*
@@ -35,14 +42,17 @@ Can read:
 Must:
   Highlight SpecDD syntax without validating document correctness.
   Depend only on shared language contracts when cross-package support is needed.
-  Use `SpecDDLineClassifier` as the shared line-classification boundary.
-  Register an IntelliJ `SyntaxHighlighterFactory` that returns `SpecDDSyntaxHighlighter`.
+  Use `@SpecDDLineClassifier` as the shared line-classification boundary.
+  Register an IntelliJ `@SyntaxHighlighterFactory` that returns `@SpecDDSyntaxHighlighter`.
+  Register an IntelliJ `@ColorSettingsPage` so SpecDD semantic highlighting keys are exposed in standard editor color schemes.
+  Provide bundled color-scheme defaults through IntelliJ `additionalTextAttributes`.
+  Use non-deprecated highlighting key registration APIs.
   Keep highlighting behavior covered by Kotest BehaviorSpec tests.
-  Keep syntax highlighter behavior, color defaults, and factory behavior in separate file-level contracts.
+  Keep syntax highlighter behavior, color keys, color scheme integration, and factory behavior in separate file-level contracts.
 
 Must not:
   Report validation diagnostics.
-  Add user-facing settings or configuration UI.
+  Add plugin-specific settings or configuration UI.
   Decide whether a section name, task state, indentation, or structure is valid.
   Add inspections, annotations, quick fixes, or error reporting.
   Define validation severity or inspection messages.

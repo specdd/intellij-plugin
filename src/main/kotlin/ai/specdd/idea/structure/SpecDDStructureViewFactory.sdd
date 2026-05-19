@@ -17,12 +17,12 @@ Can read:
   /src/test/kotlin/ai/specdd/idea/structure/SpecDDStructureViewFactoryBehaviorSpec.kt
 
 Must:
-  Implement IntelliJ `PsiStructureViewFactory`.
-  Return a tree-based structure view builder for `SpecDDPsiFile`.
+  Implement IntelliJ `@PsiStructureViewFactory`.
+  Return a tree-based structure view builder for `@SpecDDPsiFile`.
   Return no builder for non-SpecDD PSI files.
   Build structure models from current file text.
   Use one root node for the file and one child node per extracted section.
-  Use section display names from `SpecDDStructureSection`.
+  Use section display names from `@SpecDDStructureSection`.
   Navigate section nodes to their stored section start offsets when a virtual file is available.
   Use the SpecDD file icon for structure presentations.
 

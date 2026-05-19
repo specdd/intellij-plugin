@@ -123,28 +123,35 @@ class SpecDDInlineCompletionBehaviorSpec : BehaviorSpec({
             }
         }
 
-        `when`("completion is requested for a local symbol prefix") {
-            then("it returns matching symbol-like tokens from the file") {
-                val text = "Purpose:\n  Use SpecDD.Parser.classify and SpecDD.Parser.render\nMust:\n  SpecDD.P"
+        `when`("completion is requested for an explicit local symbol prefix") {
+            then("it returns matching at-prefixed symbol references from the file") {
+                val text = "Purpose:\n  Use @SpecDD.Parser.classify and @SpecDD.Parser.render\nMust:\n  @SpecDD.P"
 
                 val completion = SpecDDInlineCompletion.complete(text, text.length, null)
 
-                completion!!.prefix shouldBe "SpecDD.P"
+                completion!!.prefix shouldBe "@SpecDD.P"
                 completion.variants.map { variant -> variant.lookupString }
-                    .shouldContainExactly("SpecDD.Parser.classify", "SpecDD.Parser.render")
+                    .shouldContainExactly("@SpecDD.Parser.classify", "@SpecDD.Parser.render")
             }
         }
 
-        `when`("file paths and local symbols overlap") {
-            then("it deduplicates variants while keeping paths first") {
+        `when`("completion is requested for a plain dotted symbol prefix") {
+            then("it returns no local symbol variants") {
+                val text = "Purpose:\n  Use SpecDD.Parser.classify\nMust:\n  SpecDD.P"
+
+                SpecDDInlineCompletion.complete(text, text.length, null).shouldBeNull()
+            }
+        }
+
+        `when`("local symbol references repeat") {
+            then("it deduplicates symbol variants") {
                 val root = testVirtualRoot()
-                root.file("SpecDD.Parser.classify")
-                val text = "Purpose:\n  SpecDD.Parser.classify\nMust:\n  SpecDD.P"
+                val text = "Purpose:\n  @SpecDD.Parser.classify and @SpecDD.Parser.classify\nMust:\n  @SpecDD.P"
 
                 val completion = SpecDDInlineCompletion.complete(text, text.length, root)
 
                 completion!!.variants.map { variant -> variant.lookupString }
-                    .shouldContainExactly("SpecDD.Parser.classify")
+                    .shouldContainExactly("@SpecDD.Parser.classify")
             }
         }
 

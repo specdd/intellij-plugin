@@ -26,6 +26,7 @@ Must:
   Return unresolved status for unresolved candidates with path syntax.
   Normalize relative path segments before checking containment.
   Treat malformed glob patterns as unresolved.
+  Expose shared glob detection for reference behavior that must skip glob refactors.
   Support `**` globstar patterns across directory boundaries.
   Treat `**/` as zero or more directories.
   Cap glob resolution results.

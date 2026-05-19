@@ -1,0 +1,38 @@
+Spec: SpecDD Symbol Reference Extractor
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Extract explicit `@` symbol reference candidates from SpecDD text.
+
+Owns:
+  ./SpecDDSymbolReferenceExtractor.kt
+
+Can modify:
+  ./SpecDDSymbolReferenceExtractor.kt
+
+Can read:
+  /src/main/kotlin/ai/specdd/idea/parser/*
+  /src/test/kotlin/ai/specdd/idea/references/SpecDDSymbolReferenceExtractorBehaviorSpec.kt
+
+Must:
+  Use `@SpecDDLineClassifier` to avoid comments, blank lines, and section headers.
+  Extract symbols only when they start with `@`.
+  Expose candidate text without the leading `@`.
+  Expose the full source range including the leading `@`.
+  Require the first symbol character after `@` to be an ASCII letter or `_`.
+  Allow subsequent symbol characters to be ASCII letters, digits, `_`, `.`, `:`, `#`, `\`, `/`, `?`, or `!`.
+  Recognize symbols at line start, after whitespace, or after opening punctuation.
+  Recognize opening punctuation before `@` as `(`, `[`, `{`, `<`, `"`, or `'`.
+  Recognize `@` immediately after an inline code span opening backtick as a code-span symbol reference.
+  Ignore escaped `\@` sequences.
+  Ignore embedded `@` characters inside larger tokens such as email addresses.
+  Trim a final sentence `.` from the symbol text and source range when the next source character is whitespace, end of line, or closing punctuation.
+  Recognize symbol references in body entries, task text, scenario steps, key-value lines, continuation lines, and inline code spans.
+  Validate line-by-line for LF, CR, and CRLF line endings.
+  Cover plain symbols, dotted symbols, symbols with formal punctuation, escaped at signs, embedded at signs, comments, section headers, final sentence punctuation, opening punctuation, and inline code spans in tests.
+
+Must not:
+  Resolve symbols.
+  Report diagnostics.
+  Extract symbols without an explicit `@`.

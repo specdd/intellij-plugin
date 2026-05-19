@@ -1,0 +1,64 @@
+<?xml version='1.0'?>
+<list>
+    <option name="SPECDD_INDENT">
+        <value>
+            <option name="FOREGROUND" value="6E7781"/>
+        </value>
+    </option>
+    <option name="SPECDD_CONTINUATION_TEXT">
+        <value>
+            <option name="FOREGROUND" value="7A828E"/>
+        </value>
+    </option>
+    <option name="SPECDD_SECTION_LABEL">
+        <value>
+            <option name="FOREGROUND" value="58A6FF"/>
+            <option name="FONT_TYPE" value="1"/>
+        </value>
+    </option>
+    <option name="SPECDD_SECTION_META">
+        <value>
+            <option name="FOREGROUND" value="7A004B"/>
+            <option name="FONT_TYPE" value="1"/>
+        </value>
+    </option>
+    <option name="SPECDD_SECTION_POSITIVE">
+        <value>
+            <option name="FOREGROUND" value="22863A"/>
+            <option name="FONT_TYPE" value="1"/>
+        </value>
+    </option>
+    <option name="SPECDD_SECTION_NEGATIVE">
+        <value>
+            <option name="FOREGROUND" value="D32F2F"/>
+            <option name="FONT_TYPE" value="1"/>
+        </value>
+    </option>
+    <option name="SPECDD_SECTION_REQUIRED">
+        <value>
+            <option name="FOREGROUND" value="B26A00"/>
+            <option name="FONT_TYPE" value="1"/>
+        </value>
+    </option>
+    <option name="SPECDD_TASK_BLOCKED">
+        <value>
+            <option name="FOREGROUND" value="D32F2F"/>
+            <option name="FONT_TYPE" value="1"/>
+        </value>
+    </option>
+    <option name="SPECDD_CODE_SPAN">
+        <value>
+            <option name="FOREGROUND" value="3A6EA5"/>
+        </value>
+    </option>
+    <option name="SPECDD_CODE_SPAN_DELIMITER">
+        <value>
+            <option name="FOREGROUND" value="7A828E"/>
+        </value>
+    </option>
+    <option name="SPECDD_SYMBOL">
+        <value>
+            <option name="FOREGROUND" value="9B59D0"/>
+        </value>
+    </option>
+</list>

@@ -24,7 +24,9 @@ Must:
   Return matching known section labels for a partial unindented line prefix.
   Match partial prefixes case-insensitively.
   Preserve the original known section label spelling in completion variants.
-  Expose lookup strings as section header text ending with `: `.
+  Expose lookup strings for inline-capable sections as section header text ending with `: `.
+  Expose lookup strings for block sections as section header text ending with `:`.
+  Treat `Spec`, `Platform`, `Scenario`, and `Example` as inline-capable sections.
   Keep the model independent from editor registration and plugin metadata.
 
 Must not:

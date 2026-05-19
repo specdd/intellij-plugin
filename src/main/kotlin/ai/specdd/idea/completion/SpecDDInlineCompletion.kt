@@ -2,11 +2,14 @@ package ai.specdd.idea.completion
 
 import ai.specdd.idea.references.isInRoot
 import ai.specdd.idea.references.relativePath
+import ai.specdd.idea.references.SpecDDSymbolReferenceExtractor
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.codeInsight.lookup.LookupElementBuilder
 import com.intellij.openapi.vfs.VirtualFile
 
 object SpecDDInlineCompletion {
+    private val symbolExtractor = SpecDDSymbolReferenceExtractor()
+
     @Suppress("UNUSED_PARAMETER")
     fun defaultProjectFilter(file: VirtualFile): Boolean = true
 
@@ -93,13 +96,17 @@ object SpecDDInlineCompletion {
     }
 
     private fun symbolVariants(text: CharSequence, prefix: String): List<SpecDDInlineCompletionVariant> =
-        SYMBOL_PATTERN
-            .findAll(text)
-            .map { match -> match.value }
-            .filter { symbol -> symbol.startsWith(prefix, ignoreCase = true) }
-            .filter { symbol -> symbol != prefix }
-            .map { symbol -> SpecDDInlineCompletionVariant(symbol) }
-            .toList()
+        if (!prefix.startsWith("@")) {
+            emptyList()
+        } else {
+            symbolExtractor
+                .extract(text)
+                .map { candidate -> "@${candidate.text}" }
+                .filter { symbol -> symbol.startsWith(prefix, ignoreCase = true) }
+                .filter { symbol -> symbol != prefix }
+                .map { symbol -> SpecDDInlineCompletionVariant(symbol) }
+                .toList()
+        }
 }
 
 data class SpecDDInlineCompletionResult(
@@ -114,8 +121,7 @@ data class SpecDDInlineCompletionVariant(
         LookupElementBuilder.create(lookupString)
 }
 
-private val INLINE_PREFIX_CHARS = setOf('/', '.', '~', '*', '?', '[', ']', '{', '}', '_', '-')
-private val SYMBOL_PATTERN = Regex("""\b[A-Z][A-Za-z0-9_]*(?:\.[A-Za-z_$][A-Za-z0-9_$]*)+(?:\([^)]*\))?""")
+private val INLINE_PREFIX_CHARS = setOf('/', '.', '~', '*', '?', '[', ']', '{', '}', '_', '-', '@', ':', '#', '\\', '!')
 private const val MAX_PATH_VARIANTS = 200
 private val SKIPPED_DIRECTORIES = setOf(".git", ".gradle", ".idea", "build", "node_modules", "out")
 

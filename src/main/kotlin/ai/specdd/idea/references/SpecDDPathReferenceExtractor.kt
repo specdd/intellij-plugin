@@ -26,8 +26,7 @@ class SpecDDPathReferenceExtractor(
             }
 
             if (classification.kind in INLINE_PATH_KINDS) {
-                val isPathSection = currentSectionLabel in PATH_SECTIONS
-                if (isPathSection && SpecDDLineKind.TEXT == classification.kind) {
+                if (currentSectionLabel in PATH_SECTIONS && SpecDDLineKind.TEXT == classification.kind) {
                     addPathSectionEntry(
                         text = text,
                         range = TextRange(classification.contentStart, lineEnd),
@@ -38,8 +37,8 @@ class SpecDDPathReferenceExtractor(
                     text = text,
                     range = TextRange(classification.contentStart, lineEnd),
                     candidates = candidates,
-                    forcePathSyntax = isPathSection,
-                    warnIfUnresolved = isPathSection,
+                    forcePathSyntax = currentSectionLabel in PATH_SECTIONS,
+                    warnIfUnresolved = true,
                 )
             }
         }
@@ -82,7 +81,7 @@ class SpecDDPathReferenceExtractor(
         val codeSpanRanges = codeSpanRanges(line)
 
         for (match in PATH_PATTERN.findAll(line)) {
-            if (match.range.first > 0 && !line[match.range.first - 1].isWhitespace()) {
+            if (!hasAllowedInlinePathBoundary(line, match.range.first, codeSpanRanges)) {
                 continue
             }
             val matchStart = match.range.first
@@ -90,9 +89,6 @@ class SpecDDPathReferenceExtractor(
             if (matchEnd <= matchStart) continue
 
             if (urlRanges.any { urlRange -> matchStart <= urlRange.last && urlRange.first < matchEnd }) {
-                continue
-            }
-            if (codeSpanRanges.any { codeRange -> matchStart <= codeRange.last && codeRange.first < matchEnd }) {
                 continue
             }
             addCandidate(
@@ -103,6 +99,16 @@ class SpecDDPathReferenceExtractor(
                 warnIfUnresolved = warnIfUnresolved,
             )
         }
+    }
+
+    private fun hasAllowedInlinePathBoundary(line: String, matchStart: Int, codeSpanRanges: List<IntRange>): Boolean {
+        if (0 == matchStart) return true
+
+        val previous = line[matchStart - 1]
+        if ('`' == previous) {
+            return codeSpanRanges.any { codeRange -> codeRange.first == matchStart - 1 }
+        }
+        return previous.isWhitespace() || previous in OPENING_PUNCTUATION
     }
 
     private fun addPathSectionEntry(
@@ -212,6 +218,7 @@ private val INLINE_PATH_KINDS = setOf(
     SpecDDLineKind.TASK,
     SpecDDLineKind.SCENARIO_STEP,
     SpecDDLineKind.KEY_VALUE,
+    SpecDDLineKind.CONTINUATION,
     SpecDDLineKind.TEXT,
 )
 
@@ -219,6 +226,7 @@ private val PATH_PATTERN = Regex(
     """(?:\./|\.\./|/)[A-Za-z0-9_*?.{}\[\]-]+(?:/[A-Za-z0-9_*?.{}\[\]-]+)*""",
 )
 private val URL_PATTERN = Regex("""\b[A-Za-z][A-Za-z0-9+.-]*://\S+""")
+private val OPENING_PUNCTUATION = setOf('(', '[', '{', '<', '"', '\'')
 
 private fun hasExplicitPathPrefix(text: String): Boolean =
     text.startsWith("./") || text.startsWith("../") || text.startsWith("/")

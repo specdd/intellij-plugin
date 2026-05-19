@@ -63,7 +63,7 @@ class SpecDDSymbolReferenceBehaviorSpec : BehaviorSpec({
             }
         }
 
-        `when`("a candidate is path-like or contains prose whitespace") {
+        `when`("a candidate is path-like or contains prose whitespace or invalid symbol characters") {
             then("it is ignored") {
                 val resolver = SpecDDSymbolResolver {
                     listOf(
@@ -75,6 +75,7 @@ class SpecDDSymbolReferenceBehaviorSpec : BehaviorSpec({
 
                 resolver.resolve("./src/main.kt", project) shouldBe emptyList()
                 resolver.resolve("Fetch Client", project) shouldBe emptyList()
+                resolver.resolve("Fetch\$Client", project) shouldBe emptyList()
                 resolver.resolve("Fetch-Client", project) shouldBe emptyList()
             }
         }
@@ -99,8 +100,8 @@ class SpecDDSymbolReferenceBehaviorSpec : BehaviorSpec({
             then("it exposes soft resolve results") {
                 val target = psiElement("FetchClient")
                 val reference = SpecDDSymbolReference(
-                    element = psiElement("`FetchClient`", project(null)),
-                    rangeInElement = TextRange(1, 12),
+                    element = psiElement("@FetchClient", project(null)),
+                    rangeInElement = TextRange(0, 12),
                     symbolText = "FetchClient",
                     resolver = SpecDDSymbolResolver {
                         listOf(FakeChooseByNameContributor(mapOf(SymbolLookupCall("FetchClient", "FetchClient") to listOf(target))))
@@ -108,11 +109,70 @@ class SpecDDSymbolReferenceBehaviorSpec : BehaviorSpec({
                 )
 
                 reference.canonicalText shouldBe "FetchClient"
-                reference.rangeInElement shouldBe TextRange(1, 12)
+                reference.rangeInElement shouldBe TextRange(0, 12)
                 reference.isSoft shouldBe true
                 reference.multiResolve(false).map { result -> result.element }.shouldContainExactly(target)
             }
         }
+
+        `when`("a simple referenced symbol is renamed") {
+            then("it rewrites the reference with the explicit at prefix") {
+                var changedText: String? = null
+                val reference = SpecDDSymbolReference(
+                    element = psiElement("@Invoice", project(null)),
+                    rangeInElement = TextRange(0, "@Invoice".length),
+                    symbolText = "Invoice",
+                    referenceTextUpdater = { sourceElement, range, text ->
+                        range shouldBe TextRange(0, "@Invoice".length)
+                        changedText = text
+                        sourceElement
+                    },
+                )
+
+                reference.handleElementRename("Receipt")
+
+                changedText shouldBe "@Receipt"
+            }
+        }
+
+        `when`("a qualified referenced symbol is renamed") {
+            then("it preserves the qualifier and rewrites only the final segment") {
+                var changedText: String? = null
+                val reference = SpecDDSymbolReference(
+                    element = psiElement("@invoice_demo.models.Invoice", project(null)),
+                    rangeInElement = TextRange(0, "@invoice_demo.models.Invoice".length),
+                    symbolText = "invoice_demo.models.Invoice",
+                    referenceTextUpdater = { sourceElement, _, text ->
+                        changedText = text
+                        sourceElement
+                    },
+                )
+
+                reference.handleElementRename("Receipt")
+
+                changedText shouldBe "@invoice_demo.models.Receipt"
+            }
+        }
+
+        `when`("a renamed symbol name already includes the explicit at prefix") {
+            then("it avoids duplicating the prefix") {
+                var changedText: String? = null
+                val reference = SpecDDSymbolReference(
+                    element = psiElement("@Invoice", project(null)),
+                    rangeInElement = TextRange(0, "@Invoice".length),
+                    symbolText = "Invoice",
+                    referenceTextUpdater = { sourceElement, _, text ->
+                        changedText = text
+                        sourceElement
+                    },
+                )
+
+                reference.handleElementRename("@Receipt")
+
+                changedText shouldBe "@Receipt"
+            }
+        }
+
     }
 })
 

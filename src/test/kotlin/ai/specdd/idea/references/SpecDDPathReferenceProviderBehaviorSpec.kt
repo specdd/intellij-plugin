@@ -1,10 +1,12 @@
 package ai.specdd.idea.references
 
 import ai.specdd.idea.SpecDDFileType
+import ai.specdd.idea.directory
 import ai.specdd.idea.file
 import ai.specdd.idea.testVirtualRoot
 import com.intellij.openapi.fileTypes.FileType
 import com.intellij.openapi.fileTypes.PlainTextFileType
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.TextRange
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.psi.PsiElement
@@ -35,19 +37,34 @@ class SpecDDPathReferenceProviderBehaviorSpec : BehaviorSpec({
             }
         }
 
-        `when`("references are requested for backticked code candidates") {
-            then("it returns references for inner path and symbol text") {
+        `when`("references are requested for backticked paths and explicit symbols") {
+            then("it returns references for inner path text and explicit symbol text") {
                 val root = testVirtualRoot()
-                val text = "References:\n  `./main.sdd` and `FetchClient`"
+                val text = "References:\n  `./main.sdd` and `load(\"./src/app.kt\")` and `@FetchClient`"
                 val file = psiFile(text, SpecDDFileType(), root.file("app.sdd"))
                 val element = psiElement(text, file, TextRange(0, text.length))
 
                 val references = provider.getReferencesByElement(element, ProcessingContext())
 
                 references.map { reference -> reference.canonicalText }
-                    .shouldContainExactly("./main.sdd", "FetchClient")
+                    .shouldContainExactly("./main.sdd", "./src/app.kt", "FetchClient")
                 references.map { reference -> reference.rangeInElement }
-                    .shouldContainExactly(TextRange(15, 25), TextRange(32, 43))
+                    .shouldContainExactly(
+                        TextRange(text.indexOf("./main.sdd"), text.indexOf("./main.sdd") + "./main.sdd".length),
+                        TextRange(text.indexOf("./src/app.kt"), text.indexOf("./src/app.kt") + "./src/app.kt".length),
+                        TextRange(text.indexOf("@FetchClient"), text.indexOf("@FetchClient") + "@FetchClient".length),
+                    )
+            }
+        }
+
+        `when`("references are requested for backticked non-path code") {
+            then("it does not return a symbol reference") {
+                val root = testVirtualRoot()
+                val text = "References:\n  `FetchClient`"
+                val file = psiFile(text, SpecDDFileType(), root.file("app.sdd"))
+                val element = psiElement(text, file, TextRange(0, text.length))
+
+                provider.getReferencesByElement(element, ProcessingContext()).shouldContainExactly()
             }
         }
 
@@ -97,16 +114,17 @@ class SpecDDPathReferenceProviderBehaviorSpec : BehaviorSpec({
             }
         }
 
-        `when`("a reference is requested at an offset inside a backticked symbol") {
+        `when`("a reference is requested at an offset inside an explicit symbol") {
             then("it returns that symbol reference") {
                 val root = testVirtualRoot()
-                val text = "References:\n  `FetchClient`"
+                val text = "References:\n  @FetchClient"
                 val file = psiFile(text, SpecDDFileType(), root.file("app.sdd"))
 
                 val reference = provider.getReferenceAt(file, text.indexOf("FetchClient") + 2)
 
                 reference?.canonicalText shouldBe "FetchClient"
-                reference?.rangeInElement shouldBe TextRange(15, 26)
+                reference?.rangeInElement shouldBe
+                        TextRange(text.indexOf("@FetchClient"), text.indexOf("@FetchClient") + "@FetchClient".length)
             }
         }
 
@@ -123,6 +141,53 @@ class SpecDDPathReferenceProviderBehaviorSpec : BehaviorSpec({
             }
         }
 
+        `when`("the project root comes from an IntelliJ project metadata file") {
+            then("absolute project paths resolve from that project root") {
+                val workspace = testVirtualRoot("workspace")
+                val projectRoot = workspace.directory("repo")
+                val specFile = projectRoot.directory("specs").file("app.sdd")
+                val projectFile = projectRoot.directory(".idea").file("workspace.xml")
+                projectRoot.file("target.sdd")
+                val text = "References:\n  /target.sdd"
+                val file = psiFile(
+                    text = text,
+                    fileType = SpecDDFileType(),
+                    virtualFile = specFile,
+                    project = psiProject(projectFile = projectFile),
+                )
+
+                val reference = provider.getReferenceAt(file, text.indexOf("/target.sdd") + 1)
+
+                reference?.canonicalText shouldBe "/target.sdd"
+            }
+        }
+
+        `when`("the project root comes from alternate IntelliJ project metadata shapes") {
+            then("it accepts directory and ipr-style project metadata roots") {
+                val workspace = testVirtualRoot("workspace")
+                val directoryProjectRoot = workspace.directory("directory-project")
+                val iprProjectRoot = workspace.directory("ipr-project")
+                val text = "References:\n  /target.sdd"
+
+                listOf(
+                    directoryProjectRoot to directoryProjectRoot,
+                    iprProjectRoot to iprProjectRoot.file("project.ipr"),
+                ).forEach { (projectRoot, projectFile) ->
+                    val specFile = projectRoot.directory("specs").file("app.sdd")
+                    projectRoot.file("target.sdd")
+                    val file = psiFile(
+                        text = text,
+                        fileType = SpecDDFileType(),
+                        virtualFile = specFile,
+                        project = psiProject(projectFile = projectFile),
+                    )
+
+                    provider.getReferenceAt(file, text.indexOf("/target.sdd") + 1)?.canonicalText shouldBe
+                            "/target.sdd"
+                }
+            }
+        }
+
         `when`("a reference is requested at an offset outside path candidates") {
             then("it returns no reference") {
                 val root = testVirtualRoot()
@@ -136,7 +201,12 @@ class SpecDDPathReferenceProviderBehaviorSpec : BehaviorSpec({
     }
 })
 
-private fun psiFile(text: String, fileType: FileType, virtualFile: VirtualFile?): PsiFile =
+private fun psiFile(
+    text: String,
+    fileType: FileType,
+    virtualFile: VirtualFile?,
+    project: Project = project(virtualFile?.path),
+): PsiFile =
     Proxy.newProxyInstance(
         PsiFile::class.java.classLoader,
         arrayOf(PsiFile::class.java),
@@ -145,7 +215,7 @@ private fun psiFile(text: String, fileType: FileType, virtualFile: VirtualFile?)
                 "getText" -> text
                 "getTextRange" -> TextRange(0, text.length)
                 "getFileType" -> fileType
-                "getProject" -> project(virtualFile?.path)
+                "getProject" -> project
                 "getContainingFile" -> proxy
                 "getVirtualFile" -> virtualFile
                 else -> null
@@ -168,3 +238,18 @@ private fun psiElement(text: String, file: PsiFile, textRange: TextRange): PsiEl
             }
         },
     ) as PsiElement
+
+private fun psiProject(projectFile: VirtualFile? = null, workspaceFile: VirtualFile? = null): Project =
+    Proxy.newProxyInstance(
+        Project::class.java.classLoader,
+        arrayOf(Project::class.java),
+        InvocationHandler { _, method, _ ->
+            when (method.name) {
+                "getBasePath" -> null
+                "getProjectFile" -> projectFile
+                "getWorkspaceFile" -> workspaceFile
+                "isDisposed" -> false
+                else -> null
+            }
+        },
+    ) as Project

@@ -1,0 +1,73 @@
+Spec: Invoice Service
+
+Platform: Python 3
+
+Purpose:
+  Create validated invoices and persist them through the repository boundary.
+
+Structure:
+  ./service.py: Service implementation.
+  ./models.py: Invoice and invoice line models.
+  ./repository.py: Persistence boundary.
+  ../../tests/test_service.py: Service behavior tests.
+
+Owns:
+  ./service.py
+  ./service.sdd
+
+Can modify:
+  ./service.py
+  ./service.sdd
+
+Can read:
+  ./models.py
+  ./repository.py
+  ../../tests/test_service.py
+  ../../tests/test_service.sdd
+
+References:
+  ./models.py
+  ./repository.py
+  ../../tests/test_service.py
+
+Must:
+  Validate customer id, invoice lines, quantities, and unit prices before saving.
+  Create immutable @invoice_demo.models.Invoice values.
+  Save each created invoice through @invoice_demo.repository.InvoiceRepository.save.
+  Return the saved invoice to the caller.
+  Keep persistence details behind the repository.
+    This keeps service behavior easy to test with an in-memory repository.
+
+Must not:
+  Perform command-line parsing.
+  Read or write files.
+  Catch validation errors that callers should handle.
+
+Depends on:
+  @invoice_demo.models.Invoice
+  @invoice_demo.models.InvoiceLine
+  @invoice_demo.repository.InvoiceRepository
+
+Raises:
+  ValueError when customer_id is blank.
+  ValueError when no invoice lines are provided.
+  ValueError when quantity or unit price is not positive.
+
+Scenario: valid invoice is saved
+  Given a repository and a valid customer id
+  And one line item with positive quantity and unit price
+  When @invoice_demo.service.InvoiceService.create_invoice is called
+  Then the invoice is saved in @invoice_demo.repository.InvoiceRepository
+  And the returned invoice total is positive
+
+Scenario: invalid invoice is rejected
+  Given a blank customer id or invalid line item
+  When @invoice_demo.service.InvoiceService.create_invoice validates the request
+  Then ValueError is raised
+  But no invoice is saved
+
+Example: valid input
+  source: ./service.py
+  test: ../../tests/test_service.py
+  symbol: @invoice_demo.service.InvoiceService.create_invoice
+  line tuple: `("Design work", 2, "125.00")`

@@ -3,7 +3,7 @@ Spec: SpecDD Code Reference Extractor
 Platform: IntelliJ Platform / Kotlin
 
 Purpose:
-  Extract explicit backticked code reference candidates from SpecDD text.
+  Extract balanced single-line inline code spans from SpecDD text.
 
 Owns:
   ./SpecDDCodeReferenceExtractor.kt
@@ -21,7 +21,10 @@ Must:
   Ignore empty code spans.
   Ignore unmatched opening backticks.
   Never cross line boundaries.
+  Keep inline code extraction available for callers that need code-span ranges.
+  Keep inline code extraction separate from explicit `@` symbol extraction.
 
 Must not:
   Resolve paths or symbols.
+  Treat non-path inline code content as a symbol reference.
   Report diagnostics.

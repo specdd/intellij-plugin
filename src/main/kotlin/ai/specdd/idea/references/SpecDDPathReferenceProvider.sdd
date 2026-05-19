@@ -3,7 +3,7 @@ Spec: SpecDD Path Reference Provider
 Platform: IntelliJ Platform / Kotlin
 
 Purpose:
-  Provide path and backticked code PSI references for SpecDD PSI elements.
+  Provide path, inline-code path, and explicit symbol PSI references for SpecDD PSI elements.
 
 Owns:
   ./SpecDDPathReferenceProvider.kt
@@ -13,7 +13,7 @@ Can modify:
 
 Can read:
   ./SpecDDPathReferenceExtractor.kt
-  ./SpecDDCodeReferenceExtractor.kt
+  ./SpecDDSymbolReferenceExtractor.kt
   ./SpecDDPathReference.kt
   ./SpecDDSymbolReference.kt
   /src/main/kotlin/ai/specdd/idea/SpecDDFileType.kt
@@ -24,14 +24,17 @@ Must:
   Extract candidates from the containing file text.
   Return references whose ranges are relative to the current PSI element.
   Skip candidates outside the current PSI element range.
-  Provide path references for backticked explicit path candidates.
-  Keep backticked explicit path references warning-free when unresolved.
-  Provide symbol references for backticked non-path code candidates.
-  Keep backticked reference ranges on the inner content, not the backtick delimiters.
+  Provide path references from `@SpecDDPathReferenceExtractor`, including explicit paths inside inline code spans.
+  Provide symbol references for explicit `@` symbol candidates.
+  Pass symbol text without the leading `@` to symbol resolution.
+  Keep explicit symbol reference ranges on the `@` source reference.
+  Do not provide symbol references for backticked non-path code candidates.
   Build path resolution contexts from the IntelliJ project root, not from module or content roots.
+  Use non-deprecated IntelliJ project metadata and VFS APIs for project-root discovery.
   Support file-level reference lookup for Go to Declaration on minimal SpecDD PSI files.
 
 Must not:
   Report diagnostics.
   Define path extraction rules independently from the extractor.
+  Define symbol extraction rules independently from the symbol extractor.
   Link unbackticked prose as symbol references.

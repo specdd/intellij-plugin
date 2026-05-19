@@ -12,18 +12,22 @@ Can modify:
   ./SpecDDInlineCompletion.kt
 
 Can read:
+  /src/main/kotlin/ai/specdd/idea/references/SpecDDSymbolReferenceExtractor.kt
   /src/test/kotlin/ai/specdd/idea/completion/SpecDDInlineCompletionBehaviorSpec.kt
 
 Must:
   Return no completion when the caret offset is outside the text.
-  Detect the token prefix immediately before the caret using path and symbol characters.
+  Detect the token prefix immediately before the caret using path and formal `@` symbol characters.
   Return no completion for empty inline prefixes.
   Return matching VFS-backed file and directory path variants only for explicit path prefixes.
   Return project-root-relative variants for `/` prefixes.
   Return matching spec-file-relative variants for `./` and `../` prefixes.
   Cap path completion variants and skip common heavy directories while walking the project tree.
   Walk the project tree through IntelliJ VirtualFile entries, not local filesystem reads.
-  Return matching local symbol variants from symbol-like tokens already present in the current SpecDD file.
+  Return matching local symbol variants only from explicit `@` symbol references already present in the current SpecDD file.
+  Trigger local symbol completion only when the prefix starts with `@`.
+  Include the leading `@` in local symbol completion prefixes and lookup strings.
+  Do not return completion for plain dotted symbols without `@`.
   Keep file path variants before local symbol variants.
   Deduplicate variants while preserving first-seen order.
   Keep the model independent from IntelliJ editor registration.

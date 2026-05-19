@@ -18,13 +18,13 @@ Can read:
   /src/test/kotlin/ai/specdd/idea/completion/SpecDDCompletionContributorBehaviorSpec.kt
 
 Must:
-  Extend IntelliJ `CompletionContributor`.
+  Extend IntelliJ `@CompletionContributor`.
   Add section completion variants only for basic completion.
   Add section completion variants only for SpecDD files.
   Use the current editor document and completion offset to compute section completion.
   Apply the computed prefix to the completion result set.
   Add lookup elements from the section completion model.
-  Add inline file path and local symbol completion variants when section completion is not active.
+  Add inline file path and explicit `@` local symbol completion variants when section completion is not active.
 
 Must not:
   Define section labels independently from the completion model.

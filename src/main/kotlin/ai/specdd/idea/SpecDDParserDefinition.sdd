@@ -20,11 +20,11 @@ Must:
   Preserve lexer buffer sequence and buffer end.
   Advance the PSI lexer to the end of the requested slice.
   Create a parser that consumes all tokens into the requested root node.
-  Use a SpecDD file element type backed by `SpecDDLanguage`.
-  Use a text element type backed by `SpecDDLanguage`.
+  Use a SpecDD file element type backed by `@SpecDDLanguage`.
+  Use a text element type backed by `@SpecDDLanguage`.
   Expose empty token sets for whitespace, comments, and string literals.
   Create generic wrapper PSI elements for AST nodes.
-  Create `SpecDDPsiFile` instances for SpecDD file view providers.
+  Create `@SpecDDPsiFile` instances for SpecDD file view providers.
   Allow spaces between any tokens.
 
 Must not:

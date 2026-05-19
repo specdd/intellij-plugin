@@ -17,7 +17,7 @@ Structure:
   ./structure: Structure view concern.
   ./documentation: Hover documentation concern.
   ./completion: Section name, file path, and local symbol completion concern.
-  ./references: Path and glob reference concern.
+  ./references: Path, glob, and explicit symbol reference concern.
 
 Owns:
   ./language.sdd
@@ -82,7 +82,7 @@ Must:
   Use `sdd` as the default file extension.
   Use `SpecDD` as the file type name.
   Use `SpecDD specification file` as the file type description.
-  Use the packaged `META-INF/logo.svg` resource as the file type icon.
+  Use /src/main/resources/META-INF/logo.svg as the file type icon.
   Keep the file type as an instantiable class for IntelliJ extension point compatibility.
   Register file type, parser definition, code style provider, syntax highlighter factory, annotator, structure view factory, documentation provider, completion contributor, path reference contributor, and path warning annotator through plugin metadata.
   Use `lang.parserDefinition` for parser registration.
@@ -94,7 +94,8 @@ Must:
   Use `langCodeStyleSettingsProvider` for code style provider registration.
   Keep the minimum IntelliJ build at `223`.
   Keep PSI support intentionally minimal; parsing may consume the file as text while enabling language services.
-  Keep default indentation, continuation indentation, and tab size at 2.
+  Keep default body indentation and tab size at 2.
+  Keep default continuation indentation at 4.
   Disable tab indentation by default.
   Expose only standard indent controls for code style settings.
   Avoid user-facing configuration UI beyond standard IntelliJ code style controls.

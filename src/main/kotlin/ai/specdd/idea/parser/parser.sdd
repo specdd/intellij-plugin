@@ -25,19 +25,22 @@ Must:
   Define known scenario step keywords.
   Define supported task marker bodies.
   Classify lines independently from IntelliJ editor colors, inspections, and annotations.
-  Classify one caller-provided line range at a time.
+  Classify one caller-provided line range at a time with optional current-section context.
   Preserve original line offsets in every classification.
   Report the first non-whitespace offset as `contentStart`.
   Classify whitespace-only line ranges as blank lines.
   Classify lines whose first non-whitespace character is `#` as comments.
   Classify comments before task markers, section headers, scenario steps, key-value lines, and text.
-  Classify known section headers before task markers, scenario steps, key-value lines, and text.
+  Classify known section headers before continuation lines, task markers, scenario steps, key-value lines, and text.
   Classify a section header only when a known section label is followed immediately by `:`.
   Keep section header classification independent from whether inline content after `:` is valid.
   Report section label, colon, value start, and value end offsets.
   Preserve inline section value whitespace exactly in the reported value range.
   Keep section label ordering longest/specific enough that multi-word labels such as `Must not` and `Can modify` are recognized before shorter overlapping labels.
-  Classify task marker lines before scenario steps, key-value lines, and text.
+  Classify non-comment, non-section lines indented by at least 4 spaces as continuation lines before task markers, scenario steps, key-value lines, and text.
+  Report continuation lines with their original content start and line range.
+  Classify task marker lines before scenario steps, key-value lines, and text only when the current section is `Tasks`.
+  Treat task-looking lines outside `Tasks` as text unless they match another earlier line kind.
   Recognize supported three-character task markers `[x]`, `[X]`, `[ ]`, `[!]`, `[?]`, and `[-]`.
   Map `[x]` and `[X]` to done task status.
   Map `[ ]` to open task status.
@@ -64,13 +67,13 @@ Must:
   Expose classification payloads only for the matching line kind.
   Keep the parser facts usable by highlighting and validation without depending on either concern.
   Stay independent from syntax highlighting and validation diagnostics.
-  Cover blank lines, comments, section headers with and without values, all task states, task ids, scenario steps, key-value lines, and text lines in tests.
+  Cover blank lines, comments, section headers with and without values, continuation lines, task context, all task states, task ids, scenario steps, key-value lines, and text lines in tests.
   Cover negative cases for step-prefix words, empty hash ids, invalid task marker bodies, and unrecognized text in tests.
 
 Must not:
   Define editor colors.
   Report validation diagnostics.
-  Decide whether indentation is valid.
+  Decide whether indentation is valid beyond identifying continuation indentation.
   Decide whether a section is allowed to repeat.
   Decide whether a section supports inline values or body lines.
   Decide whether a known section is in the correct order.

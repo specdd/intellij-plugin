@@ -1,4 +1,4 @@
-# SpecDD kitchen sink fixture.
+# SpecDD kitchen sink fixture for the sample invoice project.
 # Whole-line comments are allowed; inline trailing comments are intentionally absent.
 
 Spec: SpecDD Kitchen Sink Fixture
@@ -7,92 +7,88 @@ Platform: SpecDD/1.2
 
 Purpose:
   Exercise every documented SpecDD section and common syntax form in one valid fixture.
-  Provide a compact reference file for readers, examples, syntax highlighting, and parser smoke tests.
+  Provide a compact reference file for readers, examples, syntax highlighting, validation, and navigation smoke tests.
+  Keep the kitchen sink connected to plausible Python fixture files rather than isolated placeholder paths.
 
 Structure:
-  kitchen-sink.sdd: Complete language coverage fixture
-  generated: Optional generated outputs for local experiments
-  generated/*.json: Machine-readable coverage snapshots
-  examples/sample.js: JavaScript path token sample
-  examples/sample.ts: TypeScript path token sample
-  examples/component.tsx: TSX path token sample
-  examples/component.jsx: JSX path token sample
-  examples/tool.py: Python path token sample
-  examples/service.go: Go path token sample
-  examples/lib.rs: Rust path token sample
-  examples/App.java: Java path token sample
-  examples/Program.cs: C# path token sample
-  examples/model.rb: Ruby path token sample
-  examples/page.php: PHP path token sample
-  examples/schema.json: JSON path token sample
-  examples/config.yaml: YAML path token sample
-  examples/config.yml: YML path token sample
-  examples/site.toml: TOML path token sample
-  examples/styles.css: CSS path token sample
-  examples/index.html: HTML path token sample
+  ./kitchen-sink.sdd: Complete language coverage fixture.
+  ./app.sdd: Fixture project contract.
+  ./src/invoice_demo: Python package used by this fixture.
+  ./src/invoice_demo/*.py: Python source files with resolvable path references.
+  ./src/invoice_demo/*.sdd: Source-adjacent SpecDD files.
+  ./tests/*.py: Fixture tests.
+  ./tests/*.sdd: Test-adjacent SpecDD files.
 
 Owns:
-  kitchen-sink.sdd
-  generated/*
-  SpecDDKitchenSink
-  KitchenSinkCoverageReport
-  Coverage fixture authorship and maintenance
+  ./kitchen-sink.sdd
+  ./app.sdd
+  ./src/invoice_demo/*
+  ./tests/*
+  @invoice_demo.service.InvoiceService
+  Kitchen sink fixture authorship and maintenance
 
 Can modify:
-  kitchen-sink.sdd
-  generated/*
+  ./kitchen-sink.sdd
+  ./src/invoice_demo/*
+  ./tests/*
 
 Can read:
-  ../README.md
-  ../src/.specdd/bootstrap.md
-  ../src/.specdd/bootstrap.project.md
-  ../src/.specdd/bootstrap.local.md
-  ../web/assets/js/specdd-highlight.js
+  ./app.sdd
+  ./src/invoice_demo/module.sdd
+  ./src/invoice_demo/models.py
+  ./src/invoice_demo/repository.py
+  ./src/invoice_demo/service.py
+  ./src/invoice_demo/service.sdd
+  ./tests/test_service.py
+  ./tests/test_service.sdd
 
 References:
-  ../README.md
-  ../src/.specdd/bootstrap.md
-  ../src/.specdd/bootstrap.project.md
-  ../src/.specdd/bootstrap.local.md
+  ./app.sdd
+  ./src/invoice_demo/models.py
+  ./src/invoice_demo/repository.py
+  ./src/invoice_demo/service.py
+  ./tests/test_service.py
 
 Must:
   Include every currently documented SpecDD section label.
   Include at least one whole-line comment.
-  Include path examples, glob examples, symbol examples, and free-form prose examples.
+  Include explicit path examples, glob examples, `@` symbol examples, inline code examples, and free-form prose examples.
   Include all documented task states.
-  Keep references pointed at files that exist in this repository.
+  Keep references pointed at files that exist in this fixture tree.
   Remain readable as a single source-adjacent development contract.
 
 Must not:
-  Require implementation files outside tmp to change.
+  Require implementation files outside the fixture tree to change.
   Use inline trailing comments.
-  Treat examples as permission to ignore inherited SpecDD bootstrap rules.
+  Treat examples as permission to ignore local fixture constraints.
   Expand write authority beyond the paths listed in Can modify.
 
 Forbids:
-  ../src/**
-  ../web/**
+  ./generated/**
+  ./dist/**
   network access
   destructive filesystem commands
   undocumented task state markers
 
 Depends on:
-  README.md
-  src/.specdd/bootstrap.md
-  SpecDD bootstrap language
-  SpecDDKitchenSink.coverageMatrix()
-  SpecDDKitchenSink.ReportBuilder.build(input)
+  ./app.sdd
+  ./src/invoice_demo/module.sdd
+  @invoice_demo.models.Invoice
+  @invoice_demo.repository.InvoiceRepository
+  @invoice_demo.service.InvoiceService
 
 Exposes:
-  tmp/kitchen-sink.sdd
-  SpecDDKitchenSink.coverageMatrix()
-  SpecDDKitchenSink.ReportBuilder.build(input)
-  KitchenSinkCoverageReport.sections
+  ./kitchen-sink.sdd
+  ./app.sdd
+  @invoice_demo.service.InvoiceService.create_invoice
+  @invoice_demo.cli.create_demo_invoice
 
 Accepts:
   SpecDD version 1.2 section vocabulary
-  relative paths
-  glob paths
+  fixture-root paths
+  spec-relative paths
+  glob paths such as `./src/invoice_demo/*.py`
+  inline code spans such as `InvoiceService.create_invoice`
   task status markers
   Gherkin-like scenario steps
   small concrete examples
@@ -101,7 +97,7 @@ Returns:
   a complete kitchen sink .sdd fixture
   a human-readable coverage contract
   parser and highlighter smoke-test input
-  KitchenSinkCoverageReport
+  navigation examples for fixture source files
 
 Raises:
   MissingSectionCoverageError
@@ -110,8 +106,10 @@ Raises:
   MissingReferenceError
 
 Handles:
-  root-relative mental model from tmp
+  fixture-root path references
   sibling and parent path references
+  inline code spans
+  explicit `@` symbol references
   task state coverage
   Given steps
   When steps
@@ -125,22 +123,21 @@ Tasks:
   [x] #2 Include positive and negative constraint sections.
   [x] #3 Include interface and contract sections.
   [x] #4 Include workflow and behavior sections.
-  [ ] #5 Use this fixture in future parser or documentation checks.
-  [!] #6 Add automated validation when official validation tooling exists.
+  [ ] #5 Use this fixture in future parser, documentation, or navigation checks.
+  [!] #6 Add automated fixture validation when official validation tooling exists.
   [?] #7 Decide whether fixtures should include intentionally invalid examples in a separate file.
-  [-] #8 Skip implementation changes because this request only creates a spec fixture.
+  [-] #8 Skip package metadata because this fixture intentionally avoids packaging concerns.
   # This indented comment is still a comment and is not a task.
 
 Done when:
   Every documented section label appears at least once.
   Every documented task state appears at least once.
   Scenarios include Given, When, Then, And, and But steps.
-  References resolve to existing files.
-  The fixture remains a single .sdd file under tmp.
+  References resolve to existing fixture or project files.
+  The fixture project contains plausible Python code and adjacent specs.
 
 Scenario: every documented section is represented
-  Given the SpecDD language defined by README.md and src/.specdd/bootstrap.md
-  And this fixture is read from top to bottom
+  Given this kitchen sink fixture is read from top to bottom
   When a reader checks the section labels
   Then Spec, Platform, Purpose, Structure, Owns, Can modify, Can read, References, Must, Must not, Forbids, Depends on, Exposes, Accepts, Returns, Raises, Handles, Tasks, Done when, Scenario, and Example are present
   But no inline trailing comment is required to understand the fixture
@@ -153,18 +150,25 @@ Scenario: task states are covered
   And task IDs such as #0 and #8 are visible
 
 Scenario: write authority remains local
-  Given this fixture owns kitchen-sink.sdd and generated/*
+  Given this fixture owns ./kitchen-sink.sdd and ./src/invoice_demo/*
   When an agent works under this spec
-  Then only kitchen-sink.sdd and generated/* may be modified
-  And ../README.md and ../src/.specdd/bootstrap.md may be read as context
-  But ../src/** and ../web/** remain forbidden modification targets
+  Then only fixture paths listed in Can modify may be modified
+  And ./app.sdd and ./src/invoice_demo/service.sdd may be read as context
+  But ./generated/** and ./dist/** remain forbidden modification targets
+
+Scenario: explicit references are represented
+  Given ./src/invoice_demo/service.py creates invoices
+  And ./tests/test_service.py checks service behavior
+  When @invoice_demo.service.InvoiceService.create_invoice is referenced
+  Then the symbol uses the explicit at-prefix form
+  And `./src/invoice_demo/*.py` remains inline code text with an explicit path inside it
 
 Example:
-  input spec path: tmp/kitchen-sink.sdd
-  reference path: ../src/.specdd/bootstrap.md
-  glob path: generated/*.json
-  public symbol: SpecDDKitchenSink.ReportBuilder.build(input)
+  input spec path: ./kitchen-sink.sdd
+  reference path: ./src/invoice_demo/service.sdd
+  glob path: ./src/invoice_demo/*.py
+  public symbol: @invoice_demo.service.InvoiceService.create_invoice
   accepted task states: [ ] [x] [-] [!] [?]
   accepted scenario words: Given When Then And But
-  output file: generated/coverage.json
+  output file: ./tests/test_service.py
   output status: complete

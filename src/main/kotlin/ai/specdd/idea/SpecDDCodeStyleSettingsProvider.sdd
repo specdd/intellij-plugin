@@ -15,9 +15,9 @@ Can read:
   /src/test/kotlin/ai/specdd/idea/SpecDDLanguageBehaviorSpec.kt
 
 Must:
-  Provide settings for `SpecDDLanguage`.
+  Provide settings for `@SpecDDLanguage`.
   Use 2 spaces for default indentation.
-  Use 2 spaces for default continuation indentation.
+  Use 4 spaces for default continuation indentation.
   Use tab size 2.
   Disable tab characters by default.
   Expose standard options `INDENT_SIZE`, `TAB_SIZE`, and `USE_TAB_CHARACTER` for indent settings.

@@ -1,0 +1,29 @@
+Spec: SpecDD Reference Text Updater
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Replace SpecDD reference text during IntelliJ refactors without relying on element manipulators.
+
+Owns:
+  ./SpecDDReferenceTextUpdater.kt
+
+Can modify:
+  ./SpecDDReferenceTextUpdater.kt
+
+Can read:
+  ./SpecDDPathReference.kt
+  ./SpecDDSymbolReference.kt
+  /src/test/kotlin/ai/specdd/idea/references/SpecDDReferenceTextUpdaterBehaviorSpec.kt
+
+Must:
+  Update reference text through the containing file document.
+  Compute replacement offsets from the source element file range and the reference range inside that element.
+  Commit the document after replacement.
+  Return the original source element after replacement.
+  Fall back to returning the original source element when no containing file or document exists.
+  Avoid `@ElementManipulators` because SpecDD PSI files do not provide a text manipulator.
+
+Must not:
+  Parse or validate SpecDD syntax.
+  Resolve references.

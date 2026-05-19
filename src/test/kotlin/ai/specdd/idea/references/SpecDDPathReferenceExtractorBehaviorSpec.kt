@@ -37,7 +37,7 @@ class SpecDDPathReferenceExtractorBehaviorSpec : BehaviorSpec({
         }
 
         `when`("non-path-bearing sections contain path-shaped text") {
-            then("it extracts inline paths as navigation-only candidates") {
+            then("it extracts inline paths as unresolved-warning candidates") {
                 val text = """
                     |Spec: Demo
                     |Must:
@@ -47,8 +47,8 @@ class SpecDDPathReferenceExtractorBehaviorSpec : BehaviorSpec({
                     """.trimMargin()
 
                 extractor.extract(text).shouldContainExactly(
-                    SpecDDPathCandidate("./src/main", TextRange(19, 29), true, warnIfUnresolved = false),
-                    SpecDDPathCandidate("./docs/readme.md", TextRange(43, 59), true, warnIfUnresolved = false),
+                    SpecDDPathCandidate("./src/main", TextRange(19, 29), true),
+                    SpecDDPathCandidate("./docs/readme.md", TextRange(43, 59), true),
                 )
             }
         }
@@ -62,10 +62,30 @@ class SpecDDPathReferenceExtractorBehaviorSpec : BehaviorSpec({
                     """.trimMargin()
 
                 extractor.extract(text).shouldContainExactly(
-                    SpecDDPathCandidate("./kitchen-sink.sdd", TextRange(66, 84), true, warnIfUnresolved = false),
-                    SpecDDPathCandidate("./generated/*", TextRange(89, 102), true, warnIfUnresolved = false),
-                    SpecDDPathCandidate("../README.md", TextRange(109, 121), true, warnIfUnresolved = false),
-                    SpecDDPathCandidate("../src/.specdd/bootstrap.md", TextRange(126, 153), true, warnIfUnresolved = false),
+                    SpecDDPathCandidate("./kitchen-sink.sdd", TextRange(66, 84), true),
+                    SpecDDPathCandidate("./generated/*", TextRange(89, 102), true),
+                    SpecDDPathCandidate("../README.md", TextRange(109, 121), true),
+                    SpecDDPathCandidate("../src/.specdd/bootstrap.md", TextRange(126, 153), true),
+                )
+            }
+        }
+
+        `when`("continuation lines contain explicit paths") {
+            then("it extracts inline references from continuation text") {
+                val text = """
+                    |Spec: Demo
+                    |References:
+                    |  ./docs/readme.md
+                    |    continued with ./docs/appendix.md
+                    |Purpose:
+                    |  Body entry
+                    |    continued with ./notes/todo.md
+                """.trimMargin()
+
+                extractor.extract(text).shouldContainExactly(
+                    SpecDDPathCandidate("./docs/readme.md", TextRange(25, 41), true),
+                    SpecDDPathCandidate("./docs/appendix.md", TextRange(61, 79), true),
+                    SpecDDPathCandidate("./notes/todo.md", TextRange(121, 136), true),
                 )
             }
         }
@@ -134,23 +154,26 @@ class SpecDDPathReferenceExtractorBehaviorSpec : BehaviorSpec({
                 """.trimMargin()
 
                 extractor.extract(text).shouldContainExactly(
-                    SpecDDPathCandidate("./docs/readme.md", TextRange(93, 109), true, warnIfUnresolved = false),
+                    SpecDDPathCandidate("./docs/readme.md", TextRange(93, 109), true),
                 )
             }
         }
 
-        `when`("spec text contains path-like text inside inline code spans") {
-            then("it does not extract candidates from balanced code spans") {
+        `when`("spec text contains explicit paths inside inline code spans") {
+            then("it extracts code-span path candidates as unresolved-warning references") {
                 val text = """
                     |References:
                     |  Use `./docs/missing.md` as an example.
                     |  Use ./docs/readme.md as a reference.
+                    |  Use `load("./docs/config.json")` as mixed code.
                     |  Use `./unterminated.md as ordinary text with ./docs/open.md.
                 """.trimMargin()
 
                 extractor.extract(text).shouldContainExactly(
+                    SpecDDPathCandidate("./docs/missing.md", TextRange(19, 36), true),
                     SpecDDPathCandidate("./docs/readme.md", TextRange(59, 75), true),
-                    SpecDDPathCandidate("./docs/open.md", TextRange(139, 153), true),
+                    SpecDDPathCandidate("./docs/config.json", TextRange(105, 123), true),
+                    SpecDDPathCandidate("./docs/open.md", TextRange(189, 203), true),
                 )
             }
         }

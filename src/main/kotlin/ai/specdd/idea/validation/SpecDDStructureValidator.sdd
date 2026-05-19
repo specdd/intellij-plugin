@@ -18,26 +18,36 @@ Can read:
   /src/test/kotlin/ai/specdd/idea/validation/SpecDDStructureValidatorBehaviorSpec.kt
 
 Must:
-  Use the shared `SpecDDLineClassifier` line classification boundary.
+  Use the shared `@SpecDDLineClassifier` line classification boundary.
+  Pass the current section label into shared line classification.
   Return validation issues sorted by start offset.
   Ignore empty text.
-  Ignore text with no recognized section structure.
+  Allow blank lines and comments before the first section.
+  Report nonblank non-comment text before the first section as invalid syntax.
   Validate line-by-line for LF, CR, and CRLF line endings.
   Report unknown section candidates when a non-body line starts with a section-like label followed by `:`.
   Do not limit unknown section detection to uppercase labels.
-  Include likely typo suggestions from `SpecDDKnownSections`.
+  Include likely typo suggestions from `@SpecDDKnownSections`.
   Report missing `:` when a text line exactly matches a known section label.
   Require the first known section in a file to be `Spec`.
   Report a structure issue when the first known section is not `Spec`.
   Require section headers to start at column 0.
   Report leading indentation on section headers as an error.
-  Require nonblank indentation to use spaces only.
+  Ignore comment-line indentation during indentation validation.
+  Require non-comment indentation to use ASCII spaces only.
   Require nonblank indentation length to be a multiple of 2.
-  Report tabs or non-multiple-of-2 indentation as errors.
-  Allow inline section values only for `Spec`, `Platform`, and `Scenario`.
+  Report tabs, other non-space whitespace, or non-multiple-of-2 indentation as errors.
+  Require body entries under a current section to use exactly 2 spaces of indentation.
+  Report unindented body entries under a current section as errors.
+  Treat lines indented by at least 4 spaces as continuation lines, not body entries.
+  Require scenario step body entries to use exactly 2 spaces of indentation.
+  Treat 4-space-or-deeper scenario-step-looking lines as continuation lines when they follow a body entry.
+  Allow inline section values only for `Spec`, `Platform`, `Scenario`, and `Example`.
   Require inline section values to be separated from `:` by at least one space when content is present.
   Require `Spec` to have a nonempty inline value.
   Require `Platform` to have a nonempty inline value.
+  Require `Scenario` to have a nonempty inline value.
+  Allow `Example` to have an optional inline value.
   Report inline text after `:` for other known sections.
   Treat `Spec` as a bodyless section.
   Treat `Platform` as a bodyless section.
@@ -45,6 +55,15 @@ Must:
   Report follow-up text lines under `Platform` as errors.
   Report task, scenario-step, and key-value follow-up lines under `Platform` as errors.
   Require body lines to belong to a current section that allows that body-line kind.
+  Treat task-looking lines outside `Tasks` as ordinary text when the containing section accepts text.
+  Validate task marker states only inside `Tasks`.
+  Require task entries in `Tasks` to use exactly 2 spaces of indentation.
+  Require task entries in `Tasks` to contain nonempty task text after the marker and optional numeric task id.
+  Report marker-only task entries as errors.
+  Report task-id-only task entries as errors.
+  Accept continuation lines only when a preceding body entry exists in the current section.
+  Report continuation lines without a preceding body entry in the current section as invalid syntax.
+  Allow continuation lines after task entries in `Tasks`.
   Report nonblank lines that are not comments, valid section headers, or valid body lines as invalid syntax.
   Allow repeated `Scenario` sections only when their inline values are different.
   Allow repeated `Example` sections.
@@ -52,7 +71,7 @@ Must:
   Report duplicate known sections other than `Scenario` and `Example`.
   Report invalid task marker states as errors.
   Report `[invalid]` and unsupported short task states such as `[z]` as invalid task states.
-  Cover valid snippets, unknown sections, typo suggestions, missing colons, unsupported inline text, unsupported body lines, duplicate sections, indentation errors, section indentation, invalid task states, first-section structure, line endings, empty text, and text without sections in tests.
+  Cover valid snippets, continuation lines, exact body entry indentation, task entry indentation, scenario step indentation, missing task text, task-id-only entries, comment indentation, task-looking text outside `Tasks`, required scenario titles, optional example titles, unknown sections, typo suggestions, missing colons, unsupported inline text, unsupported body lines, duplicate sections, indentation errors, section indentation, invalid task states, first-section structure, line endings, empty text, comment-only text, and text before the first section in tests.
 
 Must not:
   Define known section labels directly.

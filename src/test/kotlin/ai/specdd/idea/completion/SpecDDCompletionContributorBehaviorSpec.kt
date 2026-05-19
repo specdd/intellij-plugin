@@ -39,7 +39,7 @@ class SpecDDCompletionContributorBehaviorSpec : BehaviorSpec({
                 )
 
                 result.prefixes shouldContain "Pur"
-                result.lookupStrings shouldContain "Purpose: "
+                result.lookupStrings shouldContain "Purpose:"
                 result.lookupStrings.shouldNotContain("Spec: ")
             }
         }
@@ -83,9 +83,9 @@ class SpecDDCompletionContributorBehaviorSpec : BehaviorSpec({
             }
         }
 
-        `when`("completion is requested for an inline local symbol prefix") {
+        `when`("completion is requested for an explicit inline local symbol prefix") {
             then("it adds local symbol lookup elements") {
-                val text = "Purpose:\n  Use SpecDD.Parser.classify\nMust:\n  SpecDD.P"
+                val text = "Purpose:\n  Use @SpecDD.Parser.classify\nMust:\n  @SpecDD.P"
                 val result = RecordingCompletionResultSet(contributor)
 
                 contributor.fillCompletionVariants(
@@ -93,8 +93,8 @@ class SpecDDCompletionContributorBehaviorSpec : BehaviorSpec({
                     result = result,
                 )
 
-                result.prefixes shouldContain "SpecDD.P"
-                result.lookupStrings shouldContain "SpecDD.Parser.classify"
+                result.prefixes shouldContain "@SpecDD.P"
+                result.lookupStrings shouldContain "@SpecDD.Parser.classify"
             }
         }
 

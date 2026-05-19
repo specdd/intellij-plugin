@@ -17,11 +17,11 @@ Can read:
   /src/test/kotlin/ai/specdd/idea/SpecDDLanguageBehaviorSpec.kt
 
 Must:
-  Use `SpecDDLanguage` as the file type language.
+  Use `@SpecDDLanguage` as the file type language.
   Use `SpecDD` as the file type name.
   Use `SpecDD specification file` as the file type description.
   Use `sdd` as the default extension.
-  Use the packaged `META-INF/logo.svg` resource as the file type icon.
+  Use /src/main/resources/META-INF/logo.svg as the file type icon.
   Remain an instantiable class for IntelliJ extension point compatibility.
 
 Must not:

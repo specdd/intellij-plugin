@@ -9,6 +9,7 @@ Structure:
   ./main/kotlin/ai/specdd/idea: SpecDD language package namespace.
   ./main/resources/META-INF: IntelliJ plugin metadata.
   ./main/resources/ai/specdd/idea/documentation: Packaged SpecDD documentation text.
+  ./main/resources/colorSchemes: Bundled editor color scheme defaults.
 
 Owns:
   ./main/kotlin/ai/specdd/idea/*
@@ -17,6 +18,7 @@ Owns:
   ./main/resources/META-INF/logo.svg
   ./main/resources/META-INF/pluginIcon.svg
   ./main/resources/ai/specdd/idea/documentation/*
+  ./main/resources/colorSchemes/*
 
 Can modify:
   ./main/kotlin/ai/specdd/idea/*
@@ -25,10 +27,15 @@ Can modify:
   ./main/resources/META-INF/logo.svg
   ./main/resources/META-INF/pluginIcon.svg
   ./main/resources/ai/specdd/idea/documentation/*
+  ./main/resources/colorSchemes/*
 
 Must:
   Keep implementation code under the `ai.specdd.idea` package namespace.
   Keep syntax highlighting and language validation as separate concerns.
+  Keep plugin descriptor metadata under ./main/resources/META-INF.
+  Keep bundled documentation resources under ./main/resources/ai/specdd/idea/documentation.
+  Keep bundled editor color scheme defaults under ./main/resources/colorSchemes.
+  Register implemented IntelliJ language services through plugin metadata.
 
 Must not:
-  Add user-facing settings or configuration UI.
+  Add plugin-specific settings or configuration UI.

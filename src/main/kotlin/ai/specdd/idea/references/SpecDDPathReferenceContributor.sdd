@@ -16,8 +16,8 @@ Can read:
   /src/test/kotlin/ai/specdd/idea/references/SpecDDPathReferenceContributorBehaviorSpec.kt
 
 Must:
-  Extend IntelliJ `PsiReferenceContributor`.
-  Register `SpecDDPathReferenceProvider` for SpecDD PSI elements.
+  Extend IntelliJ `@PsiReferenceContributor`.
+  Register `@SpecDDPathReferenceProvider` for SpecDD PSI elements.
   Register references on the SpecDD PSI text token emitted by the minimal parser.
 
 Must not:

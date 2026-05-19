@@ -55,15 +55,15 @@ class SpecDDSyntaxHighlighterBehaviorSpec : BehaviorSpec({
                     |  [invalid] #6 unsupported task marker
                     |Done when:
                     |Scenario: every documented section is represented
-                    |  Given file src/main/kotlin/ai/specdd/idea/SpecDDLanguage.kt exists
+                    |  Given file /src/main/kotlin/ai/specdd/idea/SpecDDLanguage.kt exists
                     |  When SpecDDKitchenSink.ReportBuilder.build(input) runs
-                    |  Then generated/coverage.json exists
+                    |  Then ./generated/coverage.json exists
                     |  And #8 is visible
                     |  But Andromeda is not a step keyword
-                    |Example:
-                    |  public symbol: SpecDDKitchenSink.ReportBuilder.build(input)
-                    |  glob path: generated/*.json
-                    |  output file: generated/coverage.json
+                    |Example: titled example
+                    |  public symbol: @SpecDDKitchenSink.ReportBuilder.build
+                    |  glob path: ./generated/*.json
+                    |  output file: ./generated/coverage.json
                     |  unknown text
                     |    continuation text
                 """.trimMargin()
@@ -97,6 +97,8 @@ class SpecDDSyntaxHighlighterBehaviorSpec : BehaviorSpec({
                 tokens.withKey(SpecDDHighlightingColors.SECTION_COLON).map { it.text }.distinct() shouldBe listOf(":")
                 tokens.withKey(SpecDDHighlightingColors.SECTION_VALUE).map { it.text } shouldContain
                         " SpecDD Kitchen Sink Fixture"
+                tokens.withKey(SpecDDHighlightingColors.SECTION_VALUE).map { it.text } shouldContain
+                        " titled example"
                 tokens.withKey(SpecDDHighlightingColors.INDENT).map { it.text }.toSet() shouldBe setOf("  ", "    ")
                 tokens.withKey(SpecDDHighlightingColors.CONTINUATION_TEXT).map { it.text } shouldContain
                         "continuation text"
@@ -114,12 +116,14 @@ class SpecDDSyntaxHighlighterBehaviorSpec : BehaviorSpec({
                         setOf("Given", "When", "Then", "And", "But")
                 tokens.withKey(SpecDDHighlightingColors.PATH).map { it.text }.toSet() shouldBe
                         setOf(
-                            "src/main/kotlin/ai/specdd/idea/SpecDDLanguage.kt",
-                            "generated/*.json",
-                            "generated/coverage.json",
+                            "/src/main/kotlin/ai/specdd/idea/SpecDDLanguage.kt",
+                            "./generated/*.json",
+                            "./generated/coverage.json",
                         )
                 tokens.withKey(SpecDDHighlightingColors.SYMBOL).map { it.text }.toSet() shouldBe
-                        setOf("SpecDDKitchenSink.ReportBuilder.build(input)")
+                        setOf("@SpecDDKitchenSink.ReportBuilder.build")
+                tokens.withKey(SpecDDHighlightingColors.SYMBOL).map { it.text } shouldNotContain
+                        "SpecDDKitchenSink.ReportBuilder.build(input)"
                 tokens.withKey(SpecDDHighlightingColors.SCENARIO_STEP).map { it.text } shouldNotContain "Andromeda"
             }
         }
@@ -206,6 +210,25 @@ class SpecDDSyntaxHighlighterBehaviorSpec : BehaviorSpec({
             }
         }
 
+        `when`("lexing restarts inside a task line") {
+            then("it recovers the Tasks section context from earlier lines") {
+                val text = "Spec: Example\nTasks:\n  [?] #7 Check context"
+                val lexer = highlighter.highlightingLexer
+
+                lexer.start(text, text.indexOf("[?]"), text.length, 0)
+
+                val tokens = generateSequence {
+                    val type = lexer.tokenType ?: return@generateSequence null
+                    LexedToken(text.substring(lexer.tokenStart, lexer.tokenEnd), type.toString()).also {
+                        lexer.advance()
+                    }
+                }.toList()
+
+                tokens shouldContain LexedToken("[?]", "TASK_QUESTION")
+                tokens shouldContain LexedToken("#7", "TASK_ID")
+            }
+        }
+
         `when`("a document contains old Mac line endings") {
             then("the lexer advances through carriage returns") {
                 val text = "Spec:\rOwns: file.sdd\r"
@@ -256,9 +279,9 @@ class SpecDDSyntaxHighlighterBehaviorSpec : BehaviorSpec({
 
         `when`("the kitchen-sink question task is lexed") {
             then("it highlights the task marker and id without comment highlighting") {
-                val line =
-                    "  [?] #7 Decide whether fixtures should include intentionally invalid examples in a separate file."
-                val tokens = highlighter.highlight(line)
+                val text =
+                    "Tasks:\n  [?] #7 Decide whether fixtures should include intentionally invalid examples in a separate file."
+                val tokens = highlighter.highlight(text)
 
                 tokens.map { it.text to it.keys } shouldContain
                         ("[?]" to listOf(SpecDDHighlightingColors.TASK_QUESTION))
@@ -268,9 +291,24 @@ class SpecDDSyntaxHighlighterBehaviorSpec : BehaviorSpec({
             }
         }
 
+        `when`("task-looking body text outside Tasks is lexed") {
+            then("it does not receive task marker highlighting") {
+                val tokens = highlighter.highlight(
+                    """
+                    |Purpose:
+                    |  [ ] ordinary prose
+                    |  [invalid] ordinary prose
+                    """.trimMargin(),
+                )
+
+                tokens.withKey(SpecDDHighlightingColors.TASK_OPEN) shouldBe emptyList()
+                tokens.withKey(SpecDDHighlightingColors.TASK_INVALID) shouldBe emptyList()
+            }
+        }
+
         `when`("a generic key-value line is lexed") {
             then("it highlights the key and colon while still highlighting value patterns") {
-                val tokens = highlighter.highlight("  glob path: generated/*.json")
+                val tokens = highlighter.highlight("  glob path: ./generated/*.json")
 
                 tokens.map { it.text to it.keys } shouldContain
                         ("  " to listOf(SpecDDHighlightingColors.INDENT))
@@ -279,7 +317,7 @@ class SpecDDSyntaxHighlighterBehaviorSpec : BehaviorSpec({
                 tokens.map { it.text to it.keys } shouldContain
                         (":" to listOf(SpecDDHighlightingColors.SECTION_COLON))
                 tokens.map { it.text to it.keys } shouldContain
-                        ("generated/*.json" to listOf(SpecDDHighlightingColors.PATH))
+                        ("./generated/*.json" to listOf(SpecDDHighlightingColors.PATH))
             }
         }
 
@@ -295,12 +333,22 @@ class SpecDDSyntaxHighlighterBehaviorSpec : BehaviorSpec({
 
         `when`("an inline pattern appears after plain text") {
             then("it preserves the plain text gap before the highlighted token") {
-                val tokens = highlighter.highlight("  see generated/*.json")
+                val tokens = highlighter.highlight("  see ./generated/*.json")
 
                 tokens.map { it.text to it.keys } shouldContain
                         ("see " to emptyList())
                 tokens.map { it.text to it.keys } shouldContain
-                        ("generated/*.json" to listOf(SpecDDHighlightingColors.PATH))
+                        ("./generated/*.json" to listOf(SpecDDHighlightingColors.PATH))
+            }
+        }
+
+        `when`("body text contains unprefixed path-like prose and URLs") {
+            then("it does not highlight them as file paths") {
+                val tokens = highlighter.highlight(
+                    "  see generated/*.json, src/main/App.kt, plugin.xml, and https://github.com/specdd/intellij-plugin",
+                )
+
+                tokens.withKey(SpecDDHighlightingColors.PATH) shouldBe emptyList()
             }
         }
 
@@ -321,7 +369,7 @@ class SpecDDSyntaxHighlighterBehaviorSpec : BehaviorSpec({
 
         `when`("a task line contains an inline code span with a task id") {
             then("the code span wins over inline task-id highlighting") {
-                val tokens = highlighter.highlight("  [ ] compare `#123` with #124")
+                val tokens = highlighter.highlight("Tasks:\n  [ ] compare `#123` with #124")
 
                 tokens.map { it.text to it.keys } shouldContain
                         ("#123" to listOf(SpecDDHighlightingColors.CODE_SPAN))
@@ -334,13 +382,33 @@ class SpecDDSyntaxHighlighterBehaviorSpec : BehaviorSpec({
                 val tokens = highlighter.highlight("  use `SpecDD.Parser")
 
                 tokens.withKey(SpecDDHighlightingColors.CODE_SPAN) shouldBe emptyList()
-                tokens.withKey(SpecDDHighlightingColors.SYMBOL).map { it.text } shouldBe listOf("SpecDD.Parser")
+                tokens.withKey(SpecDDHighlightingColors.SYMBOL) shouldBe emptyList()
+            }
+        }
+
+        `when`("body text contains explicit and plain symbols") {
+            then("it highlights only explicit at-prefixed symbol references") {
+                val tokens = highlighter.highlight(
+                    "  Call @InvoiceService.createInvoice, not InvoiceService.createInvoice or \\@literal.",
+                )
+
+                tokens.withKey(SpecDDHighlightingColors.SYMBOL).map { it.text } shouldBe
+                        listOf("@InvoiceService.createInvoice")
+            }
+        }
+
+        `when`("explicit symbols end with period punctuation") {
+            then("it trims sentence periods but keeps non-sentence periods") {
+                val tokens = highlighter.highlight("  Call @Trailing. and @Kept., then continue.")
+
+                tokens.withKey(SpecDDHighlightingColors.SYMBOL).map { it.text } shouldBe
+                        listOf("@Trailing", "@Kept.")
             }
         }
 
         `when`("an invalid task state is lexed") {
             then("it highlights the full invalid state") {
-                val tokens = highlighter.highlight("  [invalid] #9 unsupported state")
+                val tokens = highlighter.highlight("Tasks:\n  [invalid] #9 unsupported state")
 
                 tokens.map { it.text to it.keys } shouldContain
                         ("[invalid]" to listOf(SpecDDHighlightingColors.TASK_INVALID))

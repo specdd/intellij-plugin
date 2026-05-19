@@ -76,8 +76,19 @@ class SpecDDSectionCompletionBehaviorSpec : BehaviorSpec({
             then("it exposes header insertion text and a lookup element") {
                 val variant = SpecDDSectionCompletionVariant("Purpose")
 
-                variant.lookupString shouldBe "Purpose: "
-                variant.toLookupElement().lookupString shouldBe "Purpose: "
+                variant.lookupString shouldBe "Purpose:"
+                variant.toLookupElement().lookupString shouldBe "Purpose:"
+            }
+        }
+
+        `when`("inline-capable completion variants are inspected") {
+            then("they expose insertion text with a trailing value space") {
+                listOf("Spec", "Platform", "Scenario", "Example").forEach { label ->
+                    val variant = SpecDDSectionCompletionVariant(label)
+
+                    variant.lookupString shouldBe "$label: "
+                    variant.toLookupElement().lookupString shouldBe "$label: "
+                }
             }
         }
 
@@ -97,6 +108,9 @@ class SpecDDSectionCompletionBehaviorSpec : BehaviorSpec({
                 SpecDDSectionCompletion.complete("", 0)!!.variants
                     .map { variant -> variant.lookupString }
                     .shouldContain("Spec: ")
+                SpecDDSectionCompletion.complete("", 0)!!.variants
+                    .map { variant -> variant.lookupString }
+                    .shouldContain("Purpose:")
             }
         }
     }

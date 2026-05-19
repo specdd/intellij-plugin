@@ -3,35 +3,47 @@ Spec: SpecDD Path References
 Platform: IntelliJ Platform / Kotlin
 
 Purpose:
-  Coordinate SpecDD path, glob, and backticked symbol references.
+  Coordinate SpecDD path, glob, inline-code path, and explicit symbol references.
 
 Structure:
   ./SpecDDPathReferenceExtractor.kt: Text-level path and glob candidate extraction.
-  ./SpecDDCodeReferenceExtractor.kt: Backticked code reference candidate extraction.
+  ./SpecDDCodeReferenceExtractor.kt: Backticked inline code candidate extraction.
+  ./SpecDDSymbolReferenceExtractor.kt: Explicit `@` symbol reference candidate extraction.
   ./SpecDDPathResolver.kt: VFS-based project-relative path and glob target resolution.
+  ./SpecDDReferenceTextUpdater.kt: Document-backed reference text replacement for refactors.
   ./SpecDDPathReference.kt: IntelliJ PSI reference for path and glob candidates.
-  ./SpecDDSymbolReference.kt: IntelliJ PSI reference for backticked symbol candidates.
+  ./SpecDDSymbolReference.kt: IntelliJ PSI reference for explicit `@` symbol candidates.
+  ./SpecDDReferencesSearch.kt: IntelliJ references search bridge for code-side rename and find usages.
+  ./SpecDDReferenceRenameHandler.kt: IntelliJ rename handler for rename invoked from SpecDD references.
   ./SpecDDPathReferenceProvider.kt: IntelliJ reference provider.
   ./SpecDDPathReferenceContributor.kt: IntelliJ reference contributor registration.
-  ./SpecDDPathAnnotator.kt: IntelliJ warning annotator for unresolved path and glob candidates.
+  ./SpecDDPathAnnotator.kt: IntelliJ warning annotator for unresolved path, glob, and symbol candidates.
   ./SpecDDCreateFileQuickFix.kt: IntelliJ intention action for creating unresolved exact path references.
 
 Owns:
   ./references.sdd
   ./SpecDDPathReferenceExtractor.sdd
   ./SpecDDCodeReferenceExtractor.sdd
+  ./SpecDDSymbolReferenceExtractor.sdd
   ./SpecDDPathResolver.sdd
+  ./SpecDDReferenceTextUpdater.sdd
   ./SpecDDPathReference.sdd
   ./SpecDDSymbolReference.sdd
+  ./SpecDDReferencesSearch.sdd
+  ./SpecDDReferenceRenameHandler.sdd
   ./SpecDDPathReferenceProvider.sdd
   ./SpecDDPathReferenceContributor.sdd
   ./SpecDDPathAnnotator.sdd
   ./SpecDDCreateFileQuickFix.sdd
   ./SpecDDPathReferenceExtractor.kt
   ./SpecDDCodeReferenceExtractor.kt
+  ./SpecDDSymbolReferenceExtractor.kt
   ./SpecDDPathResolver.kt
+  ./SpecDDReferenceTextUpdater.kt
   ./SpecDDPathReference.kt
   ./SpecDDSymbolReference.kt
+  ./SpecDDReferencesSearch.kt
+  ./SpecDDReferenceRenameHandler.kt
   ./SpecDDPathReferenceProvider.kt
   ./SpecDDPathReferenceContributor.kt
   ./SpecDDPathAnnotator.kt
@@ -41,18 +53,26 @@ Can modify:
   ./references.sdd
   ./SpecDDPathReferenceExtractor.sdd
   ./SpecDDCodeReferenceExtractor.sdd
+  ./SpecDDSymbolReferenceExtractor.sdd
   ./SpecDDPathResolver.sdd
+  ./SpecDDReferenceTextUpdater.sdd
   ./SpecDDPathReference.sdd
   ./SpecDDSymbolReference.sdd
+  ./SpecDDReferencesSearch.sdd
+  ./SpecDDReferenceRenameHandler.sdd
   ./SpecDDPathReferenceProvider.sdd
   ./SpecDDPathReferenceContributor.sdd
   ./SpecDDPathAnnotator.sdd
   ./SpecDDCreateFileQuickFix.sdd
   ./SpecDDPathReferenceExtractor.kt
   ./SpecDDCodeReferenceExtractor.kt
+  ./SpecDDSymbolReferenceExtractor.kt
   ./SpecDDPathResolver.kt
+  ./SpecDDReferenceTextUpdater.kt
   ./SpecDDPathReference.kt
   ./SpecDDSymbolReference.kt
+  ./SpecDDReferencesSearch.kt
+  ./SpecDDReferenceRenameHandler.kt
   ./SpecDDPathReferenceProvider.kt
   ./SpecDDPathReferenceContributor.kt
   ./SpecDDPathAnnotator.kt
@@ -64,11 +84,17 @@ Can read:
   /src/test/kotlin/ai/specdd/idea/references/*
 
 Must:
-  Keep path and glob reference behavior separate from structure validation.
+  Keep path, glob, and explicit symbol reference behavior separate from structure validation.
   Keep extraction, resolution, PSI reference creation, symbol lookup, warnings, and quick fixes in separate units.
   Use IntelliJ VFS and PSI APIs for navigation behavior.
-  Treat unresolved path diagnostics as warnings, not structural validation errors.
-  Keep backticked unresolved symbols warning-free.
+  Use document-backed replacement for reference rename text updates.
+  Treat unresolved path, glob, and explicit symbol diagnostics as warnings, not structural validation errors.
+  Support IntelliJ rename and move refactors for exact path references.
+  Support IntelliJ code-side rename discovery for exact path and explicit symbol references in SpecDD files.
+  Support IntelliJ rename invoked from explicit `@` symbol references in SpecDD files without collapsing the reference text.
+  Exclude glob references from automatic rename and move refactors.
+  Treat explicit `@` references as symbol references.
+  Do not treat backticked non-path code spans as symbol references.
   Cover each reference unit with focused tests.
 
 Must not:

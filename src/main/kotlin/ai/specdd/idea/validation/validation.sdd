@@ -41,7 +41,7 @@ Must:
   Validate known SpecDD section names.
   Report unsupported section names and likely section-name typos.
   Keep validation behavior independent from syntax highlighting.
-  Use the shared `SpecDDLineClassifier` line classification boundary.
+  Use the shared `@SpecDDLineClassifier` line classification boundary.
   Keep validation messages deterministic.
   Keep validation issue ranges precise enough for IntelliJ annotations.
   Use errors for validation diagnostics.

@@ -1,0 +1,49 @@
+Spec: Invoice Domain Model
+
+Platform: Python 3
+
+Purpose:
+  Define immutable invoice values used by the sample service.
+
+Structure:
+  ./models.py: Domain model implementation.
+  ./service.py: Consumer that creates invoices.
+  ../../tests/test_service.py: Behavior coverage.
+
+Owns:
+  ./models.py
+  ./models.sdd
+
+Can modify:
+  ./models.py
+  ./models.sdd
+
+Can read:
+  ./service.py
+  ../../tests/test_service.py
+
+Must:
+  Represent invoice lines as immutable values.
+  Calculate line totals from quantity and unit price.
+  Calculate invoice totals as the sum of line totals.
+  Use Decimal for money arithmetic.
+  Keep validation that depends on repository state outside the model.
+
+Must not:
+  Read files, environment variables, or network resources.
+  Mutate invoice line collections after invoice creation.
+
+Depends on:
+  Python dataclasses
+  Python decimal
+  @invoice_demo.models.InvoiceLine
+  @invoice_demo.models.Invoice
+
+Scenario: invoice total is derived from line totals
+  Given an invoice with multiple lines
+  When @invoice_demo.models.Invoice.total is read
+  Then it returns the sum of all @invoice_demo.models.InvoiceLine.total values
+
+Example:
+  model file: ./models.py
+  test file: ../../tests/test_service.py

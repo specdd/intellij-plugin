@@ -21,13 +21,14 @@ class SpecDDCodeStyleSettingsProvider : LanguageCodeStyleSettingsProvider() {
         indentOptions: CommonCodeStyleSettings.IndentOptions,
     ) {
         indentOptions.INDENT_SIZE = SPECDD_INDENT_SIZE
-        indentOptions.CONTINUATION_INDENT_SIZE = SPECDD_INDENT_SIZE
+        indentOptions.CONTINUATION_INDENT_SIZE = SPECDD_CONTINUATION_INDENT_SIZE
         indentOptions.TAB_SIZE = SPECDD_INDENT_SIZE
         indentOptions.USE_TAB_CHARACTER = false
     }
 
     private companion object {
         const val SPECDD_INDENT_SIZE = 2
+        const val SPECDD_CONTINUATION_INDENT_SIZE = 4
         const val CODE_SAMPLE = "Spec: Example\nPurpose:\n  Describe the behavior.\n"
     }
 }

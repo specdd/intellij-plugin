@@ -15,7 +15,7 @@ Can read:
   /src/test/kotlin/ai/specdd/idea/validation/SpecDDValidationResultBehaviorSpec.kt
 
 Must:
-  Store validation issues in `SpecDDValidationResult`.
+  Store validation issues in `@SpecDDValidationResult`.
   Treat an empty issue list as valid.
   Treat a nonempty issue list as invalid.
   Store each issue range, message, and optional suggestion.

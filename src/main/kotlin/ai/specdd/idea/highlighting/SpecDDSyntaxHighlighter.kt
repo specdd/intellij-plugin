@@ -106,10 +106,12 @@ private class SpecDDTokenBuilder(
 ) {
     private val classifiedTokens = mutableListOf<SpecDDToken>()
     private val lineClassifier = SpecDDLineClassifier()
+    private var currentSectionLabel: String? = null
 
     fun build(): List<SpecDDToken> {
         val classificationStart = findLineStart(startOffset)
         val classificationEnd = findClassificationEnd(endOffset)
+        currentSectionLabel = findCurrentSectionLabel(classificationStart)
         var lineStart = classificationStart
         while (lineStart < classificationEnd) {
             val lineEnd = findLineEnd(lineStart)
@@ -125,7 +127,7 @@ private class SpecDDTokenBuilder(
     }
 
     private fun classifyLine(lineStart: Int, lineEnd: Int) {
-        val classification = lineClassifier.classify(buffer, lineStart, lineEnd)
+        val classification = lineClassifier.classify(buffer, lineStart, lineEnd, currentSectionLabel)
         if (SpecDDLineKind.SECTION != classification.kind && lineStart < classification.contentStart) {
             classifiedTokens.add(
                 SpecDDToken(
@@ -135,7 +137,7 @@ private class SpecDDTokenBuilder(
                 )
             )
         }
-        if (shouldHighlightAsContinuation(classification.kind, lineStart, classification.contentStart)) {
+        if (SpecDDLineKind.CONTINUATION == classification.kind) {
             classifiedTokens.add(
                 SpecDDToken(classification.contentStart, lineEnd, SpecDDHighlightingTokenTypes.CONTINUATION_TEXT),
             )
@@ -152,6 +154,7 @@ private class SpecDDTokenBuilder(
 
             SpecDDLineKind.SECTION -> {
                 val sectionHeader = classification.sectionHeader ?: return
+                currentSectionLabel = sectionHeader.label
                 classifiedTokens.add(
                     SpecDDToken(
                         sectionHeader.labelStart,
@@ -178,6 +181,7 @@ private class SpecDDTokenBuilder(
                 return
             }
 
+            SpecDDLineKind.CONTINUATION -> Unit
             SpecDDLineKind.TASK -> {
                 val taskMarker = classification.taskMarker ?: return
                 classifiedTokens.add(
@@ -218,9 +222,75 @@ private class SpecDDTokenBuilder(
 
     private fun classifyInlinePatterns(contentStart: Int, lineEnd: Int) {
         addCodeSpanMatches(contentStart, lineEnd)
-        addRegexMatches(PATH_PATTERN, contentStart, lineEnd, SpecDDHighlightingTokenTypes.PATH)
-        addRegexMatches(SYMBOL_PATTERN, contentStart, lineEnd, SpecDDHighlightingTokenTypes.SYMBOL)
+        addPathMatches(contentStart, lineEnd)
+        addSymbolMatches(contentStart, lineEnd)
         addRegexMatches(TASK_ID_PATTERN, contentStart, lineEnd, SpecDDHighlightingTokenTypes.TASK_ID)
+    }
+
+    private fun addPathMatches(contentStart: Int, lineEnd: Int) {
+        val line = buffer.subSequence(contentStart, lineEnd).toString()
+        val urlRanges = URL_PATTERN
+            .findAll(line)
+            .map { match -> match.range.first..match.range.last }
+            .toList()
+
+        for (match in PATH_PATTERN.findAll(line)) {
+            val start = contentStart + match.range.first
+            val end = contentStart + match.range.last + 1
+            if (!hasAllowedPathBoundary(start)) continue
+            if (urlRanges.any { urlRange -> match.range.first <= urlRange.last && urlRange.first < match.range.last + 1 }) {
+                continue
+            }
+            if (isRangeFree(start, end)) {
+                classifiedTokens.add(SpecDDToken(start, end, SpecDDHighlightingTokenTypes.PATH))
+            }
+        }
+    }
+
+    private fun hasAllowedPathBoundary(start: Int): Boolean {
+        if (0 == start) return true
+
+        val previous = buffer[start - 1]
+        return previous.isWhitespace() || previous in PATH_OPENING_PUNCTUATION
+    }
+
+    private fun addSymbolMatches(contentStart: Int, lineEnd: Int) {
+        var offset = contentStart
+        while (offset < lineEnd) {
+            if ('@' != buffer[offset] || !canStartSymbol(contentStart, offset, lineEnd)) {
+                offset += 1
+                continue
+            }
+
+            val symbolStart = offset + 1
+            var symbolEnd = symbolStart + 1
+            while (symbolEnd < lineEnd && isSymbolPart(buffer[symbolEnd])) {
+                symbolEnd += 1
+            }
+            val trimmedEnd = trimSentencePeriod(symbolStart, symbolEnd, lineEnd)
+            if (offset < trimmedEnd && isRangeFree(offset, trimmedEnd)) {
+                classifiedTokens.add(SpecDDToken(offset, trimmedEnd, SpecDDHighlightingTokenTypes.SYMBOL))
+            }
+            offset = symbolEnd
+        }
+    }
+
+    private fun canStartSymbol(contentStart: Int, atOffset: Int, lineEnd: Int): Boolean {
+        if (atOffset + 1 >= lineEnd || !isSymbolStart(buffer[atOffset + 1])) return false
+        if (contentStart == atOffset) return true
+
+        val previous = buffer[atOffset - 1]
+        if ('\\' == previous) return false
+        return previous.isWhitespace() || previous in SYMBOL_OPENING_PUNCTUATION
+    }
+
+    private fun trimSentencePeriod(symbolStart: Int, symbolEnd: Int, lineEnd: Int): Int {
+        if (symbolStart >= symbolEnd || '.' != buffer[symbolEnd - 1]) return symbolEnd
+        if (symbolEnd >= lineEnd) return symbolEnd - 1
+
+        val next = buffer[symbolEnd]
+        if (next.isWhitespace() || next in SYMBOL_CLOSING_PUNCTUATION) return symbolEnd - 1
+        return symbolEnd
     }
 
     private fun addCodeSpanMatches(contentStart: Int, lineEnd: Int) {
@@ -249,20 +319,22 @@ private class SpecDDTokenBuilder(
         }
     }
 
-    private fun shouldHighlightAsContinuation(kind: SpecDDLineKind, lineStart: Int, contentStart: Int): Boolean {
-        if (CONTINUATION_INDENT_SIZE > contentStart - lineStart) return false
-        return when (kind) {
-            SpecDDLineKind.TASK,
-            SpecDDLineKind.SCENARIO_STEP,
-            SpecDDLineKind.KEY_VALUE,
-            SpecDDLineKind.TEXT,
-                -> true
-
-            SpecDDLineKind.BLANK,
-            SpecDDLineKind.COMMENT,
-            SpecDDLineKind.SECTION,
-                -> false
+    private fun findCurrentSectionLabel(beforeOffset: Int): String? {
+        var current: String? = null
+        var lineStart = 0
+        while (lineStart < beforeOffset) {
+            val lineEnd = minOf(findLineEnd(lineStart), beforeOffset)
+            val classification = lineClassifier.classify(buffer, lineStart, lineEnd, current)
+            if (SpecDDLineKind.SECTION == classification.kind) {
+                current = classification.sectionHeader?.label
+            }
+            lineStart = if (lineEnd < beforeOffset && '\r' == buffer[lineEnd]) {
+                if (lineEnd + 1 < beforeOffset && '\n' == buffer[lineEnd + 1]) lineEnd + 2 else lineEnd + 1
+            } else {
+                lineEnd + 1
+            }
         }
+        return current
     }
 
     private fun addRegexMatches(pattern: Regex, contentStart: Int, lineEnd: Int, type: IElementType) {
@@ -337,12 +409,28 @@ private class SpecDDTokenBuilder(
 }
 
 private val TASK_ID_PATTERN = Regex("""#\d+\b""")
-private const val CONTINUATION_INDENT_SIZE = 4
 private const val NO_OFFSET = -1
 private val PATH_PATTERN = Regex(
-    """(?:\.{1,2}/)?[A-Za-z0-9_*.-]+(?:/[A-Za-z0-9_*.-]+)+|[A-Za-z0-9_.-]+\.(?:sdd|js|ts|tsx|jsx|py|go|rs|java|cs|rb|php|md|json|ya?ml|toml|css|html)\b""",
+    """(?:\./|\.\./|/)[A-Za-z0-9_*?.{}\[\].-]+(?:/[A-Za-z0-9_*?.{}\[\].-]+)*""",
 )
-private val SYMBOL_PATTERN = Regex("""\b[A-Z][A-Za-z0-9_]*(?:\.[A-Za-z_$][A-Za-z0-9_$]*)+(?:\([^)]*\))?""")
+private val URL_PATTERN = Regex("""\b[A-Za-z][A-Za-z0-9+.-]*://\S+""")
+private val PATH_OPENING_PUNCTUATION = setOf('(', '[', '{', '<', '"', '\'', '`')
+private val SYMBOL_OPENING_PUNCTUATION = setOf('(', '[', '{', '<', '"', '\'')
+private val SYMBOL_CLOSING_PUNCTUATION = setOf(')', ']', '}', '>', '"', '\'')
+
+private fun isSymbolStart(character: Char): Boolean =
+    character in 'A'..'Z' || character in 'a'..'z' || '_' == character
+
+private fun isSymbolPart(character: Char): Boolean =
+    isSymbolStart(character) ||
+            character in '0'..'9' ||
+            '.' == character ||
+            ':' == character ||
+            '#' == character ||
+            '\\' == character ||
+            '/' == character ||
+            '?' == character ||
+            '!' == character
 
 private data class SpecDDToken(
     val start: Int,

@@ -16,13 +16,14 @@ Can read:
   /src/test/kotlin/ai/specdd/idea/structure/SpecDDStructureModelBehaviorSpec.kt
 
 Must:
-  Use `SpecDDLineClassifier` to identify section header lines.
+  Use `@SpecDDLineClassifier` to identify section header lines.
   Scan text line-by-line for LF, CR, and CRLF line endings.
   Return sections in file order.
   Store section label, trimmed inline value, label start offset, section start offset, and line end offset.
   Use `Label: value` as the display name when an inline value is present.
   Use `Label` as the display name when no inline value is present.
   Preserve duplicate and repeatable sections as independent entries.
+  Preserve optional `Example` inline titles in structure entry display names.
   Ignore comments, blank lines, body lines, tasks, scenario steps, and key-value lines.
 
 Must not:

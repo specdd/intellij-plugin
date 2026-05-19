@@ -62,7 +62,7 @@ class SpecDDLineClassifierBehaviorSpec : BehaviorSpec({
 
         `when`("a task marker with a numeric id is classified") {
             then("it reports the marker and task id ranges") {
-                classifier.classify("  [x] #12 Done", 0, 14) shouldBe
+                classifier.classify("  [x] #12 Done", 0, 14, "Tasks") shouldBe
                         SpecDDLineClassification.task(
                             lineStart = 0,
                             lineEnd = 14,
@@ -72,12 +72,32 @@ class SpecDDLineClassifierBehaviorSpec : BehaviorSpec({
             }
         }
 
+        `when`("a continuation line is classified") {
+            then("it reports continuation before task, scenario, key-value, and text classifications") {
+                val taskLike = "    [ ] not a task at continuation indent"
+                classifier.classify(taskLike, 0, taskLike.length) shouldBe
+                        SpecDDLineClassification.continuation(lineStart = 0, lineEnd = taskLike.length, contentStart = 4)
+
+                val stepLike = "    Given not a step at continuation indent"
+                classifier.classify(stepLike, 0, stepLike.length) shouldBe
+                        SpecDDLineClassification.continuation(lineStart = 0, lineEnd = stepLike.length, contentStart = 4)
+
+                val keyValueLike = "    key: value"
+                classifier.classify(keyValueLike, 0, keyValueLike.length) shouldBe
+                        SpecDDLineClassification.continuation(
+                            lineStart = 0,
+                            lineEnd = keyValueLike.length,
+                            contentStart = 4,
+                        )
+            }
+        }
+
         `when`("a question task marker with a numeric id is classified") {
             then("it remains a task instead of a comment") {
                 val line =
                     "  [?] #7 Decide whether fixtures should include intentionally invalid examples in a separate file."
 
-                classifier.classify(line, 0, line.length) shouldBe
+                classifier.classify(line, 0, line.length, "Tasks") shouldBe
                         SpecDDLineClassification.task(
                             lineStart = 0,
                             lineEnd = line.length,
@@ -89,7 +109,7 @@ class SpecDDLineClassifierBehaviorSpec : BehaviorSpec({
 
         `when`("a task marker has no numeric id") {
             then("it reports only the marker range") {
-                classifier.classify("[-] skipped", 0, 11) shouldBe
+                classifier.classify("[-] skipped", 0, 11, "Tasks") shouldBe
                         SpecDDLineClassification.task(
                             lineStart = 0,
                             lineEnd = 11,
@@ -101,7 +121,7 @@ class SpecDDLineClassifierBehaviorSpec : BehaviorSpec({
 
         `when`("a task marker has an empty hash id") {
             then("it ignores the id range") {
-                classifier.classify("[!] # blocked", 0, 13) shouldBe
+                classifier.classify("[!] # blocked", 0, 13, "Tasks") shouldBe
                         SpecDDLineClassification.task(
                             lineStart = 0,
                             lineEnd = 13,
@@ -187,13 +207,27 @@ class SpecDDLineClassifierBehaviorSpec : BehaviorSpec({
 
         `when`("an unsupported task marker is classified") {
             then("it reports an invalid task marker") {
-                classifier.classify("  [invalid] #9 Fix state", 0, 24) shouldBe
+                classifier.classify("  [invalid] #9 Fix state", 0, 24, "Tasks") shouldBe
                         SpecDDLineClassification.task(
                             lineStart = 0,
                             lineEnd = 24,
                             contentStart = 2,
                             taskMarker = SpecDDTaskMarker(2, 11, SpecDDTaskStatus.INVALID, SpecDDTaskId(12, 14)),
                         )
+            }
+        }
+
+        `when`("a task marker candidate is not closed before whitespace") {
+            then("it remains ordinary text") {
+                classifier.classify("  [invalid task marker", 0, 21, "Tasks") shouldBe
+                        SpecDDLineClassification.text(lineStart = 0, lineEnd = 21, contentStart = 2)
+            }
+        }
+
+        `when`("a task-looking line is classified outside Tasks") {
+            then("it remains ordinary text") {
+                classifier.classify("  [ ] ordinary body text", 0, 24, "Purpose") shouldBe
+                        SpecDDLineClassification.text(lineStart = 0, lineEnd = 24, contentStart = 2)
             }
         }
 

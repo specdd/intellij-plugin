@@ -17,10 +17,12 @@ Can read:
   /src/test/kotlin/ai/specdd/idea/highlighting/SpecDDSyntaxHighlighterBehaviorSpec.kt
 
 Must:
-  Extend IntelliJ `SyntaxHighlighterBase`.
-  Use `SpecDDLineClassifier` as the shared line-classification boundary.
+  Extend IntelliJ `@SyntaxHighlighterBase`.
+  Use `@SpecDDLineClassifier` as the shared line-classification boundary.
+  Track the current section while lexing so task marker highlighting is limited to `Tasks`.
   Keep lexer token offsets stable for full documents and partial lexer restart slices.
   Classify the full containing line when IntelliJ restarts lexing inside a line.
+  Recover the current section from earlier lines when IntelliJ restarts lexing from a slice.
   Clip emitted tokens to the lexer slice requested by IntelliJ.
   Preserve line endings as plain text tokens.
   Map bad-character token types to the bad-character highlighting key.
@@ -28,39 +30,42 @@ Must:
   Highlight comments from `#` through the end of the line.
   Keep indented comments highlighted as comments.
   Highlight leading indentation on non-section lines with the indentation highlight key.
-  Highlight non-comment continuation lines indented by at least 4 spaces as continuation text.
+  Highlight shared parser continuation lines as continuation text.
   Let continuation text take precedence over task, scenario-step, key-value, path, symbol, and task-id highlighting.
   Highlight top-level section labels separately from body `key: value` keys.
   Highlight section colons separately from section labels and values.
   Highlight inline section values separately from section labels and colons.
   Highlight body `key: value` keys with the dedicated key-value key highlight.
   Still highlight supported value patterns after body `key: value` keys.
-  Highlight task markers by task state.
+  Highlight task markers by task state only inside `Tasks`.
   Highlight `[x]` and `[X]` as done task markers.
   Highlight `[ ]` as open task markers.
   Highlight `[!]` as blocked task markers.
   Highlight `[?]` as question task markers.
   Highlight `[-]` as skipped task markers.
-  Highlight unsupported task marker states as invalid task markers.
+  Highlight unsupported task marker states as invalid task markers only inside `Tasks`.
   Highlight `#<digits>` task ids as task ids, including task ids after task markers.
   Treat task ids after task markers as task ids, not comments.
   Highlight scenario step keywords `Given`, `When`, `Then`, `And`, and `But`.
   Highlight only exact scenario step keywords, not words that merely start with a step keyword.
   Highlight balanced single-line inline code spans delimited with single backticks.
   Highlight inline code span content separately from the opening and closing backtick delimiters.
-  Let inline code spans take precedence over path, symbol, and task-id highlighting inside the span.
+  Let inline code spans take precedence over path and task-id highlighting inside the span.
   Ignore unmatched inline code opening backticks.
-  Highlight path-like values and filenames with known source/spec/data extensions.
-  Highlight dotted code symbols and call-like dotted symbols.
+  Highlight path-like values only when they use explicit `./`, `../`, or `/` prefixes.
+  Do not highlight unprefixed filenames, slash paths, dependency names, class names, service names, symbols, or prose as paths.
+  Do not highlight URL hosts or URL path fragments as file paths.
+  Highlight only explicit `@` symbol references as symbol syntax.
+  Do not highlight plain dotted code symbols or call-like dotted symbols as symbol syntax.
   Highlight `Spec` and `Platform` as meta section labels.
   Highlight `Scenario`, `Purpose`, `Structure`, `Owns`, `References`, `Depends on`, `Tasks`, `Done when`, and `Example` as default section labels.
   Highlight `Can modify`, `Can read`, `Exposes`, `Accepts`, `Returns`, and `Handles` as positive section labels.
   Highlight `Must not`, `Forbids`, and `Raises` as negative section labels.
   Highlight `Must` as the required section label.
   Cover all supported section label groups in tests.
-  Cover comments, indentation, continuation text, section colons, section values, and body `key: value` keys in tests.
-  Cover each supported task marker state and invalid task marker states in tests.
-  Cover task ids, scenario step keywords, inline code spans, paths, symbols, line-ending handling, and lexer restart slices in tests.
+  Cover comments, indentation, shared continuation text, section colons, section values including titled examples, and body `key: value` keys in tests.
+  Cover each supported task marker state, invalid task marker states, and task-looking body text outside `Tasks` in tests.
+  Cover task ids, scenario step keywords, inline code spans, explicit paths, unprefixed path-like prose, URLs, explicit `@` symbols, plain dotted code text, line-ending handling, and lexer restart slices in tests.
   Cover that body `key: value` keys do not inherit top-level section label styling in tests.
 
 Must not:

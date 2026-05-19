@@ -157,14 +157,14 @@ class SpecDDLanguageBehaviorSpec : BehaviorSpec({
         val provider = SpecDDCodeStyleSettingsProvider()
 
         `when`("default common settings are requested") {
-            then("it uses two-space indentation") {
+            then("it uses SpecDD indentation defaults") {
                 @Suppress("DEPRECATION")
                 val indentOptions = provider.defaultCommonSettings.indentOptions
                 indentOptions.shouldNotBeNull()
 
                 provider.language shouldBeSameInstanceAs SpecDDLanguage
                 indentOptions.INDENT_SIZE shouldBe 2
-                indentOptions.CONTINUATION_INDENT_SIZE shouldBe 2
+                indentOptions.CONTINUATION_INDENT_SIZE shouldBe 4
                 indentOptions.TAB_SIZE shouldBe 2
                 indentOptions.USE_TAB_CHARACTER shouldBe false
             }

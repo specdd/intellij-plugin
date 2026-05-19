@@ -1,0 +1,29 @@
+Spec: SpecDD Reference Rename Handler
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Route rename actions invoked from explicit SpecDD `@` symbol references to the resolved IntelliJ PSI target.
+
+Owns:
+  ./SpecDDReferenceRenameHandler.kt
+
+Can modify:
+  ./SpecDDReferenceRenameHandler.kt
+
+Can read:
+  /src/test/kotlin/ai/specdd/idea/references/SpecDDReferenceRenameHandlerBehaviorSpec.kt
+
+Must:
+  Activate only inside SpecDD files.
+  Activate only when the caret is on a resolved `@SpecDDSymbolReference`.
+  Use the referenced PSI target as the element being renamed.
+  Use the SpecDD reference element as the rename context.
+  Delegate the actual rename refactor to IntelliJ PSI rename support.
+  Preserve full SpecDD reference text by relying on `@SpecDDSymbolReference.handleElementRename`.
+  Handle caret positions at the reference end by checking the previous offset.
+  Stay independent from language-specific plugins.
+
+Must not:
+  Rename unresolved symbol references.
+  Claim rename for path references, glob references, plain prose, or non-SpecDD files.

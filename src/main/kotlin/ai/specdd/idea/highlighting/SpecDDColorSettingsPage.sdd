@@ -1,0 +1,32 @@
+Spec: SpecDD Color Settings Page
+
+Platform: IntelliJ Platform / Kotlin
+
+Purpose:
+  Expose SpecDD highlighting keys through IntelliJ's standard editor color scheme UI.
+
+Owns:
+  ./SpecDDColorSettingsPage.kt
+
+Can modify:
+  ./SpecDDColorSettingsPage.kt
+
+Can read:
+  ./SpecDDHighlightingColors.kt
+  ./SpecDDSyntaxHighlighter.kt
+  /src/test/kotlin/ai/specdd/idea/highlighting/SpecDDColorSettingsPageBehaviorSpec.kt
+
+Must:
+  Implement IntelliJ `@ColorSettingsPage`.
+  Return the SpecDD file type icon.
+  Return a `@SpecDDSyntaxHighlighter`.
+  Provide complete demo text that exercises every known SpecDD section and the major valid body forms.
+  Include comments, explicit paths, globs, key-value lines, continuations, inline code spans, explicit symbols, all valid task markers, scenario steps, and repeated examples in the demo text.
+  Expose descriptors for all SpecDD semantic highlighting keys.
+  Provide default preview attributes for SpecDD-specific colors without using deprecated `@TextAttributesKey` registration overloads.
+  Keep color scheme integration separate from tokenization.
+
+Must not:
+  Add plugin-specific settings or configuration UI.
+  Report validation diagnostics.
+  Define tokenization rules.

@@ -1,0 +1,115 @@
+# Negative SpecDD kitchen sink fixture.
+# This file is intentionally invalid and should produce many diagnostics.
+
+plain text before the first section is invalid
+
+Spec:
+  body under Spec is invalid because Spec is bodyless
+
+Platform:
+  body under Platform is invalid because Platform requires an inline value
+
+Porpose:
+  misspelled section name
+
+Spec : Invalid Space Before Colon
+Spec:MissingSpaceAfterColon
+
+Purpose: inline text is not allowed on block sections
+  valid-looking body after invalid inline section header
+
+  Structure:
+  indented section headers are invalid
+
+Structure:
+./unindented-body.sdd
+  ./missing-local-file.sdd
+  ./missing-glob-*.json
+  generated:missing-space-after-colon
+  key : value with whitespace before colon is plain text
+   odd indentation is invalid
+	body with tab indentation is invalid
+    orphan continuation at the beginning of a section is invalid
+
+Owns:
+  ./missing-owned-file.py
+  @MissingOwnedSymbol
+Owns:
+  duplicate non-repeatable section
+
+Can modify:
+  ./missing-edit-target.py
+Can modify:
+  duplicate write section
+
+Can read:
+  ./missing-read-target.sdd
+
+References:
+  ./missing-reference.sdd
+  @MissingReferenceSymbol
+  `./missing-code-reference.py`
+  `@MissingCodeSymbol`
+
+Must:
+  Call @MissingService.run before ./missing/output.json exists.
+    Continuation mentions ./missing/continuation.md and @MissingContinuationSymbol
+  [ ] task-looking text outside Tasks is allowed as text, but ./missing/prose-task.txt should warn
+Must:
+  duplicate Must section is invalid
+
+Must not: inline text is invalid here too
+  body after invalid inline text
+
+Forbids:
+  ./missing-forbidden-path
+
+Depends on:
+  @MissingDependency
+  ./missing-dependency.sdd
+
+Exposes:
+  @MissingPublicApi
+
+Accepts:
+  input without issue
+
+Returns:
+  ./missing-return-artifact.json
+
+Raises:
+  @MissingErrorType
+
+Handles:
+  ./missing-case.md
+
+Tasks:
+  [ ]
+  [ ] #12
+  [invalid] #13 unsupported long marker
+  [z] #14 unsupported short marker
+  [-] valid skipped task
+    continuation after a task is valid shape but references @MissingTaskContinuation
+  ordinary text is invalid inside Tasks
+
+Done when:
+    orphan continuation after section header is invalid
+  ./missing-done-marker.txt
+
+Scenario:
+  Given a scenario without title is invalid
+
+Scenario: duplicate scenario title
+  Given ./missing-scenario-file.txt is referenced
+  When @MissingScenarioSymbol is used
+  Then validation should warn and error
+
+Scenario: duplicate scenario title
+  Given duplicate scenario names are invalid
+
+Example: valid title but bad body references
+  path: ./missing-example-path.txt
+  symbol: @MissingExampleSymbol
+
+Example:
+    orphan continuation in an empty example is invalid

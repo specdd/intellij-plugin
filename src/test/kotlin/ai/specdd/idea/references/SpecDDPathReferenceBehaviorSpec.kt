@@ -1,5 +1,6 @@
 package ai.specdd.idea.references
 
+import ai.specdd.idea.directory
 import ai.specdd.idea.file
 import ai.specdd.idea.testVirtualRoot
 import com.intellij.codeInsight.multiverse.CodeInsightContext
@@ -122,10 +123,276 @@ class SpecDDPathReferenceBehaviorSpec : BehaviorSpec({
                 reference.multiResolve(false) shouldBe emptyArray()
             }
         }
+
+        `when`("an exact path target is renamed") {
+            then("it replaces only the final path segment") {
+                val updatedElement = psiElement("updated")
+                var changedText: String? = null
+                val reference = SpecDDPathReference(
+                    element = psiElement("./src/service.py"),
+                    rangeInElement = TextRange(0, "./src/service.py".length),
+                    candidate = SpecDDPathCandidate("./src/service.py", TextRange(0, "./src/service.py".length), true),
+                    context = null,
+                    referenceTextUpdater = { _, range, text ->
+                        range shouldBe TextRange(0, "./src/service.py".length)
+                        changedText = text
+                        updatedElement
+                    },
+                )
+
+                (reference.handleElementRename("invoice_service.py") === updatedElement) shouldBe true
+                changedText shouldBe "./src/invoice_service.py"
+                reference.participatesInAutomaticRename() shouldBe true
+            }
+        }
+
+        `when`("a bare exact path target is renamed") {
+            then("it replaces the whole path text with the new name") {
+                var changedText: String? = null
+                val reference = SpecDDPathReference(
+                    element = psiElement("service.py"),
+                    rangeInElement = TextRange(0, "service.py".length),
+                    candidate = SpecDDPathCandidate("service.py", TextRange(0, "service.py".length), true),
+                    context = null,
+                    referenceTextUpdater = { sourceElement, _, text ->
+                        changedText = text
+                        sourceElement
+                    },
+                )
+
+                reference.handleElementRename("invoice_service.py")
+
+                changedText shouldBe "invoice_service.py"
+            }
+        }
+
+        `when`("the default reference text updater has no document") {
+            then("it leaves the reference element unchanged") {
+                val element = psiElement("service.py")
+                val reference = SpecDDPathReference(
+                    element = element,
+                    rangeInElement = TextRange(0, "service.py".length),
+                    candidate = SpecDDPathCandidate("service.py", TextRange(0, "service.py".length), true),
+                    context = null,
+                )
+
+                (reference.handleElementRename("invoice_service.py") === element) shouldBe true
+            }
+        }
+
+        `when`("a glob target is renamed") {
+            then("it leaves the reference unchanged") {
+                val element = psiElement("./src/*.py")
+                val reference = SpecDDPathReference(
+                    element = element,
+                    rangeInElement = TextRange(0, "./src/*.py".length),
+                    candidate = SpecDDPathCandidate("./src/*.py", TextRange(0, "./src/*.py".length), true),
+                    context = null,
+                    referenceTextUpdater = { _, _, _ -> error("glob references must not be rewritten") },
+                )
+
+                (reference.handleElementRename("invoice.py") === element) shouldBe true
+                reference.participatesInAutomaticRename() shouldBe false
+            }
+        }
+
+        `when`("an exact project-root path is rebound to a moved file") {
+            then("it recomputes the reference as a project-root path") {
+                val root = testVirtualRoot()
+                val specDirectory = root.directory("specs")
+                val target = root.file("src/invoice_service.py")
+                var changedText: String? = null
+                val reference = SpecDDPathReference(
+                    element = psiElement("/src/service.py"),
+                    rangeInElement = TextRange(0, "/src/service.py".length),
+                    candidate = SpecDDPathCandidate("/src/service.py", TextRange(0, "/src/service.py".length), true),
+                    context = SpecDDPathResolutionContext(root, specDirectory),
+                    referenceTextUpdater = { sourceElement, _, text ->
+                        changedText = text
+                        sourceElement
+                    },
+                )
+
+                reference.bindToElement(psiFile("invoice_service.py", target))
+
+                changedText shouldBe "/src/invoice_service.py"
+            }
+        }
+
+        `when`("an exact spec-relative path is rebound to a moved descendant file") {
+            then("it recomputes the reference with an explicit relative prefix") {
+                val root = testVirtualRoot()
+                val specDirectory = root.directory("specs")
+                val target = specDirectory.file("impl/invoice_service.py")
+                var changedText: String? = null
+                val reference = SpecDDPathReference(
+                    element = psiElement("./impl/service.py"),
+                    rangeInElement = TextRange(0, "./impl/service.py".length),
+                    candidate = SpecDDPathCandidate("./impl/service.py", TextRange(0, "./impl/service.py".length), true),
+                    context = SpecDDPathResolutionContext(root, specDirectory),
+                    referenceTextUpdater = { sourceElement, _, text ->
+                        changedText = text
+                        sourceElement
+                    },
+                )
+
+                reference.bindToElement(psiFile("invoice_service.py", target))
+
+                changedText shouldBe "./impl/invoice_service.py"
+            }
+        }
+
+        `when`("an exact spec-relative path is rebound to a moved sibling-tree file") {
+            then("it recomputes the reference with parent segments") {
+                val root = testVirtualRoot()
+                val specDirectory = root.directory("specs/domain")
+                val target = root.file("shared/invoice_service.py")
+                var changedText: String? = null
+                val reference = SpecDDPathReference(
+                    element = psiElement("../shared/service.py"),
+                    rangeInElement = TextRange(0, "../shared/service.py".length),
+                    candidate = SpecDDPathCandidate("../shared/service.py", TextRange(0, "../shared/service.py".length), true),
+                    context = SpecDDPathResolutionContext(root, specDirectory),
+                    referenceTextUpdater = { sourceElement, _, text ->
+                        changedText = text
+                        sourceElement
+                    },
+                )
+
+                reference.bindToElement(psiFile("invoice_service.py", target))
+
+                changedText shouldBe "../../shared/invoice_service.py"
+            }
+        }
+
+        `when`("an exact unprefixed path is rebound") {
+            then("it recomputes the reference without adding an explicit prefix") {
+                val root = testVirtualRoot()
+                val specDirectory = root.directory("specs")
+                val target = specDirectory.file("impl/invoice_service.py")
+                var changedText: String? = null
+                val reference = SpecDDPathReference(
+                    element = psiElement("impl/service.py"),
+                    rangeInElement = TextRange(0, "impl/service.py".length),
+                    candidate = SpecDDPathCandidate("impl/service.py", TextRange(0, "impl/service.py".length), true),
+                    context = SpecDDPathResolutionContext(root, specDirectory),
+                    referenceTextUpdater = { sourceElement, _, text ->
+                        changedText = text
+                        sourceElement
+                    },
+                )
+
+                reference.bindToElement(psiFile("invoice_service.py", target))
+
+                changedText shouldBe "impl/invoice_service.py"
+            }
+        }
+
+        `when`("an exact path is rebound to a directory") {
+            then("it uses the directory virtual file") {
+                val root = testVirtualRoot()
+                val target = root.directory("src/invoice_demo")
+                var changedText: String? = null
+                val reference = SpecDDPathReference(
+                    element = psiElement("/src/service"),
+                    rangeInElement = TextRange(0, "/src/service".length),
+                    candidate = SpecDDPathCandidate("/src/service", TextRange(0, "/src/service".length), true),
+                    context = SpecDDPathResolutionContext(root, root),
+                    referenceTextUpdater = { sourceElement, _, text ->
+                        changedText = text
+                        sourceElement
+                    },
+                )
+
+                reference.bindToElement(psiDirectory("invoice_demo", target))
+
+                changedText shouldBe "/src/invoice_demo"
+            }
+        }
+
+        `when`("an exact path is rebound to a navigation element") {
+            then("it uses the navigation target virtual file") {
+                val root = testVirtualRoot()
+                val target = root.file("src/invoice_service.py")
+                var changedText: String? = null
+                val reference = SpecDDPathReference(
+                    element = psiElement("/src/service.py"),
+                    rangeInElement = TextRange(0, "/src/service.py".length),
+                    candidate = SpecDDPathCandidate("/src/service.py", TextRange(0, "/src/service.py".length), true),
+                    context = SpecDDPathResolutionContext(root, root),
+                    referenceTextUpdater = { sourceElement, _, text ->
+                        changedText = text
+                        sourceElement
+                    },
+                )
+
+                reference.bindToElement(psiElement("light", navigationElement = psiFile("invoice_service.py", target)))
+
+                changedText shouldBe "/src/invoice_service.py"
+            }
+        }
+
+        `when`("an exact path is rebound without enough context") {
+            then("it leaves the reference unchanged") {
+                val element = psiElement("./service.py")
+                val root = testVirtualRoot()
+                val outsideRoot = testVirtualRoot("outside")
+                val referenceWithoutContext = SpecDDPathReference(
+                    element = element,
+                    rangeInElement = TextRange(0, "./service.py".length),
+                    candidate = SpecDDPathCandidate("./service.py", TextRange(0, "./service.py".length), true),
+                    context = null,
+                    referenceTextUpdater = { _, _, _ -> error("missing context must not be rewritten") },
+                )
+                val referenceWithoutTarget = SpecDDPathReference(
+                    element = element,
+                    rangeInElement = TextRange(0, "./service.py".length),
+                    candidate = SpecDDPathCandidate("./service.py", TextRange(0, "./service.py".length), true),
+                    context = SpecDDPathResolutionContext(root, root),
+                    referenceTextUpdater = { _, _, _ -> error("missing target must not be rewritten") },
+                )
+                val referenceOutsideRoot = SpecDDPathReference(
+                    element = element,
+                    rangeInElement = TextRange(0, "./service.py".length),
+                    candidate = SpecDDPathCandidate("./service.py", TextRange(0, "./service.py".length), true),
+                    context = SpecDDPathResolutionContext(root, root),
+                    referenceTextUpdater = { _, _, _ -> error("outside root target must not be rewritten") },
+                )
+                val referenceOutsideProject = SpecDDPathReference(
+                    element = element,
+                    rangeInElement = TextRange(0, "./service.py".length),
+                    candidate = SpecDDPathCandidate("./service.py", TextRange(0, "./service.py".length), true),
+                    context = SpecDDPathResolutionContext(root, root) { false },
+                    referenceTextUpdater = { _, _, _ -> error("outside project target must not be rewritten") },
+                )
+
+                (referenceWithoutContext.bindToElement(psiFile("service.py", root.file("service.py"))) === element) shouldBe true
+                (referenceWithoutTarget.bindToElement(psiElement("target")) === element) shouldBe true
+                (referenceOutsideRoot.bindToElement(psiFile("service.py", outsideRoot.file("service.py"))) === element) shouldBe true
+                (referenceOutsideProject.bindToElement(psiFile("service.py", root.file("service.py"))) === element) shouldBe true
+            }
+        }
+
+        `when`("a glob path is rebound") {
+            then("it leaves the reference unchanged") {
+                val root = testVirtualRoot()
+                val target = root.file("src/invoice_service.py")
+                val element = psiElement("./src/*.py")
+                val reference = SpecDDPathReference(
+                    element = element,
+                    rangeInElement = TextRange(0, "./src/*.py".length),
+                    candidate = SpecDDPathCandidate("./src/*.py", TextRange(0, "./src/*.py".length), true),
+                    context = SpecDDPathResolutionContext(root, root),
+                    referenceTextUpdater = { _, _, _ -> error("glob references must not be rewritten") },
+                )
+
+                (reference.bindToElement(psiFile("invoice_service.py", target)) === element) shouldBe true
+            }
+        }
     }
 })
 
-internal fun psiElement(text: String, project: Project? = null): PsiElement =
+internal fun psiElement(text: String, project: Project? = null, navigationElement: PsiElement? = null): PsiElement =
     Proxy.newProxyInstance(
         PsiElement::class.java.classLoader,
         arrayOf(PsiElement::class.java),
@@ -135,6 +402,7 @@ internal fun psiElement(text: String, project: Project? = null): PsiElement =
                 "getProject" -> project
                 "getText" -> text
                 "getTextRange" -> TextRange(0, text.length)
+                "getNavigationElement" -> navigationElement ?: throw UnsupportedOperationException("No navigation element")
                 "isValid" -> true
                 else -> {
                     if (Boolean::class.javaPrimitiveType == method.returnType) false else null
@@ -143,7 +411,7 @@ internal fun psiElement(text: String, project: Project? = null): PsiElement =
         },
     ) as PsiElement
 
-private fun psiDirectory(text: String): PsiDirectory =
+private fun psiDirectory(text: String, virtualFile: VirtualFile? = null): PsiDirectory =
     Proxy.newProxyInstance(
         PsiDirectory::class.java.classLoader,
         arrayOf(PsiDirectory::class.java),
@@ -151,6 +419,7 @@ private fun psiDirectory(text: String): PsiDirectory =
             when (method.name) {
                 "toString" -> "PsiDirectory($text)"
                 "getName" -> text
+                "getVirtualFile" -> virtualFile
                 "isValid" -> true
                 else -> {
                     if (Boolean::class.javaPrimitiveType == method.returnType) false else null
@@ -159,7 +428,7 @@ private fun psiDirectory(text: String): PsiDirectory =
         },
     ) as PsiDirectory
 
-private fun psiFile(text: String): PsiFile =
+private fun psiFile(text: String, virtualFile: VirtualFile? = null): PsiFile =
     Proxy.newProxyInstance(
         PsiFile::class.java.classLoader,
         arrayOf(PsiFile::class.java),
@@ -167,6 +436,7 @@ private fun psiFile(text: String): PsiFile =
             when (method.name) {
                 "toString" -> "PsiFile($text)"
                 "getName" -> text
+                "getVirtualFile" -> virtualFile
                 "isValid" -> true
                 else -> {
                     if (Boolean::class.javaPrimitiveType == method.returnType) false else null

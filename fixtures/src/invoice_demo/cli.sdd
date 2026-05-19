@@ -1,0 +1,43 @@
+Spec: Invoice Demo CLI
+
+Platform: Python 3
+
+Purpose:
+  Provide a minimal adapter that exercises the invoice service manually.
+
+Structure:
+  ./cli.py: Command-line adapter.
+  ./service.py: Service dependency.
+  ./repository.py: Repository dependency.
+
+Owns:
+  ./cli.py
+  ./cli.sdd
+
+Can modify:
+  ./cli.py
+  ./cli.sdd
+
+Can read:
+  ./service.py
+  ./repository.py
+
+Must:
+  Instantiate @invoice_demo.repository.InvoiceRepository.
+  Instantiate @invoice_demo.service.InvoiceService.
+  Create one deterministic demo invoice request.
+  Return display text instead of performing complex presentation logic.
+
+Must not:
+  Parse command-line flags.
+  Read environment variables.
+  Add external dependencies.
+
+Depends on:
+  @invoice_demo.repository.InvoiceRepository
+  @invoice_demo.service.InvoiceService
+
+Scenario: demo invoice can be created
+  Given the adapter is run as a script
+  When @invoice_demo.cli.create_demo_invoice calls the service
+  Then a display string contains the invoice id and total

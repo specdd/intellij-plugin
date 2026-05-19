@@ -16,17 +16,21 @@ Can read:
   /src/test/kotlin/ai/specdd/idea/references/SpecDDPathReferenceExtractorBehaviorSpec.kt
 
 Must:
-  Use `SpecDDLineClassifier` to identify sections and body line shapes.
+  Use `@SpecDDLineClassifier` to identify sections and body line shapes.
   Track the current known section while scanning lines.
   Extract file reference candidates only when the candidate starts with `./`, `../`, or `/`.
   Treat `/` prefixes as project-root-relative paths.
   Treat `./` and `../` prefixes as spec-file-directory-relative paths.
-  Treat matching body entries in path-bearing sections as unresolved-warning candidates.
-  Extract inline path-like candidates from task lines, scenario steps, key-value lines, and ordinary body text.
-  Treat inline path-like candidates outside path-bearing entries as navigation-only candidates that do not warn when unresolved.
+  Treat every extracted explicit path candidate as an unresolved-warning candidate.
+  Extract inline path-like candidates from task lines, scenario steps, key-value lines, continuation lines, and ordinary body text.
+  Treat explicit paths on continuation lines as independent inline path references, not as descriptions attached to the preceding body entry.
+  Mark explicit paths on continuation lines as unresolved-warning candidates.
+  Mark inline path-like candidates outside path-bearing entries as unresolved-warning candidates.
+  Extract explicit path candidates inside balanced single-line inline code spans.
+  Treat explicit path candidates inside inline code spans as unresolved-warning candidates.
+  Recognize inline path candidates after whitespace, an inline code opening backtick, or common opening punctuation.
   Recognize inline candidates only when they use explicit path prefixes.
   Ignore URL text when extracting file path candidates.
-  Ignore path-like text inside balanced single-line inline code spans delimited with single backticks.
   Exclude trailing sentence periods from inline path candidate ranges.
   Ignore blank lines, comments, section headers, and non-path prose.
   Preserve exact candidate text ranges in file coordinates.

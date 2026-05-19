@@ -1,0 +1,44 @@
+Spec: Invoice Demo Package
+
+Platform: Python 3
+
+Purpose:
+  Group invoice demo domain, persistence, and orchestration code.
+
+Structure:
+  ./__init__.py: Package exports.
+  ./models.py: Invoice entities and total calculation.
+  ./models.sdd: Model contract.
+  ./repository.py: In-memory repository.
+  ./repository.sdd: Repository contract.
+  ./service.py: Invoice orchestration service.
+  ./service.sdd: Service contract.
+  ./cli.py: Minimal user-facing adapter.
+  ./cli.sdd: CLI adapter contract.
+
+Owns:
+  ./*.py
+  ./*.sdd
+
+Can modify:
+  ./*.py
+  ./*.sdd
+
+Can read:
+  ../../app.sdd
+  ../../tests/test_service.py
+  ../../tests/test_service.sdd
+
+Must:
+  Keep package modules independent from external packages.
+  Keep domain behavior deterministic.
+  Keep command-line parsing separate from service orchestration.
+
+Depends on:
+  @invoice_demo.models.Invoice
+  @invoice_demo.repository.InvoiceRepository
+  @invoice_demo.service.InvoiceService
+
+Done when:
+  Package exports expose the domain model, repository, and service.
+  Service behavior remains covered by ../../tests/test_service.py.

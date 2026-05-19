@@ -3,9 +3,6 @@ package ai.specdd.idea.highlighting
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors
 import com.intellij.openapi.editor.HighlighterColors
 import com.intellij.openapi.editor.colors.TextAttributesKey
-import com.intellij.openapi.editor.markup.TextAttributes
-import java.awt.Color
-import java.awt.Font
 
 object SpecDDHighlightingColors {
     val COMMENT: TextAttributesKey = TextAttributesKey.createTextAttributesKey(
@@ -13,50 +10,43 @@ object SpecDDHighlightingColors {
         DefaultLanguageHighlighterColors.LINE_COMMENT,
     )
 
-    @Suppress("DEPRECATION")
     val INDENT: TextAttributesKey = TextAttributesKey.createTextAttributesKey(
         "SPECDD_INDENT",
-        TextAttributes(Color(0x6E7781), null, null, null, Font.PLAIN),
+        DefaultLanguageHighlighterColors.LINE_COMMENT,
     )
 
-    @Suppress("DEPRECATION")
     val CONTINUATION_TEXT: TextAttributesKey = TextAttributesKey.createTextAttributesKey(
         "SPECDD_CONTINUATION_TEXT",
-        TextAttributes(Color(0x7A828E), null, null, null, Font.PLAIN),
+        DefaultLanguageHighlighterColors.DOC_COMMENT,
     )
 
-    @Suppress("DEPRECATION")
     val SECTION_LABEL: TextAttributesKey = TextAttributesKey.createTextAttributesKey(
         "SPECDD_SECTION_LABEL",
-        TextAttributes(Color(0x58A6FF), null, null, null, Font.BOLD),
+        DefaultLanguageHighlighterColors.IDENTIFIER,
     )
     val KEY_VALUE_KEY: TextAttributesKey = TextAttributesKey.createTextAttributesKey(
         "SPECDD_KEY_VALUE_KEY",
         DefaultLanguageHighlighterColors.INSTANCE_FIELD,
     )
 
-    @Suppress("DEPRECATION")
     val SECTION_META: TextAttributesKey = TextAttributesKey.createTextAttributesKey(
         "SPECDD_SECTION_META",
-        TextAttributes(Color(0x7A004B), null, null, null, Font.BOLD),
+        DefaultLanguageHighlighterColors.METADATA,
     )
 
-    @Suppress("DEPRECATION")
     val SECTION_POSITIVE: TextAttributesKey = TextAttributesKey.createTextAttributesKey(
         "SPECDD_SECTION_POSITIVE",
-        TextAttributes(Color(0x22863A), null, null, null, Font.BOLD),
+        DefaultLanguageHighlighterColors.MARKUP_TAG,
     )
 
-    @Suppress("DEPRECATION")
     val SECTION_NEGATIVE: TextAttributesKey = TextAttributesKey.createTextAttributesKey(
         "SPECDD_SECTION_NEGATIVE",
-        TextAttributes(Color(0xD32F2F), null, null, null, Font.BOLD),
+        DefaultLanguageHighlighterColors.IDENTIFIER,
     )
 
-    @Suppress("DEPRECATION")
     val SECTION_REQUIRED: TextAttributesKey = TextAttributesKey.createTextAttributesKey(
         "SPECDD_SECTION_REQUIRED",
-        TextAttributes(Color(0xB26A00), null, null, null, Font.BOLD),
+        DefaultLanguageHighlighterColors.KEYWORD,
     )
     val SECTION_COLON: TextAttributesKey = TextAttributesKey.createTextAttributesKey(
         "SPECDD_SECTION_COLON",
@@ -75,10 +65,9 @@ object SpecDDHighlightingColors {
         DefaultLanguageHighlighterColors.MARKUP_TAG,
     )
 
-    @Suppress("DEPRECATION")
     val TASK_BLOCKED: TextAttributesKey = TextAttributesKey.createTextAttributesKey(
         "SPECDD_TASK_BLOCKED",
-        TextAttributes(Color(0xD32F2F), null, null, null, Font.BOLD),
+        DefaultLanguageHighlighterColors.IDENTIFIER,
     )
     val TASK_QUESTION: TextAttributesKey = TextAttributesKey.createTextAttributesKey(
         "SPECDD_TASK_QUESTION",
@@ -100,16 +89,14 @@ object SpecDDHighlightingColors {
         "SPECDD_SCENARIO_STEP",
         DefaultLanguageHighlighterColors.KEYWORD,
     )
-    @Suppress("DEPRECATION")
     val CODE_SPAN: TextAttributesKey = TextAttributesKey.createTextAttributesKey(
         "SPECDD_CODE_SPAN",
-        TextAttributes(Color(0x3A6EA5), null, null, null, Font.PLAIN),
+        DefaultLanguageHighlighterColors.INLINE_PARAMETER_HINT,
     )
 
-    @Suppress("DEPRECATION")
     val CODE_SPAN_DELIMITER: TextAttributesKey = TextAttributesKey.createTextAttributesKey(
         "SPECDD_CODE_SPAN_DELIMITER",
-        TextAttributes(Color(0x7A828E), null, null, null, Font.PLAIN),
+        DefaultLanguageHighlighterColors.DOC_COMMENT_MARKUP,
     )
     val PATH: TextAttributesKey = TextAttributesKey.createTextAttributesKey(
         "SPECDD_PATH",

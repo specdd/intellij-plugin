@@ -12,7 +12,7 @@ Structure:
   ./structure: Structure view tests.
   ./documentation: Hover documentation tests.
   ./completion: Completion contributor tests.
-  ./references: Path and glob reference tests.
+  ./references: Path, glob, and explicit symbol reference tests.
 
 Owns:
   ./*.kt
@@ -40,19 +40,30 @@ Can read:
   /fixtures/*
 
 Must:
-  Use Kotest `BehaviorSpec` style.
+  Use Kotest `@BehaviorSpec` style.
   Keep tests under the `ai.specdd.idea` package namespace.
   Cover public behavior and material internal contracts required by local specs.
   Keep package-level tests aligned with the production concern they verify.
   Verify plugin metadata extension-point names and minimum IntelliJ build.
   Verify language identity, file type metadata, parser definition behavior, PSI file metadata, and code style defaults.
+  Verify code style defaults use 2-space body indentation, 4-space continuation indentation, 2-space tabs, and spaces instead of tabs.
   Verify highlighting behavior in highlighting tests.
   Verify parser facts and classifier behavior in parser tests.
   Verify validation, known-section, result-model, and annotator behavior in validation tests.
   Verify structure extraction and structure view factory behavior in structure tests.
   Verify section documentation registry and provider behavior in documentation tests.
   Verify section completion behavior in completion tests.
-  Verify path and glob reference behavior in references tests.
+  Verify path, glob, and explicit symbol reference behavior in references tests.
+  Verify explicit `@` symbol reference extraction and provider behavior in references tests.
+  Verify document-backed reference text replacement for rename refactors.
+  Verify SpecDD references search behavior for code-side rename and find usages.
+  Verify SDD-side explicit symbol rename invocation in references tests.
+  Verify unresolved explicit path and `@` symbol warnings in references tests.
+  Cover shared continuation-line classification where parser, validation, highlighting, and references depend on it.
+  Cover path extraction from continuation lines in both path-bearing and non-path-bearing sections.
+  Cover task-marker semantics as limited to the `Tasks` section where parser, validation, and highlighting depend on it.
+  Cover task body validation, including exact task indentation, required task text, task-id-only entries, and task continuations.
+  Cover scenario step indentation, including unindented steps, valid 2-space steps, and 4-space step-looking continuations.
   Maintain 100 percent coverage as required by the Gradle Kover gate.
   Prefer focused fixtures and direct behavior assertions over broad snapshot assertions.
   Use local fakes or proxies when IntelliJ platform interfaces are needed and full IDE fixtures are unnecessary.
@@ -61,4 +72,4 @@ Must not:
   Define production behavior not backed by source specs.
   Depend on network access.
   Launch the IDE or plugin verifier as part of normal unit tests.
-  Add user-facing settings or unrelated IDE feature coverage.
+  Add plugin-specific settings or unrelated IDE feature coverage.

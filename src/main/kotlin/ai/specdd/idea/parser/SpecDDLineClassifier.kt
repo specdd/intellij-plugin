@@ -1,7 +1,12 @@
 package ai.specdd.idea.parser
 
 class SpecDDLineClassifier {
-    fun classify(buffer: CharSequence, lineStart: Int, lineEnd: Int): SpecDDLineClassification {
+    fun classify(
+        buffer: CharSequence,
+        lineStart: Int,
+        lineEnd: Int,
+        currentSectionLabel: String? = null,
+    ): SpecDDLineClassification {
         val contentStart = firstNonWhitespace(buffer, lineStart, lineEnd)
         if (contentStart >= lineEnd) {
             return SpecDDLineClassification.blank(lineStart, lineEnd)
@@ -16,9 +21,15 @@ class SpecDDLineClassifier {
             return SpecDDLineClassification.section(lineStart, lineEnd, contentStart, sectionHeader)
         }
 
-        val taskMarker = findTaskMarker(buffer, contentStart, lineEnd)
-        if (null != taskMarker) {
-            return SpecDDLineClassification.task(lineStart, lineEnd, contentStart, taskMarker)
+        if (isContinuation(lineStart, contentStart)) {
+            return SpecDDLineClassification.continuation(lineStart, lineEnd, contentStart)
+        }
+
+        if (TASKS_SECTION == currentSectionLabel) {
+            val taskMarker = findTaskMarker(buffer, contentStart, lineEnd)
+            if (null != taskMarker) {
+                return SpecDDLineClassification.task(lineStart, lineEnd, contentStart, taskMarker)
+            }
         }
 
         val scenarioStep = findScenarioStep(buffer, contentStart, lineEnd)
@@ -52,6 +63,9 @@ class SpecDDLineClassifier {
 
         return null
     }
+
+    private fun isContinuation(lineStart: Int, contentStart: Int): Boolean =
+        CONTINUATION_INDENT_SIZE <= contentStart - lineStart
 
     private fun findTaskMarker(buffer: CharSequence, contentStart: Int, lineEnd: Int): SpecDDTaskMarker? {
         if (lineEnd <= contentStart || '[' != buffer[contentStart]) return null
@@ -158,7 +172,9 @@ class SpecDDLineClassifier {
     }
 
     private companion object {
+        const val TASKS_SECTION = "Tasks"
         const val TASK_MARKER_LENGTH = 3
+        const val CONTINUATION_INDENT_SIZE = 4
     }
 }
 
@@ -186,6 +202,9 @@ data class SpecDDLineClassification(
             sectionHeader: SpecDDSectionHeader,
         ): SpecDDLineClassification =
             SpecDDLineClassification(SpecDDLineKind.SECTION, lineStart, lineEnd, contentStart, sectionHeader)
+
+        fun continuation(lineStart: Int, lineEnd: Int, contentStart: Int): SpecDDLineClassification =
+            SpecDDLineClassification(SpecDDLineKind.CONTINUATION, lineStart, lineEnd, contentStart)
 
         fun task(
             lineStart: Int,
@@ -238,6 +257,7 @@ enum class SpecDDLineKind {
     BLANK,
     COMMENT,
     SECTION,
+    CONTINUATION,
     TASK,
     SCENARIO_STEP,
     KEY_VALUE,

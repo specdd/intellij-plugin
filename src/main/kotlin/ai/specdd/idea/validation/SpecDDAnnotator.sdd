@@ -18,11 +18,11 @@ Can read:
 
 Must:
   Validate only PSI files.
-  Validate only files whose file type is `SpecDDFileType`.
+  Validate only files whose file type is `@SpecDDFileType`.
   Ignore non-file PSI elements.
   Ignore non-SpecDD PSI files.
-  Validate file text through `SpecDDStructureValidator`.
-  Create IntelliJ annotations with `HighlightSeverity.ERROR`.
+  Validate file text through `@SpecDDStructureValidator`.
+  Create IntelliJ annotations with `@HighlightSeverity.ERROR`.
   Use each issue display message for the annotation message.
   Use each issue range for the annotation range.
   Expose direct text annotation support for focused tests.

@@ -33,7 +33,7 @@ Can read:
 
 Must:
   Keep documentation behavior independent from syntax highlighting and validation diagnostics.
-  Use the shared `SpecDDLineClassifier` line classification boundary.
+  Use the shared `@SpecDDLineClassifier` line classification boundary.
   Provide documentation for known SpecDD section labels.
   Show documentation only when the hover offset is within a section label range.
   Return no documentation for section values, body text, comments, tasks, scenario steps, key-value lines, and unknown labels.

@@ -1,0 +1,46 @@
+Spec: Invoice Service Tests
+
+Platform: Python 3 / pytest
+
+Purpose:
+  Cover the fixture invoice service behavior without needing external systems.
+
+Structure:
+  ./test_service.py: Pytest behavior tests.
+  ../src/invoice_demo/service.py: Service under test.
+  ../src/invoice_demo/repository.py: In-memory repository test double.
+
+Owns:
+  ./test_service.py
+  ./test_service.sdd
+
+Can modify:
+  ./test_service.py
+  ./test_service.sdd
+
+Can read:
+  ../src/invoice_demo/service.py
+  ../src/invoice_demo/service.sdd
+  ../src/invoice_demo/models.py
+  ../src/invoice_demo/repository.py
+
+Must:
+  Verify successful invoice creation persists the invoice.
+  Verify invoice totals use Decimal arithmetic.
+  Verify invalid invoice input raises ValueError.
+  Keep tests readable as fixture code, not exhaustive production tests.
+
+Depends on:
+  pytest
+  @invoice_demo.service.InvoiceService
+  @invoice_demo.repository.InvoiceRepository
+
+Scenario: create invoice test passes
+  Given @invoice_demo.service.InvoiceService receives a valid request
+  When ./test_service.py checks the returned invoice
+  Then the total is Decimal("250.00")
+  And the repository can retrieve the saved invoice
+
+Example:
+  service spec: ../src/invoice_demo/service.sdd
+  service source: ../src/invoice_demo/service.py

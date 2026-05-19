@@ -15,7 +15,7 @@ Can read:
   /src/test/kotlin/ai/specdd/idea/SpecDDLanguageBehaviorSpec.kt
 
 Must:
-  Expose a singleton `Language` instance for SpecDD.
+  Expose a singleton `@Language` instance for SpecDD.
   Use `SpecDD` as the IntelliJ language id.
   Be shared by file type, parser definition, PSI file, and code style support.
   Stay independent from highlighting and validation behavior.

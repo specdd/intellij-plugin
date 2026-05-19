@@ -3,7 +3,7 @@ Spec: SpecDD Highlighting Colors
 Platform: IntelliJ Platform / Kotlin
 
 Purpose:
-  Define SpecDD highlighting attribute keys and default visual attributes.
+  Define SpecDD highlighting attribute keys and theme-aware fallback attributes.
 
 Owns:
   ./SpecDDHighlightingColors.kt
@@ -22,22 +22,15 @@ Must:
   Define separate keys for default section labels, body key-value keys, meta section labels, positive section labels, negative section labels, required section labels, section colons, and section values.
   Define separate task marker keys for done, open, blocked, question, skipped, and invalid states.
   Define task id, scenario step, inline code span content, inline code span delimiter, path, symbol, and bad-character keys.
-  Use default section label color light blue `#58A6FF` with bold text.
-  Use meta section label color `#7A004B` with bold text.
-  Use positive section label color `#22863A` with bold text.
-  Use negative section label color `#D32F2F` with bold text.
-  Use required section label color `#B26A00` with bold text.
-  Use indentation color muted gray `#6E7781`.
-  Use continuation text color muted gray `#7A828E`.
-  Use inline code span content color blue-gray `#3A6EA5`.
-  Use inline code span delimiter color muted gray `#7A828E`.
-  Use blocked task marker color `#D32F2F` with bold text and no diagnostic underline.
+  Use non-deprecated `@TextAttributesKey` registration APIs.
+  Assign each custom key a platform fallback key so normal editor schemes remain usable.
+  Do not use bad-character fallbacks for valid blocked task or negative section tokens.
   Use platform bad-character fallback for invalid task markers and bad characters.
   Keep body key-value keys distinct from top-level section label keys.
-  Cover external names, default attributes, distinct keys, blocked marker attributes, and invalid marker fallback in tests.
+  Cover external names, fallback keys, distinct keys, and invalid marker fallback in tests.
 
 Must not:
   Tokenize text.
   Decide section label groups.
   Report validation diagnostics.
-  Add user-facing settings.
+  Add plugin-specific settings.

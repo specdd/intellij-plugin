@@ -30,12 +30,13 @@ Can modify:
 
 Can read:
   /src/main/kotlin/ai/specdd/idea/parser/*
+  /src/main/kotlin/ai/specdd/idea/references/SpecDDSymbolReferenceExtractor.kt
   /src/main/kotlin/ai/specdd/idea/SpecDDFileType.kt
   /src/test/kotlin/ai/specdd/idea/completion/*
 
 Must:
   Provide basic completion for known SpecDD section labels.
-  Reuse `SpecDDLanguageFacts.sectionLabels` as the section label source.
+  Reuse `@SpecDDLanguageFacts.sectionLabels` as the section label source.
   Propose section labels only for SpecDD files.
   Propose section labels only for basic completion.
   Propose section labels on unindented top-level lines.
@@ -44,10 +45,14 @@ Must:
   Support multi-word partial prefixes such as `Can m`.
   Reject completion on indented lines because section headers must start at column 0.
   Reject completion for comments, task lines, body text, scenario steps, key-value lines, and text that cannot be a section label prefix.
-  Insert completed sections as header text ending with `: `.
+  Insert completed inline-capable sections as header text ending with `: `.
+  Insert completed block sections as header text ending with `:`.
+  Treat `Spec`, `Platform`, `Scenario`, and `Example` as inline-capable sections for insertion text.
   Provide file path completion from paths under the current project root.
   Complete `./` and `../` path prefixes relative to the current `.sdd` file directory.
-  Provide local symbol completion from symbol-like tokens already present in the current SpecDD file.
+  Provide local symbol completion from explicit `@` symbol references already present in the current SpecDD file.
+  Trigger local symbol completion only on prefixes that start with `@`.
+  Complete explicit symbol reference text including the leading `@`.
   Do not require cross-language symbol indexes for the first local symbol completion implementation.
   Cover completion prefix rules and contributor behavior with Kotest BehaviorSpec tests.
 

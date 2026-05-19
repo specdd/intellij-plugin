@@ -18,8 +18,10 @@ class SpecDDStructureModelBehaviorSpec : BehaviorSpec({
                     |Scenario: first
                     |  Given a spec
                     |Scenario: second
-                    |Example:
+                    |Example: titled example
                     |  output: generated/result.json
+                    |Example:
+                    |  output: generated/other.json
                 """.trimMargin()
 
                 model.sections(text).map { section -> section.displayName }.shouldContainExactly(
@@ -27,6 +29,7 @@ class SpecDDStructureModelBehaviorSpec : BehaviorSpec({
                     "Purpose",
                     "Scenario: first",
                     "Scenario: second",
+                    "Example: titled example",
                     "Example",
                 )
             }

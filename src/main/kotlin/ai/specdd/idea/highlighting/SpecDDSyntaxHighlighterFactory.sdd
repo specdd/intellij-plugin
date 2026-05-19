@@ -15,8 +15,8 @@ Can read:
   /src/test/kotlin/ai/specdd/idea/highlighting/SpecDDSyntaxHighlighterFactoryBehaviorSpec.kt
 
 Must:
-  Extend IntelliJ `SyntaxHighlighterFactory`.
-  Return a new `SpecDDSyntaxHighlighter` from `getSyntaxHighlighter`.
+  Extend IntelliJ `@SyntaxHighlighterFactory`.
+  Return a new `@SpecDDSyntaxHighlighter` from `getSyntaxHighlighter`.
   Accept nullable project and virtual-file inputs.
   Stay stateless.
   Cover factory creation behavior in tests.

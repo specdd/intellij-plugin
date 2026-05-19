@@ -37,13 +37,33 @@ class SpecDDPluginMetadataBehaviorSpec : BehaviorSpec({
                 val extensionNames = pluginXml.extensionElementNames()
 
                 extensionNames.shouldContain("lang.syntaxHighlighterFactory")
+                extensionNames.shouldContain("colorSettingsPage")
                 extensionNames.shouldContain("lang.parserDefinition")
                 extensionNames.shouldContain("langCodeStyleSettingsProvider")
                 extensionNames.shouldContain("lang.psiStructureViewFactory")
                 extensionNames.shouldContain("documentationProvider")
                 extensionNames.shouldContain("completion.contributor")
                 extensionNames.shouldContain("psi.referenceContributor")
+                extensionNames.shouldContain("referencesSearch")
+                extensionNames.shouldContain("renameHandler")
                 extensionNames.shouldNotContain("syntaxHighlighterFactory")
+            }
+        }
+
+        `when`("color scheme defaults are registered") {
+            then("it registers bundled default and Darcula text attributes") {
+                val pluginXml = readPluginXml()
+                val attributes = pluginXml
+                    .getElementsByTagName("additionalTextAttributes")
+
+                val registered = (0 until attributes.length)
+                    .map { attributes.item(it).attributes }
+                    .map { attribute ->
+                        attribute.getNamedItem("scheme").nodeValue to attribute.getNamedItem("file").nodeValue
+                    }
+
+                registered.shouldContain("Default" to "colorSchemes/SpecDDDefault.xml")
+                registered.shouldContain("Darcula" to "colorSchemes/SpecDDDarcula.xml")
             }
         }
 
@@ -58,6 +78,33 @@ class SpecDDPluginMetadataBehaviorSpec : BehaviorSpec({
                 referenceContributor.getNamedItem("implementation").nodeValue shouldBe
                         "ai.specdd.idea.references.SpecDDPathReferenceContributor"
                 referenceContributor.getNamedItem("language").nodeValue shouldBe "SpecDD"
+            }
+        }
+
+        `when`("references search is registered") {
+            then("it uses the references search implementation attribute") {
+                val pluginXml = readPluginXml()
+                val referencesSearch = pluginXml
+                    .getElementsByTagName("referencesSearch")
+                    .item(0)
+                    .attributes
+
+                referencesSearch.getNamedItem("implementation").nodeValue shouldBe
+                        "ai.specdd.idea.references.SpecDDReferencesSearch"
+            }
+        }
+
+        `when`("reference rename handler is registered") {
+            then("it is ordered before the default rename handler") {
+                val pluginXml = readPluginXml()
+                val renameHandler = pluginXml
+                    .getElementsByTagName("renameHandler")
+                    .item(0)
+                    .attributes
+
+                renameHandler.getNamedItem("implementation").nodeValue shouldBe
+                        "ai.specdd.idea.references.SpecDDReferenceRenameHandler"
+                renameHandler.getNamedItem("order").nodeValue shouldBe "first"
             }
         }
 

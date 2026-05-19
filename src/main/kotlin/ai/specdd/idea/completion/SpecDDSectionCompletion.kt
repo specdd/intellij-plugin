@@ -44,10 +44,12 @@ data class SpecDDSectionCompletionResult(
 data class SpecDDSectionCompletionVariant(
     val label: String,
 ) {
-    val lookupString: String = "$label: "
+    val lookupString: String = if (label in INLINE_VALUE_SECTIONS) "$label: " else "$label:"
 
     fun toLookupElement(): LookupElement =
         LookupElementBuilder
             .create(lookupString)
             .withPresentableText(label)
 }
+
+private val INLINE_VALUE_SECTIONS = setOf("Spec", "Platform", "Scenario", "Example")
