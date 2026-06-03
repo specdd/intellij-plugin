@@ -70,36 +70,46 @@ class SpecDDLineClassifier {
     private fun findTaskMarker(buffer: CharSequence, contentStart: Int, lineEnd: Int): SpecDDTaskMarker? {
         if (lineEnd <= contentStart || '[' != buffer[contentStart]) return null
 
-        val markerEnd = findTaskMarkerEnd(buffer, contentStart, lineEnd) ?: return null
-        val markerBody = buffer[contentStart + 1]
-        val status = if (TASK_MARKER_LENGTH == markerEnd - contentStart) {
-            if (markerBody !in SpecDDLanguageFacts.taskMarkerBodies) SpecDDTaskStatus.INVALID else
-                SpecDDTaskStatus.fromMarkerBody(markerBody)
-        } else {
+        val closedMarkerEnd = findTaskMarkerEnd(buffer, contentStart, lineEnd)
+        val markerEnd = closedMarkerEnd ?: lineEnd
+        val malformed = null == closedMarkerEnd
+        val status = if (malformed) {
             SpecDDTaskStatus.INVALID
+        } else {
+            taskStatus(buffer, contentStart, markerEnd)
         }
+        val taskId = if (malformed) null else findTaskId(buffer, markerEnd, lineEnd)
 
-        val taskIdStart = firstNonWhitespace(buffer, markerEnd, lineEnd)
+        return SpecDDTaskMarker(contentStart, markerEnd, status, taskId, malformed)
+    }
+
+    private fun taskStatus(buffer: CharSequence, contentStart: Int, markerEnd: Int): SpecDDTaskStatus {
+        if (TASK_MARKER_LENGTH != markerEnd - contentStart) return SpecDDTaskStatus.INVALID
+
+        val markerBody = buffer[contentStart + 1]
+        if (markerBody !in SpecDDLanguageFacts.taskMarkerBodies) return SpecDDTaskStatus.INVALID
+        return SpecDDTaskStatus.fromMarkerBody(markerBody)
+    }
+
+    private fun findTaskId(buffer: CharSequence, markerEnd: Int, lineEnd: Int): SpecDDTaskId? {
+        if (markerEnd >= lineEnd || ' ' != buffer[markerEnd]) return null
+
+        val taskIdStart = firstNonWhitespace(buffer, markerEnd + 1, lineEnd)
         if (taskIdStart >= lineEnd || '#' != buffer[taskIdStart]) {
-            return SpecDDTaskMarker(contentStart, markerEnd, status, null)
+            return null
         }
 
         val taskIdEnd = consumeDigits(buffer, taskIdStart + 1, lineEnd)
         if (taskIdStart + 1 >= taskIdEnd) {
-            return SpecDDTaskMarker(contentStart, markerEnd, status, null)
+            return null
         }
 
-        return SpecDDTaskMarker(contentStart, markerEnd, status, SpecDDTaskId(taskIdStart, taskIdEnd))
+        return SpecDDTaskId(taskIdStart, taskIdEnd)
     }
 
     private fun findTaskMarkerEnd(buffer: CharSequence, contentStart: Int, lineEnd: Int): Int? {
-        val supportedMarkerEnd = contentStart + TASK_MARKER_LENGTH
-        if (supportedMarkerEnd <= lineEnd && ']' == buffer[supportedMarkerEnd - 1]) {
-            return supportedMarkerEnd
-        }
-
         var offset = contentStart + 1
-        while (offset < lineEnd && !buffer[offset].isWhitespace()) {
+        while (offset < lineEnd) {
             if (']' == buffer[offset]) return offset + 1
             offset += 1
         }
@@ -278,6 +288,7 @@ data class SpecDDTaskMarker(
     val markerEnd: Int,
     val status: SpecDDTaskStatus,
     val taskId: SpecDDTaskId?,
+    val malformed: Boolean = false,
 )
 
 enum class SpecDDTaskStatus {

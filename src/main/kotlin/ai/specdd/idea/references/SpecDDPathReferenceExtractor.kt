@@ -116,13 +116,20 @@ class SpecDDPathReferenceExtractor(
         range: TextRange,
         candidates: MutableList<SpecDDPathCandidate>,
     ) {
-        val value = text.subSequence(range.startOffset, range.endOffset).toString().trim()
-        if (!hasExplicitPathPrefix(value)) return
+        val line = text.subSequence(range.startOffset, range.endOffset).toString()
+        val trimmedStartInLine = line.indexOfFirst { character -> !character.isWhitespace() }
+        if (-1 == trimmedStartInLine) return
+        if (!hasExplicitPathPrefix(line.substring(trimmedStartInLine))) return
 
-        val trimmedStart = range.startOffset + text.subSequence(range.startOffset, range.endOffset).indexOf(value)
+        val match = PATH_PATTERN.find(line, trimmedStartInLine) ?: return
+        if (trimmedStartInLine != match.range.first) return
+
+        val matchEnd = trimmedInlinePathEnd(line, match.range.last + 1)
+        if (matchEnd <= match.range.first) return
+
         addCandidate(
             text = text,
-            range = TextRange(trimmedStart, trimmedStart + value.length),
+            range = TextRange(range.startOffset + match.range.first, range.startOffset + matchEnd),
             candidates = candidates,
             forcePathSyntax = true,
             warnIfUnresolved = true,
@@ -165,7 +172,7 @@ class SpecDDPathReferenceExtractor(
 
     private fun trimmedInlinePathEnd(line: String, endExclusive: Int): Int {
         var end = endExclusive
-        while (end > 0 && '.' == line[end - 1]) {
+        while (end > 0 && line[end - 1] in TRAILING_PATH_PUNCTUATION) {
             end -= 1
         }
         return end
@@ -223,10 +230,11 @@ private val INLINE_PATH_KINDS = setOf(
 )
 
 private val PATH_PATTERN = Regex(
-    """(?:\./|\.\./|/)[A-Za-z0-9_*?.{}\[\]-]+(?:/[A-Za-z0-9_*?.{}\[\]-]+)*""",
+    """(?:\./|\.\./|/)[A-Za-z0-9_*?.,{}\[\]-]+(?:/[A-Za-z0-9_*?.,{}\[\]-]+)*""",
 )
 private val URL_PATTERN = Regex("""\b[A-Za-z][A-Za-z0-9+.-]*://\S+""")
 private val OPENING_PUNCTUATION = setOf('(', '[', '{', '<', '"', '\'')
+private val TRAILING_PATH_PUNCTUATION = setOf('.', ',')
 
 private fun hasExplicitPathPrefix(text: String): Boolean =
     text.startsWith("./") || text.startsWith("../") || text.startsWith("/")

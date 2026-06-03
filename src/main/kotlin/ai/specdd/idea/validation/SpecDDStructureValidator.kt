@@ -77,7 +77,19 @@ class SpecDDStructureValidator(
 
                 SpecDDLineKind.TASK -> {
                     val taskMarker = classification.taskMarker ?: return@forEachLine
-                    if (SpecDDTaskStatus.INVALID == taskMarker.status) {
+                    if (taskMarker.malformed) {
+                        issues.add(
+                            SpecDDValidationIssue(
+                                range = TextRange(taskMarker.markerStart, taskMarker.markerEnd),
+                                message = "Malformed SpecDD task marker '${
+                                    text.subSequence(
+                                        taskMarker.markerStart,
+                                        taskMarker.markerEnd,
+                                    )
+                                }'.",
+                            ),
+                        )
+                    } else if (SpecDDTaskStatus.INVALID == taskMarker.status) {
                         issues.add(
                             SpecDDValidationIssue(
                                 range = TextRange(taskMarker.markerStart, taskMarker.markerEnd),
@@ -90,7 +102,9 @@ class SpecDDStructureValidator(
                             ),
                         )
                     }
-                    val taskTextIssue = validateTaskText(text, lineEnd, taskMarker)
+                    val taskSeparatorIssue = validateTaskSeparators(text, lineEnd, taskMarker)
+                    if (null != taskSeparatorIssue) issues.add(taskSeparatorIssue)
+                    val taskTextIssue = if (taskMarker.malformed) null else validateTaskText(text, lineEnd, taskMarker)
                     if (null != taskTextIssue) issues.add(taskTextIssue)
                     val issue = validateNonSectionLine(
                         text = text,
@@ -102,7 +116,12 @@ class SpecDDStructureValidator(
                         hasPreviousBodyEntry = currentSectionHasBodyEntry,
                     )
                     if (null != issue) issues.add(issue)
-                    if (null == issue && null == taskTextIssue && classification.kind in BODY_ENTRY_LINE_KINDS) {
+                    if (
+                        null == issue &&
+                        null == taskSeparatorIssue &&
+                        null == taskTextIssue &&
+                        classification.kind in BODY_ENTRY_LINE_KINDS
+                    ) {
                         currentSectionHasBodyEntry = true
                     }
                 }
@@ -233,14 +252,17 @@ class SpecDDStructureValidator(
             return validateMissingColon(text, contentStart, lineEnd)
         }
 
-        val label = text.subSequence(contentStart, colonOffset).toString().trimEnd()
+        val rawLabel = text.subSequence(contentStart, colonOffset).toString()
+        val label = rawLabel.trimEnd()
         if (!isSectionCandidate(label)) return null
 
         if (SpecDDKnownSections.isKnown(label)) {
-            return SpecDDValidationIssue(
-                range = TextRange(contentStart, contentStart + label.length),
-                message = "Section '$label' is missing ':'.",
-            )
+            if (rawLabel.length != label.length) {
+                return SpecDDValidationIssue(
+                    range = TextRange(contentStart + label.length, colonOffset),
+                    message = "Whitespace before ':' in section headers is invalid.",
+                )
+            }
         }
 
         if (lineStart != contentStart) return null
@@ -336,6 +358,31 @@ class SpecDDStructureValidator(
         return SpecDDValidationIssue(
             range = TextRange(contentStart, lineEnd),
             message = "Section '$label' does not support inline text after ':'.",
+        )
+    }
+
+    private fun validateTaskSeparators(
+        text: CharSequence,
+        lineEnd: Int,
+        taskMarker: SpecDDTaskMarker,
+    ): SpecDDValidationIssue? {
+        if (taskMarker.malformed) return null
+        if (taskMarker.markerEnd >= lineEnd) return null
+
+        if (' ' != text[taskMarker.markerEnd]) {
+            return SpecDDValidationIssue(
+                range = TextRange(taskMarker.markerEnd, taskMarker.markerEnd + 1),
+                message = "Task marker must be followed by a space.",
+            )
+        }
+
+        val taskId = taskMarker.taskId ?: return null
+        if (taskId.end >= lineEnd) return null
+        if (' ' == text[taskId.end]) return null
+
+        return SpecDDValidationIssue(
+            range = TextRange(taskId.end, taskId.end + 1),
+            message = "Task id must be followed by a space.",
         )
     }
 

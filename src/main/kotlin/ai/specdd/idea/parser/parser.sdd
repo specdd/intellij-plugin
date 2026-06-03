@@ -53,6 +53,8 @@ Must:
   Recognize an optional task id only when non-whitespace text after the task marker starts with `#` followed by at least one digit.
   Report task id start and end offsets when a numeric task id is present.
   Ignore empty hash ids such as `#` with no digits.
+  Classify any `Tasks` body entry whose first non-whitespace character is `[` as task-like.
+  Report unclosed task marker candidates as malformed task markers.
   Classify scenario step lines before key-value lines and text.
   Recognize scenario step keywords `Given`, `When`, `Then`, `And`, and `But`.
   Require a scenario step keyword to be followed by end of line or whitespace.

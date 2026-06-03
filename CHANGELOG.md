@@ -4,6 +4,16 @@
 
 ## [Unreleased]
 
+## [1.0.3] - 2026-06-04
+
+### Fixed
+
+- Align `Tasks` parsing and validation with the SpecDD language grammar by requiring task-marker and task-id separators.
+- Report malformed task markers in `Tasks` as task diagnostics instead of falling through as generic text.
+- Extract and highlight brace-alternative glob paths such as `./src/{main,test}.sdd`.
+- Trim terminal `:` from explicit `@` symbol references while preserving internal symbol colons.
+- Report whitespace before `:` in section headers with a specific validation diagnostic.
+
 ## [1.0.2] - 2026-05-19
 
 ### Added

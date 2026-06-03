@@ -218,9 +218,38 @@ class SpecDDLineClassifierBehaviorSpec : BehaviorSpec({
         }
 
         `when`("a task marker candidate is not closed before whitespace") {
-            then("it remains ordinary text") {
-                classifier.classify("  [invalid task marker", 0, 21, "Tasks") shouldBe
-                        SpecDDLineClassification.text(lineStart = 0, lineEnd = 21, contentStart = 2)
+            then("it reports a malformed task marker") {
+                val line = "  [invalid task marker"
+
+                classifier.classify(line, 0, line.length, "Tasks") shouldBe
+                        SpecDDLineClassification.task(
+                            lineStart = 0,
+                            lineEnd = line.length,
+                            contentStart = 2,
+                            taskMarker = SpecDDTaskMarker(2, line.length, SpecDDTaskStatus.INVALID, null, true),
+                        )
+            }
+        }
+
+        `when`("task marker separators are missing") {
+            then("it still classifies the line as task-like without accepting malformed ids") {
+                val missingMarkerSeparator = "  [x]#12 Done"
+                classifier.classify(missingMarkerSeparator, 0, missingMarkerSeparator.length, "Tasks") shouldBe
+                        SpecDDLineClassification.task(
+                            lineStart = 0,
+                            lineEnd = missingMarkerSeparator.length,
+                            contentStart = 2,
+                            taskMarker = SpecDDTaskMarker(2, 5, SpecDDTaskStatus.DONE, null),
+                        )
+
+                val missingIdSeparator = "  [x] #12Done"
+                classifier.classify(missingIdSeparator, 0, missingIdSeparator.length, "Tasks") shouldBe
+                        SpecDDLineClassification.task(
+                            lineStart = 0,
+                            lineEnd = missingIdSeparator.length,
+                            contentStart = 2,
+                            taskMarker = SpecDDTaskMarker(2, 5, SpecDDTaskStatus.DONE, SpecDDTaskId(6, 9)),
+                        )
             }
         }
 

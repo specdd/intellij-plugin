@@ -107,6 +107,34 @@ class SpecDDPathReferenceExtractorBehaviorSpec : BehaviorSpec({
             }
         }
 
+        `when`("path candidates use brace alternatives") {
+            then("it preserves comma-separated alternatives without trailing punctuation") {
+                val text = """
+                    |References:
+                    |  ./src/{main,test}.sdd, and /src/{main,test}/**/*.kt.
+                """.trimMargin()
+
+                extractor.extract(text).shouldContainExactly(
+                    SpecDDPathCandidate(
+                        "./src/{main,test}.sdd",
+                        TextRange(
+                            text.indexOf("./src/{main,test}.sdd"),
+                            text.indexOf("./src/{main,test}.sdd") + "./src/{main,test}.sdd".length,
+                        ),
+                        true,
+                    ),
+                    SpecDDPathCandidate(
+                        "/src/{main,test}/**/*.kt",
+                        TextRange(
+                            text.indexOf("/src/{main,test}/**/*.kt"),
+                            text.indexOf("/src/{main,test}/**/*.kt") + "/src/{main,test}/**/*.kt".length,
+                        ),
+                        true,
+                    ),
+                )
+            }
+        }
+
         `when`("path-bearing key-value sections use bare names") {
             then("it treats the keys as concrete path candidates") {
                 val text = """

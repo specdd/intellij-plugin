@@ -29,6 +29,7 @@ Must:
   Do not limit unknown section detection to uppercase labels.
   Include likely typo suggestions from `@SpecDDKnownSections`.
   Report missing `:` when a text line exactly matches a known section label.
+  Report whitespace before `:` in known section header candidates.
   Require the first known section in a file to be `Spec`.
   Report a structure issue when the first known section is not `Spec`.
   Require section headers to start at column 0.
@@ -58,6 +59,8 @@ Must:
   Treat task-looking lines outside `Tasks` as ordinary text when the containing section accepts text.
   Validate task marker states only inside `Tasks`.
   Require task entries in `Tasks` to use exactly 2 spaces of indentation.
+  Require task markers to be followed by a literal space before task text or task id when more text follows the marker.
+  Require task ids to be followed by a literal space before task text when more text follows the task id.
   Require task entries in `Tasks` to contain nonempty task text after the marker and optional numeric task id.
   Report marker-only task entries as errors.
   Report task-id-only task entries as errors.
@@ -70,8 +73,9 @@ Must:
   Report duplicate `Scenario` inline values on the second and later matching `Scenario` section.
   Report duplicate known sections other than `Scenario` and `Example`.
   Report invalid task marker states as errors.
+  Report malformed task markers in `Tasks` as errors.
   Report `[invalid]` and unsupported short task states such as `[z]` as invalid task states.
-  Cover valid snippets, continuation lines, exact body entry indentation, task entry indentation, scenario step indentation, missing task text, task-id-only entries, comment indentation, task-looking text outside `Tasks`, required scenario titles, optional example titles, unknown sections, typo suggestions, missing colons, unsupported inline text, unsupported body lines, duplicate sections, indentation errors, section indentation, invalid task states, first-section structure, line endings, empty text, comment-only text, and text before the first section in tests.
+  Cover valid snippets, continuation lines, exact body entry indentation, task entry indentation, task separator validation, scenario step indentation, missing task text, task-id-only entries, comment indentation, task-looking text outside `Tasks`, required scenario titles, optional example titles, unknown sections, typo suggestions, missing colons, whitespace before section colons, unsupported inline text, unsupported body lines, duplicate sections, indentation errors, section indentation, invalid task states, malformed task markers, first-section structure, line endings, empty text, comment-only text, and text before the first section in tests.
 
 Must not:
   Define known section labels directly.

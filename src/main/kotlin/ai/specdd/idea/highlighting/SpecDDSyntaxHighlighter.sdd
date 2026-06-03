@@ -55,8 +55,11 @@ Must:
   Highlight path-like values only when they use explicit `./`, `../`, or `/` prefixes.
   Do not highlight unprefixed filenames, slash paths, dependency names, class names, service names, symbols, or prose as paths.
   Do not highlight URL hosts or URL path fragments as file paths.
+  Highlight brace-alternative glob candidates such as `./src/{main,test}.sdd` as one path token.
+  Exclude trailing sentence periods and commas from path highlight ranges.
   Highlight only explicit `@` symbol references as symbol syntax.
   Do not highlight plain dotted code symbols or call-like dotted symbols as symbol syntax.
+  Exclude terminal `.` and `:` punctuation from symbol highlight ranges when followed by whitespace, end of line, or closing punctuation.
   Highlight `Spec` and `Platform` as meta section labels.
   Highlight `Scenario`, `Purpose`, `Structure`, `Owns`, `References`, `Depends on`, `Tasks`, `Done when`, and `Example` as default section labels.
   Highlight `Can modify`, `Can read`, `Exposes`, `Accepts`, `Returns`, and `Handles` as positive section labels.

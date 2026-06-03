@@ -342,6 +342,15 @@ class SpecDDSyntaxHighlighterBehaviorSpec : BehaviorSpec({
             }
         }
 
+        `when`("body text contains brace-alternative globs") {
+            then("it highlights the complete glob without trailing punctuation") {
+                val tokens = highlighter.highlight("  see ./src/{main,test}.sdd, and /src/{main,test}/**/*.kt.")
+
+                tokens.withKey(SpecDDHighlightingColors.PATH).map { it.text } shouldBe
+                        listOf("./src/{main,test}.sdd", "/src/{main,test}/**/*.kt")
+            }
+        }
+
         `when`("body text contains unprefixed path-like prose and URLs") {
             then("it does not highlight them as file paths") {
                 val tokens = highlighter.highlight(
@@ -406,6 +415,15 @@ class SpecDDSyntaxHighlighterBehaviorSpec : BehaviorSpec({
             }
         }
 
+        `when`("explicit symbols end with colon punctuation") {
+            then("it trims terminal colons but keeps internal colons") {
+                val tokens = highlighter.highlight("  See (@Symbol:) and (@Namespace:Symbol:)")
+
+                tokens.withKey(SpecDDHighlightingColors.SYMBOL).map { it.text } shouldBe
+                        listOf("@Symbol", "@Namespace:Symbol")
+            }
+        }
+
         `when`("an invalid task state is lexed") {
             then("it highlights the full invalid state") {
                 val tokens = highlighter.highlight("Tasks:\n  [invalid] #9 unsupported state")
@@ -414,6 +432,15 @@ class SpecDDSyntaxHighlighterBehaviorSpec : BehaviorSpec({
                         ("[invalid]" to listOf(SpecDDHighlightingColors.TASK_INVALID))
                 tokens.map { it.text to it.keys } shouldContain
                         ("#9" to listOf(SpecDDHighlightingColors.TASK_ID))
+            }
+        }
+
+        `when`("a malformed task marker is lexed inside Tasks") {
+            then("it highlights the malformed marker as invalid") {
+                val tokens = highlighter.highlight("Tasks:\n  [invalid task marker")
+
+                tokens.map { it.text to it.keys } shouldContain
+                        ("[invalid task marker" to listOf(SpecDDHighlightingColors.TASK_INVALID))
             }
         }
     }

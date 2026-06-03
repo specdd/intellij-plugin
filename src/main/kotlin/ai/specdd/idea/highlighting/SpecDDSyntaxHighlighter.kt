@@ -236,9 +236,12 @@ private class SpecDDTokenBuilder(
 
         for (match in PATH_PATTERN.findAll(line)) {
             val start = contentStart + match.range.first
-            val end = contentStart + match.range.last + 1
+            val matchEnd = trimmedPathEnd(line, match.range.last + 1)
+            if (matchEnd <= match.range.first) continue
+
+            val end = contentStart + matchEnd
             if (!hasAllowedPathBoundary(start)) continue
-            if (urlRanges.any { urlRange -> match.range.first <= urlRange.last && urlRange.first < match.range.last + 1 }) {
+            if (urlRanges.any { urlRange -> match.range.first <= urlRange.last && urlRange.first < matchEnd }) {
                 continue
             }
             if (isRangeFree(start, end)) {
@@ -254,6 +257,14 @@ private class SpecDDTokenBuilder(
         return previous.isWhitespace() || previous in PATH_OPENING_PUNCTUATION
     }
 
+    private fun trimmedPathEnd(line: String, endExclusive: Int): Int {
+        var end = endExclusive
+        while (end > 0 && line[end - 1] in TRAILING_PATH_PUNCTUATION) {
+            end -= 1
+        }
+        return end
+    }
+
     private fun addSymbolMatches(contentStart: Int, lineEnd: Int) {
         var offset = contentStart
         while (offset < lineEnd) {
@@ -267,7 +278,7 @@ private class SpecDDTokenBuilder(
             while (symbolEnd < lineEnd && isSymbolPart(buffer[symbolEnd])) {
                 symbolEnd += 1
             }
-            val trimmedEnd = trimSentencePeriod(symbolStart, symbolEnd, lineEnd)
+            val trimmedEnd = trimTerminalSymbolPunctuation(symbolStart, symbolEnd, lineEnd)
             if (offset < trimmedEnd && isRangeFree(offset, trimmedEnd)) {
                 classifiedTokens.add(SpecDDToken(offset, trimmedEnd, SpecDDHighlightingTokenTypes.SYMBOL))
             }
@@ -284,8 +295,11 @@ private class SpecDDTokenBuilder(
         return previous.isWhitespace() || previous in SYMBOL_OPENING_PUNCTUATION
     }
 
-    private fun trimSentencePeriod(symbolStart: Int, symbolEnd: Int, lineEnd: Int): Int {
-        if (symbolStart >= symbolEnd || '.' != buffer[symbolEnd - 1]) return symbolEnd
+    private fun trimTerminalSymbolPunctuation(symbolStart: Int, symbolEnd: Int, lineEnd: Int): Int {
+        if (symbolStart >= symbolEnd) return symbolEnd
+
+        val terminal = buffer[symbolEnd - 1]
+        if ('.' != terminal && ':' != terminal) return symbolEnd
         if (symbolEnd >= lineEnd) return symbolEnd - 1
 
         val next = buffer[symbolEnd]
@@ -411,10 +425,11 @@ private class SpecDDTokenBuilder(
 private val TASK_ID_PATTERN = Regex("""#\d+\b""")
 private const val NO_OFFSET = -1
 private val PATH_PATTERN = Regex(
-    """(?:\./|\.\./|/)[A-Za-z0-9_*?.{}\[\].-]+(?:/[A-Za-z0-9_*?.{}\[\].-]+)*""",
+    """(?:\./|\.\./|/)[A-Za-z0-9_*?.,{}\[\].-]+(?:/[A-Za-z0-9_*?.,{}\[\].-]+)*""",
 )
 private val URL_PATTERN = Regex("""\b[A-Za-z][A-Za-z0-9+.-]*://\S+""")
 private val PATH_OPENING_PUNCTUATION = setOf('(', '[', '{', '<', '"', '\'', '`')
+private val TRAILING_PATH_PUNCTUATION = setOf('.', ',')
 private val SYMBOL_OPENING_PUNCTUATION = setOf('(', '[', '{', '<', '"', '\'')
 private val SYMBOL_CLOSING_PUNCTUATION = setOf(')', ']', '}', '>', '"', '\'')
 

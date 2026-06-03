@@ -89,9 +89,9 @@ class SpecDDStructureValidatorBehaviorSpec : BehaviorSpec({
         }
 
         `when`("known section labels have whitespace before the colon") {
-            then("it reports the label as missing the required separator") {
+            then("it reports whitespace before the section separator") {
                 validator.validate("Spec : Example").issues.shouldContainExactly(
-                    SpecDDValidationIssue(TextRange(0, 4), "Section 'Spec' is missing ':'."),
+                    SpecDDValidationIssue(TextRange(4, 5), "Whitespace before ':' in section headers is invalid."),
                 )
             }
         }
@@ -284,6 +284,37 @@ class SpecDDStructureValidatorBehaviorSpec : BehaviorSpec({
                     SpecDDValidationIssue(
                         range = TextRange(text.indexOf("#1"), text.indexOf("#1") + "#1".length),
                         message = "Task entries must include task text.",
+                    ),
+                )
+            }
+        }
+
+        `when`("task marker and task id separators are missing") {
+            then("it reports strict task separator issues") {
+                val text = """
+                    |Spec: Example
+                    |Tasks:
+                    |  [ ]No space after marker.
+                    |  [x]#12 Missing marker separator.
+                    |  [x] #12Missing task id separator.
+                """.trimMargin()
+
+                val firstMarkerEnd = text.indexOf("[ ]No space") + "[ ]".length
+                val secondMarkerEnd = text.indexOf("[x]#12") + "[x]".length
+                val taskIdEnd = text.indexOf("#12Missing") + "#12".length
+
+                validator.validate(text).issues.shouldContainExactly(
+                    SpecDDValidationIssue(
+                        range = TextRange(firstMarkerEnd, firstMarkerEnd + 1),
+                        message = "Task marker must be followed by a space.",
+                    ),
+                    SpecDDValidationIssue(
+                        range = TextRange(secondMarkerEnd, secondMarkerEnd + 1),
+                        message = "Task marker must be followed by a space.",
+                    ),
+                    SpecDDValidationIssue(
+                        range = TextRange(taskIdEnd, taskIdEnd + 1),
+                        message = "Task id must be followed by a space.",
                     ),
                 )
             }
@@ -506,6 +537,20 @@ class SpecDDStructureValidatorBehaviorSpec : BehaviorSpec({
                 validator.validate(text).issues.shouldContainExactly(
                     issueAt(text, "[invalid]", "Invalid SpecDD task state '[invalid]'."),
                     issueAt(text, "[z]", "Invalid SpecDD task state '[z]'."),
+                )
+            }
+        }
+
+        `when`("malformed task markers are validated") {
+            then("it reports malformed task marker issues") {
+                val text = """
+                    |Spec: Example
+                    |Tasks:
+                    |  [invalid task marker
+                """.trimMargin()
+
+                validator.validate(text).issues.shouldContainExactly(
+                    issueAt(text, "[invalid task marker", "Malformed SpecDD task marker '[invalid task marker'."),
                 )
             }
         }

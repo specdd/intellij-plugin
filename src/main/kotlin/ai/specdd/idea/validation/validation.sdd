@@ -40,6 +40,7 @@ Can read:
 Must:
   Validate known SpecDD section names.
   Report unsupported section names and likely section-name typos.
+  Report whitespace before `:` in known section header candidates.
   Keep validation behavior independent from syntax highlighting.
   Use the shared `@SpecDDLineClassifier` line classification boundary.
   Keep validation messages deterministic.

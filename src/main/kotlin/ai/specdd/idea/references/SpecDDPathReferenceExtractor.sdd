@@ -21,6 +21,8 @@ Must:
   Extract file reference candidates only when the candidate starts with `./`, `../`, or `/`.
   Treat `/` prefixes as project-root-relative paths.
   Treat `./` and `../` prefixes as spec-file-directory-relative paths.
+  Preserve commas inside brace-alternative glob candidates such as `./src/{main,test}.sdd`.
+  Extract only the leading explicit path token from path-bearing body text that starts with a path and then continues with prose.
   Treat every extracted explicit path candidate as an unresolved-warning candidate.
   Extract inline path-like candidates from task lines, scenario steps, key-value lines, continuation lines, and ordinary body text.
   Treat explicit paths on continuation lines as independent inline path references, not as descriptions attached to the preceding body entry.
@@ -31,7 +33,7 @@ Must:
   Recognize inline path candidates after whitespace, an inline code opening backtick, or common opening punctuation.
   Recognize inline candidates only when they use explicit path prefixes.
   Ignore URL text when extracting file path candidates.
-  Exclude trailing sentence periods from inline path candidate ranges.
+  Exclude trailing sentence periods and commas from inline path candidate ranges.
   Ignore blank lines, comments, section headers, and non-path prose.
   Preserve exact candidate text ranges in file coordinates.
   Mark candidates with path syntax when they start with `./`, `../`, or `/`.

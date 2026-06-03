@@ -74,6 +74,26 @@ class SpecDDSymbolReferenceExtractorBehaviorSpec : BehaviorSpec({
             }
         }
 
+        `when`("a final colon follows a symbol") {
+            then("it trims terminal colon punctuation without removing internal colons") {
+                val text = "Must:\n  See @Symbol: and (@Namespace:Symbol:)"
+
+                extractor.extract(text).shouldContainExactly(
+                    SpecDDSymbolReferenceCandidate(
+                        text = "Symbol",
+                        range = TextRange(text.indexOf("@Symbol:"), text.indexOf("@Symbol:") + "@Symbol".length),
+                    ),
+                    SpecDDSymbolReferenceCandidate(
+                        text = "Namespace:Symbol",
+                        range = TextRange(
+                            text.indexOf("@Namespace:Symbol:"),
+                            text.indexOf("@Namespace:Symbol:") + "@Namespace:Symbol".length,
+                        ),
+                    ),
+                )
+            }
+        }
+
         `when`("a final symbol period is followed by non-closing punctuation") {
             then("it keeps the period in the candidate") {
                 val text = "Must:\n  Compare @Namespace., with text."

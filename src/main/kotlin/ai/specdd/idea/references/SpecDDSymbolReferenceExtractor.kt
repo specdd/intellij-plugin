@@ -43,7 +43,7 @@ class SpecDDSymbolReferenceExtractor(
                 symbolEnd += 1
             }
 
-            val trimmedEnd = trimSentencePeriod(text, symbolStart, symbolEnd, lineEnd)
+            val trimmedEnd = trimTerminalPunctuation(text, symbolStart, symbolEnd, lineEnd)
             if (symbolStart < trimmedEnd) {
                 candidates.add(
                     SpecDDSymbolReferenceCandidate(
@@ -66,13 +66,16 @@ class SpecDDSymbolReferenceExtractor(
         return previous.isWhitespace() || previous in OPENING_PUNCTUATION || '`' == previous
     }
 
-    private fun trimSentencePeriod(
+    private fun trimTerminalPunctuation(
         text: CharSequence,
         symbolStart: Int,
         symbolEnd: Int,
         lineEnd: Int,
     ): Int {
-        if (symbolStart >= symbolEnd || '.' != text[symbolEnd - 1]) return symbolEnd
+        if (symbolStart >= symbolEnd) return symbolEnd
+
+        val terminal = text[symbolEnd - 1]
+        if ('.' != terminal && ':' != terminal) return symbolEnd
         if (symbolEnd >= lineEnd) return symbolEnd - 1
 
         val next = text[symbolEnd]

@@ -27,7 +27,7 @@ Must:
   Recognize `@` immediately after an inline code span opening backtick as a code-span symbol reference.
   Ignore escaped `\@` sequences.
   Ignore embedded `@` characters inside larger tokens such as email addresses.
-  Trim a final sentence `.` from the symbol text and source range when the next source character is whitespace, end of line, or closing punctuation.
+  Trim final sentence `.` or `:` punctuation from the symbol text and source range when the next source character is whitespace, end of line, or closing punctuation.
   Recognize symbol references in body entries, task text, scenario steps, key-value lines, continuation lines, and inline code spans.
   Validate line-by-line for LF, CR, and CRLF line endings.
   Cover plain symbols, dotted symbols, symbols with formal punctuation, escaped at signs, embedded at signs, comments, section headers, final sentence punctuation, opening punctuation, and inline code spans in tests.
